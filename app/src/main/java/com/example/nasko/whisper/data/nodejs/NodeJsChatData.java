@@ -2,12 +2,10 @@ package com.example.nasko.whisper.data.nodejs;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 
-import com.example.nasko.whisper.Chat;
 import com.example.nasko.whisper.Message;
 import com.example.nasko.whisper.data.ChatData;
-import com.example.nasko.whisper.data.MessagesEventListener;
+import com.example.nasko.whisper.data.listeners.MessagesEventListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,15 +25,15 @@ public class NodeJsChatData implements ChatData {
         socket.on("show messages", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
-//                JSONObject data = (JSONObject) args[0];
+                JSONObject data = (JSONObject) args[0];
                 try {
-//                    String chatId = (String) data.get("_id");
-                    JSONArray msgArr = (JSONArray) args[0];//data.get("messages");
+                    String chatId = (String) data.get("chatId");
+                    JSONArray msgArr = data.getJSONArray("messages");
                     final Message[] messages = new Message[msgArr.length()];
                     for (int i = 0; i < msgArr.length(); i++) {
 
                         JSONObject json = (JSONObject) msgArr.get(i);
-                        messages[i] = new Message(json);
+                        messages[i] = new Message(json, chatId);
                     }
 
                     new Handler(Looper.getMainLooper()).post(new Runnable() {

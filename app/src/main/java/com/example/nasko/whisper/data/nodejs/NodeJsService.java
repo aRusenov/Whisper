@@ -1,7 +1,8 @@
 package com.example.nasko.whisper.data.nodejs;
 
+import android.content.Context;
 import android.util.Log;
-
+import com.example.nasko.whisper.WhisperApplication;
 
 import com.example.nasko.whisper.data.ChatData;
 import com.example.nasko.whisper.data.ChatService;
@@ -16,31 +17,36 @@ import io.socket.emitter.Emitter;
 
 public class NodeJsService implements ChatService {
 
-    private static final String SERVICE_ENDPOINT = "http://192.168.56.1:3000";
     private ChatData chatData;
     private UserData userData;
     private ContactsData contactsData;
     private Socket socket;
+    private Context context;
 
     private static NodeJsService instance;
 
     public static NodeJsService getInstance() {
+        return getInstance(null);
+    }
+
+    public static NodeJsService getInstance(Context context) {
         if (instance == null) {
-            instance = new NodeJsService();
+            instance = new NodeJsService(context);
         }
 
         return instance;
     }
 
-    private NodeJsService() {
-        try {
-            this.socket = IO.socket(SERVICE_ENDPOINT);
+    private NodeJsService(Context context) {
+        this.context = context;
 
+        try {
+            this.socket = IO.socket(WhisperApplication.SERVICE_ENDPOINT);
         } catch (URISyntaxException ex) {
             Log.d("EX", ex.getMessage());
         }
 
-        this.userData = new NodeJsUserData(this.socket);
+        this.userData = new NodeJsUserData(this.socket, WhisperApplication.SERVICE_ENDPOINT + "/login", this.context);
         this.contactsData = new NodeJsContactsData(this.socket);
         this.chatData = new NodeJsChatData(this.socket);
 
@@ -63,7 +69,7 @@ public class NodeJsService implements ChatService {
             }
         });
 
-//        this.socket.connect();
+//        this.socket.openSocketConnection();
     }
 
     @Override
@@ -79,5 +85,15 @@ public class NodeJsService implements ChatService {
     @Override
     public UserData getUserData() {
         return this.userData;
+    }
+
+    @Override
+    public void setContext(Context context) {
+        this.context = context;
+    }
+
+    @Override
+    public Context getContext() {
+        return this.context;
     }
 }

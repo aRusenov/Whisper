@@ -3,20 +3,32 @@ package com.example.nasko.whisper;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 public class Chat {
     private String id;
     private Message lastMessage;
+    private Contact otherContact;
+    private List<Contact> contacts;
 
-    public Chat(JSONObject jsonObject) throws JSONException {
+    public Chat(JSONObject jsonObject, Contact otherContact) throws JSONException {
+        this.otherContact = otherContact;
+
         JSONObject lastMessage = jsonObject.getJSONObject("lastMessage");
-        String text = lastMessage.get("text").toString();
-        String name = lastMessage.get("createdBy").toString();
+        this.id = (String) jsonObject.get("_id");
+        this.lastMessage = new Message(lastMessage, this.id);
+        this.contacts = new ArrayList<>();
+    }
 
-        this.lastMessage = new Message(new Date(), name, text);
-        this.id = jsonObject.get("_id").toString();
+    public Contact getOtherContact() {
+        return otherContact;
+    }
+
+    public void setOtherContact(Contact otherContact) {
+        this.otherContact = otherContact;
     }
 
     public String getId() {

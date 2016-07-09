@@ -35,7 +35,8 @@
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:minHeight="50dp"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_gravity="center_vertical">
 
             <EditText
                 android:layout_width="0dp"
@@ -43,13 +44,17 @@
                 android:layout_weight="5"
                 android:id="@+id/edit_newMessage"
                 android:imeOptions="actionDone"
-                android:inputType="text"/>
+                android:inputType="text"
+                android:hint="Message"/>
 
-            <Button
+            <ImageButton
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:id="@+id/btn_send_message"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                android:src="@drawable/send"
+                android:adjustViewBounds="true"
+                android:scaleType="centerInside"/>
 
         </LinearLayout>
     </LinearLayout>

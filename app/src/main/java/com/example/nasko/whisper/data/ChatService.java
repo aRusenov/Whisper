@@ -1,5 +1,7 @@
 package com.example.nasko.whisper.data;
 
+import android.content.Context;
+
 public interface ChatService {
 
     ChatData getChatData();
@@ -7,4 +9,8 @@ public interface ChatService {
     ContactsData getContactsData();
 
     UserData getUserData();
+
+    void setContext(Context context);
+
+    Context getContext();
 }

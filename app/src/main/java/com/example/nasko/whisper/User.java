@@ -3,12 +3,14 @@ package com.example.nasko.whisper;
 public class User {
     private String username;
     private String uId;
+    private String sessionToken;
 
     public User() {}
 
-    public User(String username, String uId) {
+    public User(String username, String uId, String sessionToken) {
         this.username = username;
         this.uId = uId;
+        this.sessionToken = sessionToken;
     }
 
     public String getUsername() {
@@ -17,5 +19,9 @@ public class User {
 
     public String getUId() {
         return uId;
+    }
+
+    public String getSessionToken() {
+        return sessionToken;
     }
 }

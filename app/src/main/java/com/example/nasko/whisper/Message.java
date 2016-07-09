@@ -13,17 +13,18 @@ public class Message {
     private static DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
     private Date date;
-    private String from;
+    private String authorId;
+    private String authorName;
     private String text;
     private boolean seen;
     private int seq;
     private String chatId;
 
-    public Message(JSONObject json) throws JSONException {
-        this.from = (String) json.get("createdBy");
+    public Message(JSONObject json, String chatId) throws JSONException {
+        this.authorId = (String) json.get("createdBy");
         this.seq = json.getInt("seq");
         this.text = (String) json.get("text");
-        this.chatId = (String) json.get("chatId");
+        this.chatId = chatId;
         String dateString = (String) json.get("createdAt");
         try {
             this.date = dateFormat.parse(dateString);
@@ -32,9 +33,14 @@ public class Message {
         }
     }
 
-    public Message(Date date, String from, String text) {
+    public Message(JSONObject json) throws JSONException {
+        this(json, null);
+        this.chatId = (String) json.get("chatId");
+    }
+
+    public Message(Date date, String authorId, String text) {
         this.date = date;
-        this.from = from;
+        this.authorId = authorId;
         this.text = text;
     }
 
@@ -51,11 +57,13 @@ public class Message {
     }
 
     public String getFrom() {
-        return from;
+        return authorId;
     }
 
-    public void setFrom(String from) {
-        this.from = from;
+    public String getAuthorName() { return authorName; }
+
+    public void setFrom(String authorId) {
+        this.authorId = authorId;
     }
 
     public String getText() {
