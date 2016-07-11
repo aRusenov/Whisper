@@ -1,19 +1,27 @@
 package com.example.nasko.whisper.chat;
 
 import android.content.Intent;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ListView;
 
+import com.example.nasko.whisper.Message;
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.User;
 import com.example.nasko.whisper.data.ChatData;
+import com.example.nasko.whisper.data.listeners.MessagesEventListener;
 import com.example.nasko.whisper.data.nodejs.NodeJsService;
+
+import java.util.List;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -37,24 +45,59 @@ public class ChatActivity extends AppCompatActivity {
         Intent intent = this.getIntent();
         this.chatId = intent.getStringExtra("chatId");
 
-        final ListView messageList = (ListView) this.findViewById(R.id.message_list);
-        final MessageAdapter adapter = new MessageAdapter(this, R.layout.chat_message_layout, messageList, currentUser, chatId);
-
+        final RecyclerView messageList = (RecyclerView) this.findViewById(R.id.message_list);
+        final MessageAdapter adapter = new MessageAdapter(this, currentUser, chatId);
+        final LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        layoutManager.setStackFromEnd(true);
         messageList.setAdapter(adapter);
-        messageList.setOnScrollListener(new EndlessScrollListener() {
+        messageList.setLayoutManager(layoutManager);
+
+        final EndlessUpScrollListener endlessScrollListener = new EndlessUpScrollListener(layoutManager) {
             @Override
-            public boolean onLoadMore(int firstMessageSeq) {
-                if (firstMessageSeq == 0) {
-                    return false;
+            public void onLoadMore(int lastLoadedItemId) {
+                if (lastLoadedItemId == 0) {
+                    return;
                 }
 
-                Log.i("LOADING", "loading messages");
-                chatData.requestMessages(currentUser.getUsername(), chatId, firstMessageSeq, PAGE_SIZE);
-                return true;
+                Log.i("LOADING", "actually loading now");
+                chatData.requestMessages(currentUser.getUsername(), chatId, lastLoadedItemId, PAGE_SIZE);
+            }
+        };
+
+        messageList.addOnScrollListener(endlessScrollListener);
+
+        this.chatData.setMessagesEventListener(new MessagesEventListener() {
+            @Override
+            public void onMessageAdded(Message message) {
+                if (! message.getChatId().equals(chatId)) {
+                    return;
+                }
+
+                int lastVisible = layoutManager.findLastCompletelyVisibleItemPosition();
+                boolean scrollToBottom = lastVisible == adapter.getItemCount() - 1;
+                adapter.add(message);
+
+                if (scrollToBottom) {
+                    messageList.getLayoutManager().scrollToPosition(adapter.getItemCount() - 1);
+                } else if (! currentUser.getUId().equals(message.getFrom())) {
+                    playNewMessageSound();
+                }
+            }
+
+            @Override
+            public void onMessagesLoaded(List<Message> messages) {
+                // Insert messages at top
+                adapter.addAllAt(0, messages);
+                int lastLoadedMessageSeq = messages.get(0).getSeq();
+                endlessScrollListener.setLastLoadedItemId(lastLoadedMessageSeq);
+
+                // Maintain scroll position
+                int index = layoutManager.findFirstVisibleItemPosition() + messages.size();
+                View topmostView = messageList.getChildAt(0);
+                int top = (topmostView == null) ? 0 : (topmostView.getTop() - messageList.getPaddingTop());
+                messageList.scrollToPosition(index);
             }
         });
-
-        this.chatData.setMessagesEventListener(adapter);
 
         // Request initial messages
         this.chatData.requestMessages(currentUser.getUsername(), chatId, -1, PAGE_SIZE * 2);
@@ -79,6 +122,12 @@ public class ChatActivity extends AppCompatActivity {
 //                return false;
 //            }
 //        });
+    }
+
+    private void playNewMessageSound() {
+        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        Ringtone r = RingtoneManager.getRingtone(this, notification);
+        r.play();
     }
 
     private void sendMessage() {

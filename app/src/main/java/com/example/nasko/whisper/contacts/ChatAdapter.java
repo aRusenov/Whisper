@@ -1,12 +1,12 @@
 package com.example.nasko.whisper.contacts;
 
 import android.content.Context;
-import android.view.LayoutInflater;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.example.nasko.whisper.ArrayRecyclerViewAdapter;
 import com.example.nasko.whisper.Chat;
 import com.example.nasko.whisper.DateProvider;
 import com.example.nasko.whisper.R;
@@ -16,40 +16,62 @@ import com.squareup.picasso.Picasso;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class ChatAdapter extends ArrayAdapter<Chat> implements ChatsEventListener {
+public class ChatAdapter extends ArrayRecyclerViewAdapter<Chat, ChatAdapter.ChatViewHolder> implements ChatsEventListener {
+
+    class ChatViewHolder extends RecyclerView.ViewHolder {
+
+        TextView contactName;
+        TextView msgDate;
+        TextView lastMessage;
+        CircleImageView profileImg;
+
+        ChatViewHolder(View itemView) {
+            super(itemView);
+            this.msgDate = (TextView) itemView.findViewById(R.id.message_date);
+            this.contactName = (TextView) itemView.findViewById(R.id.contact_name);
+            this.lastMessage = (TextView) itemView.findViewById(R.id.last_message);
+            this.profileImg = (CircleImageView) itemView.findViewById(R.id.profile_image);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    OnItemClickListener listener = getItemClickListener();
+                    if (listener != null) {
+                        listener.onItemClick(getAdapterPosition());
+                    }
+                }
+            });
+        }
+    }
 
     private DateProvider dateProvider;
 
-    public ChatAdapter(Context context, int resource, DateProvider dateProvider) {
-        super(context, resource);
+    public ChatAdapter(Context context, DateProvider dateProvider) {
+        super(context);
         this.dateProvider = dateProvider;
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        Chat chat = getItem(position);
+    public ChatViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = this.getInflater().inflate(R.layout.chat_item_layout, parent, false);
+        return new ChatViewHolder(view);
+    }
 
-        if (convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.chat_item_layout, parent, false);
-        }
+    @Override
+    public void onBindViewHolder(ChatViewHolder holder, int position) {
+        Chat chat = this.items.get(position);
 
         String dateText = getDisplayDate(chat.getLastMessage().getDate());
-        TextView tvDate = (TextView) convertView.findViewById(R.id.message_date);
-        tvDate.setText(dateText);
-
-        TextView tvContactName = (TextView) convertView.findViewById(R.id.contact_name);
-        tvContactName.setText(chat.getOtherContact().getName());
-
-        TextView tvLastMessage = (TextView) convertView.findViewById(R.id.last_message);
-        tvLastMessage.setText(chat.getLastMessage().getText());
-
-        CircleImageView imgProfile = (CircleImageView) convertView.findViewById(R.id.profile_image);
-        Picasso.with(this.getContext()).load(chat.getOtherContact().getImageUrl()).into(imgProfile);
-
-        return convertView;
+        holder.msgDate.setText(dateText);
+        holder.contactName.setText(chat.getOtherContact().getName());
+        holder.lastMessage.setText(chat.getLastMessage().getText());
+        Picasso.with(this.getContext())
+                .load(chat.getOtherContact().getImageUrl())
+                .into(holder.profileImg);
     }
 
     private String getDisplayDate(Date date) {
@@ -66,18 +88,25 @@ public class ChatAdapter extends ArrayAdapter<Chat> implements ChatsEventListene
     }
 
     @Override
-    public void onContactsLoaded(Chat[] chats) {
+    public void onContactAdded(Chat chat) {
+        this.add(chat);
+    }
+
+    @Override
+    public void onContactsLoaded(List<Chat> chats) {
         this.addAll(chats);
     }
 
     @Override
     public void onContactUpdated(Chat chat) {
-        this.remove(chat);
-        this.insert(chat, 0);
-    }
+        // Remove item from old position
+        int oldPosition = this.items.indexOf(chat);
+        Chat oldChat = this.items.remove(oldPosition);
+        oldChat.setLastMessage(chat.getLastMessage());
 
-    @Override
-    public void onContactAdded(Chat chat) {
-        this.add(chat);
+        // Insert item at start
+        this.items.add(0, oldChat);
+        this.notifyItemChanged(oldPosition);
+        this.notifyItemMoved(oldPosition, 0);
     }
 }

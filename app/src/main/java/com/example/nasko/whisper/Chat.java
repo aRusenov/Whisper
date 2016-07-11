@@ -4,8 +4,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 public class Chat {
@@ -15,8 +13,11 @@ public class Chat {
     private List<Contact> contacts;
 
     public Chat(JSONObject jsonObject, Contact otherContact) throws JSONException {
+        this(jsonObject);
         this.otherContact = otherContact;
+    }
 
+    public Chat(JSONObject jsonObject) throws JSONException {
         JSONObject lastMessage = jsonObject.getJSONObject("lastMessage");
         this.id = (String) jsonObject.get("_id");
         this.lastMessage = new Message(lastMessage, this.id);

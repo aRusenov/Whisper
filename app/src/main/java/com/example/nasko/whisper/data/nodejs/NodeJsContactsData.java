@@ -17,7 +17,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import io.socket.client.Socket;
@@ -50,7 +52,7 @@ public class NodeJsContactsData implements ContactsData {
                     }
 
                     JSONArray chatsJson = rootObj.getJSONArray("chats");
-                    final Chat[] chats = new Chat[chatsJson.length()];
+                    final List<Chat> chats = new ArrayList<>(chatsJson.length());
                     for (int i = 0; i < chatsJson.length(); i++) {
                         JSONObject json = (JSONObject) chatsJson.get(i);
                         JSONArray chatParticipants = json.getJSONArray("participants");
@@ -60,7 +62,7 @@ public class NodeJsContactsData implements ContactsData {
                         }
 
                         Contact contact = contactsData.get(participantId);
-                        chats[i] = new Chat(json, contact);
+                        chats.add(new Chat(json, contact));
                     }
 
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -77,17 +79,18 @@ public class NodeJsContactsData implements ContactsData {
             @Override
             public void call(Object... args) {
                 JSONObject json = (JSONObject) args[0];
-//                try {
-//                    final Chat chat = new Chat(json);
-//                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            listener.onContactUpdated(chat);
-//                        }
-//                    });
-//                } catch (JSONException e) {
-//                    e.printStackTrace();
+                try {
+                    final Chat chat = new Chat(json);
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            listener.onContactUpdated(chat);
+                        }
+                    });
+                } catch (JSONException e) {
+                    e.printStackTrace();
 //                }
+                }
             }
         });
     }
@@ -120,19 +123,19 @@ public class NodeJsContactsData implements ContactsData {
     }
 
     @Override
-    public void queryContacts(final String contactQuery, final OnSuccessListener<Contact[]> success, OnErrorListener<Error> error) {
+    public void queryContacts(final String contactQuery, final OnSuccessListener<List<Contact>> success, OnErrorListener<Error> error) {
 
         this.socket.on("query contacts", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
                 Log.v("nigga", "cmon");
                 JSONArray jsonArr = (JSONArray) args[0];
-                final Contact[] contacts = new Contact[jsonArr.length()];
+                final List<Contact> contacts = new ArrayList<Contact>(jsonArr.length());
                 try {
                     for (int i = 0; i < jsonArr.length(); i++) {
                         Contact contact = new Contact(jsonArr.getJSONObject(i));
                         contact.setImageUrl(WhisperApplication.SERVICE_ENDPOINT + "/images/" + contact.getImageUrl());
-                        contacts[i] = contact;
+                        contacts.add(contact);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();

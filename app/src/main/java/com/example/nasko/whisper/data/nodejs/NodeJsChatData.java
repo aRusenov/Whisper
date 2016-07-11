@@ -11,6 +11,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 
@@ -29,11 +32,11 @@ public class NodeJsChatData implements ChatData {
                 try {
                     String chatId = (String) data.get("chatId");
                     JSONArray msgArr = data.getJSONArray("messages");
-                    final Message[] messages = new Message[msgArr.length()];
-                    for (int i = 0; i < msgArr.length(); i++) {
+                    final List<Message> messages = new ArrayList<>(msgArr.length());
+                    for (int i = msgArr.length() - 1; i >= 0; i--) {
 
                         JSONObject json = (JSONObject) msgArr.get(i);
-                        messages[i] = new Message(json, chatId);
+                        messages.add(new Message(json, chatId));
                     }
 
                     new Handler(Looper.getMainLooper()).post(new Runnable() {

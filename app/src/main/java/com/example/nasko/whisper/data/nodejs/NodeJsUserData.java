@@ -100,7 +100,7 @@ public class NodeJsUserData implements UserData {
     public void connect(String token, final OnSuccessListener<User> successListener, final OnErrorListener<Error> errorListener) {
 
         if (! this.socket.connected()) {
-            this.openSocketConnection(token);
+            this.socket.connect();
         }
 
         this.socket.on("authenticated", new Emitter.Listener() {
@@ -132,6 +132,8 @@ public class NodeJsUserData implements UserData {
                 });
             }
         });
+
+        tryAuthenticate(token);
     }
 
     @Override
@@ -139,8 +141,7 @@ public class NodeJsUserData implements UserData {
 
     }
 
-    private void openSocketConnection(String token) {
-        this.socket.connect();
+    private void tryAuthenticate(String token) {
         JSONObject user = new JSONObject();
         try {
             user.put("token", token);

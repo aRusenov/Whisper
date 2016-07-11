@@ -84,7 +84,7 @@ public class LoginActivity extends AppCompatActivity {
                             @Override
                             public void onSuccess(User user) {
                                 currentUser = user;
-                                goToContacts();
+
                             }
                         }, new OnErrorListener<Error>() {
                             @Override
