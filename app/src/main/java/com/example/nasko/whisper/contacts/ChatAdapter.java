@@ -48,6 +48,9 @@ public class ChatAdapter extends ArrayRecyclerViewAdapter<Chat, ChatAdapter.Chat
         }
     }
 
+    private static final DateFormat WEEKDAY_FORMAT = new SimpleDateFormat("E");
+    private static DateFormat MONTHLY_FORMAT = new SimpleDateFormat("W d");
+
     private DateProvider dateProvider;
 
     public ChatAdapter(Context context, DateProvider dateProvider) {
@@ -79,11 +82,9 @@ public class ChatAdapter extends ArrayRecyclerViewAdapter<Chat, ChatAdapter.Chat
         if (today.getDay() == date.getDay()) {
             return String.format("%02d:%02d", date.getHours(), date.getMinutes());
         } else if (today.getDay() - date.getDay() <= 6) {
-            DateFormat weekdayFormat = new SimpleDateFormat("E");
-            return weekdayFormat.format(date);
+            return WEEKDAY_FORMAT.format(date);
         } else {
-            DateFormat monthlyFormat = new SimpleDateFormat("W d");
-            return monthlyFormat.format(date);
+            return MONTHLY_FORMAT.format(date);
         }
     }
 
