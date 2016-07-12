@@ -49,7 +49,7 @@ public class ChatAdapter extends ArrayRecyclerViewAdapter<Chat, ChatAdapter.Chat
     }
 
     private static final DateFormat WEEKDAY_FORMAT = new SimpleDateFormat("E");
-    private static DateFormat MONTHLY_FORMAT = new SimpleDateFormat("W d");
+    private static final DateFormat MONTHLY_FORMAT = new SimpleDateFormat("W d");
 
     private DateProvider dateProvider;
 
