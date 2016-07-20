@@ -2,8 +2,8 @@ package com.example.nasko.whisper;
 
 import android.app.Application;
 
-import com.example.nasko.whisper.data.ChatService;
-import com.example.nasko.whisper.data.nodejs.NodeJsService;
+import com.example.nasko.whisper.network.ChatService;
+import com.example.nasko.whisper.network.impl.NodeJsService;
 
 public class WhisperApplication extends Application {
 
