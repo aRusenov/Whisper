@@ -1,7 +1,18 @@
 package com.example.nasko.whisper.data;
 
-/**
- * Created by nasko on 28/06/2016.
- */
 public class Error {
+
+    private String message;
+
+    public Error(String message) {
+        this.message = message;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
 }

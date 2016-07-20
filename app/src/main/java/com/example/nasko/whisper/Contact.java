@@ -14,8 +14,11 @@ public class Contact {
     public Contact(JSONObject json) throws JSONException {
         this.id = json.getString("_id");
         this.username = json.getString("username");
-        this.name = json.getString("name");
-        this.imageUrl = json.getJSONObject("image").getString("url");
+        this.name = json.has("name") ? json.getString("name") : this.username;
+        if (json.has("image")) {
+            this.imageUrl = json.getJSONObject("image").getString("url");
+        }
+
         if (json.has("isFriend")) {
             this.isFriend = json.getBoolean("isFriend");
         }

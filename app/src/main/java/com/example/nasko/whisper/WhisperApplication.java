@@ -7,7 +7,7 @@ import com.example.nasko.whisper.data.nodejs.NodeJsService;
 
 public class WhisperApplication extends Application {
 
-    public static final String SERVICE_ENDPOINT = "http://192.168.0.102:3000";
+    public static final String SERVICE_ENDPOINT = "http://192.168.0.103:3000";
     private ChatService chatService;
     private static WhisperApplication instance;
 

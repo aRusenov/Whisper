@@ -100,6 +100,15 @@ public class ContactsActivity extends AppCompatActivity implements DateProvider 
                 (SearchView) MenuItemCompat.getActionView(searchItem);
         final RecyclerView contactSearchView = (RecyclerView) findViewById(R.id.new_contacts_view);
         final ContactQueryAdapter adapter = new ContactQueryAdapter(this, currentUser);
+        adapter.setInvitationIconClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(int position) {
+                // TODO: send add request
+                Contact contact = adapter.getItem(position);
+                contactsData.addContact(currentUser.getSessionToken(), contact.getUsername());
+            }
+        });
+
         contactSearchView.setAdapter(adapter);
         contactSearchView.setLayoutManager(new LinearLayoutManager(this));
 

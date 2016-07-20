@@ -8,13 +8,13 @@ import rx.Observable;
 
 public interface UserData {
 
-    Observable<User> login(String username, String password);
+    Task<User, Error> login(String username, String password);
 
     Observable<ProfileData> editProfile(ProfileData profileData);
 
-    void connect(String token, OnSuccessListener<User> successListener, OnErrorListener<Error> error);
+    Task<User, Error> register(String username, String password);
 
-    void register(String username, String password);
+    void connect(String token, OnSuccessListener<User> successListener, OnErrorListener<Error> error);
 
     User getCurrentUser();
 

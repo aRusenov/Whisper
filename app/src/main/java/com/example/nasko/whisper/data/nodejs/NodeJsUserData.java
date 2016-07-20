@@ -3,7 +3,6 @@ package com.example.nasko.whisper.data.nodejs;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -13,6 +12,7 @@ import com.android.volley.toolbox.Volley;
 import com.example.nasko.whisper.User;
 import com.example.nasko.whisper.data.Error;
 import com.example.nasko.whisper.data.ProfileData;
+import com.example.nasko.whisper.data.Task;
 import com.example.nasko.whisper.data.UserData;
 import com.example.nasko.whisper.data.listeners.OnErrorListener;
 import com.example.nasko.whisper.data.listeners.OnSuccessListener;
@@ -23,18 +23,19 @@ import org.json.JSONObject;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 import rx.Observable;
-import rx.Subscriber;
 
 public class NodeJsUserData implements UserData {
 
     private String loginEndpoint;
+    private String registerEndpoint;
     private Socket socket;
     private User currentUser;
     private RequestQueue requestQueue;
 
-    public NodeJsUserData(Socket socket, String loginEndpoint, Context context) {
+    public NodeJsUserData(Socket socket, String serviceEndpoint, Context context) {
         this.socket = socket;
-        this.loginEndpoint = loginEndpoint;
+        this.loginEndpoint = serviceEndpoint + "/login";
+        this.registerEndpoint = serviceEndpoint + "/register";
         this.requestQueue = Volley.newRequestQueue(context);
     }
 
@@ -54,41 +55,43 @@ public class NodeJsUserData implements UserData {
     }
 
     @Override
-    public Observable<User> login(final String username, final String password) {
+    public Task<User, Error> login(final String username, final String password) {
 
-        return Observable.create(new Observable.OnSubscribe<User>() {
+        return new Task<User, Error>(true) {
             @Override
-            public void call(final Subscriber<? super User> subscriber) {
+            public void execute() {
                 JSONObject loginData = new JSONObject();
                 try {
                     loginData.put("username", username);
                     loginData.put("password", password);
                 } catch (JSONException e) {
-                    subscriber.onError(e);
+                    getErrorListener().onError(new Error(e.getMessage()));
                 }
 
                 JsonObjectRequest request = new JsonObjectRequest(loginEndpoint, loginData, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
-                            currentUser = new User(response.getString("username"), response.getString("uId"), response.getString("token"));
-                            subscriber.onNext(currentUser);
-                            subscriber.onCompleted();
+                            currentUser = new User(
+                                    response.getString("username"),
+                                    response.getString("uId"),
+                                    response.getString("token"));
+
+                            getSuccessListener().onSuccess(currentUser);
                         } catch (JSONException e) {
-                            subscriber.onError(e);
+                            getErrorListener().onError(new Error(e.getMessage()));
                         }
                     }
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.e("ERROR", error.toString());
-//                        subscriber.onError(e);
+                        getErrorListener().onError(new Error(error.getMessage()));
                     }
                 });
 
                 requestQueue.add(request);
             }
-        });
+        };
     }
 
     @Override
@@ -127,7 +130,7 @@ public class NodeJsUserData implements UserData {
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
-                        errorListener.onError(new Error());
+                        errorListener.onError(new Error("Invalid session token"));
                     }
                 });
             }
@@ -137,8 +140,42 @@ public class NodeJsUserData implements UserData {
     }
 
     @Override
-    public void register(String username, String password) {
+    public Task<User, Error> register(final String username, final String password) {
+        return new Task<User, Error>(true) {
+            @Override
+            public void execute() {
+                JSONObject loginData = new JSONObject();
+                try {
+                    loginData.put("username", username);
+                    loginData.put("password", password);
+                } catch (JSONException e) {
+                    getErrorListener().onError(new Error(e.getMessage()));
+                }
 
+                JsonObjectRequest request = new JsonObjectRequest(registerEndpoint, loginData, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            currentUser = new User(
+                                    response.getString("username"),
+                                    response.getString("uId"),
+                                    response.getString("token"));
+
+                            getSuccessListener().onSuccess(currentUser);
+                        } catch (JSONException e) {
+                            getErrorListener().onError(new Error(e.getMessage()));
+                        }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        getErrorListener().onError(new Error(error.getMessage()));
+                    }
+                });
+
+                requestQueue.add(request);
+            }
+        };
     }
 
     private void tryAuthenticate(String token) {

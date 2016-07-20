@@ -29,18 +29,13 @@ public class MainActivity extends AppCompatActivity {
         User loggedUser = localUserRepository.getLoggedUser();
 
         if (loggedUser.getSessionToken() == null) {
-            Intent intent = new Intent(this, LoginActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-
-            this.startActivity(intent);
+            startActivity(LoginActivity.class, false);
         } else {
             userData.setCurrentUser(loggedUser);
             userData.connect(loggedUser.getSessionToken(), new OnSuccessListener<User>() {
                 @Override
                 public void onSuccess(User user) {
-                    Intent intent = new Intent(MainActivity.this, ContactsActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
+                    startActivity(ContactsActivity.class, true);
                 }
             }, new OnErrorListener<Error>() {
                 @Override
@@ -49,11 +44,18 @@ public class MainActivity extends AppCompatActivity {
                     Toast toast = Toast.makeText(MainActivity.this, "You must relog", Toast.LENGTH_SHORT);
                     toast.show();
 
-                    Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
+                    startActivity(LoginActivity.class, true);
                 }
             });
         }
+    }
+
+    private void startActivity(Class componentClass, boolean clearStack) {
+        Intent intent = new Intent(this, componentClass);
+        if (clearStack) {
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        }
+
+        startActivity(intent);
     }
 }

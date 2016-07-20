@@ -18,14 +18,9 @@ import com.example.nasko.whisper.data.UserData;
 import com.example.nasko.whisper.data.listeners.OnErrorListener;
 import com.example.nasko.whisper.data.listeners.OnSuccessListener;
 
-import rx.Observer;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
-
 public class LoginActivity extends AppCompatActivity {
 
     private UserData userData;
-    private User currentUser;
     private LocalUserRepository localUserRepository;
 
     private Button regButton;
@@ -58,42 +53,67 @@ public class LoginActivity extends AppCompatActivity {
                 login(username, password);
             }
         });
+
+        this.regButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String username = editEmail.getText().toString();
+                String password = editPassword.getText().toString();
+                register(username, password);
+            }
+        });
     }
 
     private void login(final String username, String password) {
 
         this.userData.login(username, password)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<User>() {
+                .onSuccess(new OnSuccessListener<User>() {
                     @Override
-                    public void onError(Throwable e) {
-                        Toast errorToast = Toast.makeText(LoginActivity.this, e.getMessage(), Toast.LENGTH_SHORT);
-                        errorToast.show();
+                    public void onSuccess(User user) {
+                        tryConnect(user);
                     }
-
+                }).onError(new OnErrorListener<Error>() {
                     @Override
-                    public void onNext(User user) {
-                        currentUser = user;
-                        localUserRepository.saveLoginData(user);
+                    public void onError(Error error) {
+                        displayToast(error.getMessage());
                     }
+                }).execute();
+    }
 
+    private void register(final String username, String password) {
+
+        this.userData.register(username, password)
+                .onSuccess(new OnSuccessListener<User>() {
                     @Override
-                    public void onCompleted() {
-                        userData.connect(currentUser.getSessionToken(), new OnSuccessListener<User>() {
-                            @Override
-                            public void onSuccess(User user) {
-                                currentUser = user;
-
-                            }
-                        }, new OnErrorListener<Error>() {
-                            @Override
-                            public void onError(Error error) {
-                                throw new UnsupportedOperationException();
-                            }
-                        });
+                    public void onSuccess(User user) {
+                        tryConnect(user);
                     }
-                });
+                }).onError(new OnErrorListener<Error>() {
+                    @Override
+                    public void onError(Error error) {
+                        displayToast(error.getMessage());
+                    }
+                }).execute();
+    }
+
+    private void tryConnect(User user) {
+        localUserRepository.saveLoginData(user);
+        userData.connect(user.getSessionToken(), new OnSuccessListener<User>() {
+            @Override
+            public void onSuccess(User user) {
+                goToContacts();
+            }
+        }, new OnErrorListener<Error>() {
+            @Override
+            public void onError(Error error) {
+                displayToast(error.getMessage());
+            }
+        });
+    }
+
+    private void displayToast(String message) {
+        Toast errorToast = Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT);
+        errorToast.show();
     }
 
     private void goToContacts() {

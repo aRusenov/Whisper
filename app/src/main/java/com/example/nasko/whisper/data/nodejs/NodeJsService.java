@@ -43,33 +43,29 @@ public class NodeJsService implements ChatService {
         try {
             this.socket = IO.socket(WhisperApplication.SERVICE_ENDPOINT);
         } catch (URISyntaxException ex) {
-            Log.d("EX", ex.getMessage());
+            Log.d("SOCKET", ex.getMessage());
         }
 
-        this.userData = new NodeJsUserData(this.socket, WhisperApplication.SERVICE_ENDPOINT + "/login", this.context);
+        this.userData = new NodeJsUserData(this.socket, WhisperApplication.SERVICE_ENDPOINT, this.context);
         this.contactsData = new NodeJsContactsData(this.socket);
         this.chatData = new NodeJsChatData(this.socket);
 
         socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
             @Override
             public void call(Object... args) {
-                Log.v("NEWTORK", "SUCCESS");
+                Log.d("SOCKET", "initial socket connection");
             }
-        });
-        socket.on(Socket.EVENT_CONNECT_TIMEOUT, new Emitter.Listener() {
+        }).on(Socket.EVENT_CONNECT_TIMEOUT, new Emitter.Listener() {
             @Override
             public void call(Object... args) {
-                Log.v("", "");
+                Log.v("SOCKET", "socket timeout");
             }
-        });
-        socket.on(Socket.EVENT_CONNECT_ERROR, new Emitter.Listener() {
+        }).on(Socket.EVENT_CONNECT_ERROR, new Emitter.Listener() {
             @Override
             public void call(Object... args) {
-                Log.v("", "");
+                Log.v("SOCKET", "socket connection error");
             }
         });
-
-//        this.socket.openSocketConnection();
     }
 
     @Override

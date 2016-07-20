@@ -2,7 +2,6 @@ package com.example.nasko.whisper.data.nodejs;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 
 import com.example.nasko.whisper.Chat;
 import com.example.nasko.whisper.Contact;
@@ -35,7 +34,7 @@ public class NodeJsContactsData implements ContactsData {
         socket.on("new contact", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
-                int a = 5;
+                // TODO: add chat
             }
         }).on("show chats", new Emitter.Listener() {
             @Override
@@ -105,10 +104,10 @@ public class NodeJsContactsData implements ContactsData {
     }
 
     @Override
-    public void addContact(String username, String contact) {
+    public void addContact(String sessionToken, String contact) {
         JSONObject data = new JSONObject();
         try {
-            data.put("username", username);
+            data.put("token", sessionToken);
             data.put("contact", contact);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -128,7 +127,6 @@ public class NodeJsContactsData implements ContactsData {
         this.socket.on("query contacts", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
-                Log.v("nigga", "cmon");
                 JSONArray jsonArr = (JSONArray) args[0];
                 final List<Contact> contacts = new ArrayList<Contact>(jsonArr.length());
                 try {

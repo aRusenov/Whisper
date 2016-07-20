@@ -29,10 +29,10 @@ public class ContactQueryAdapter extends ArrayRecyclerViewAdapter<Contact, Conta
             this.name = (TextView) itemView.findViewById(R.id.contact_name);
             this.inviteIcon = (ImageView) itemView.findViewById(R.id.invite_icon);
 
-            itemView.setOnClickListener(new View.OnClickListener() {
+            inviteIcon.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    OnItemClickListener listener = getItemClickListener();
+                    OnItemClickListener listener = getInvitationIconClickListener();
                     if (listener != null) {
                         listener.onItemClick(getAdapterPosition());
                     }
@@ -42,10 +42,19 @@ public class ContactQueryAdapter extends ArrayRecyclerViewAdapter<Contact, Conta
     }
 
     private User currentUser;
+    private OnItemClickListener invitationIconClickListener;
 
     public ContactQueryAdapter(Context context, User currentUser) {
         super(context);
         this.currentUser = currentUser;
+    }
+
+    public OnItemClickListener getInvitationIconClickListener() {
+        return invitationIconClickListener;
+    }
+
+    public void setInvitationIconClickListener(OnItemClickListener invitationIconClickListener) {
+        this.invitationIconClickListener = invitationIconClickListener;
     }
 
     @Override
@@ -65,6 +74,8 @@ public class ContactQueryAdapter extends ArrayRecyclerViewAdapter<Contact, Conta
         boolean isContactUser = currentUser.getUId().equals(contact.getId());
         if (!contact.isFriend() && !isContactUser) {
             holder.inviteIcon.setVisibility(View.VISIBLE);
+        } else {
+            holder.inviteIcon.setVisibility(View.GONE);
         }
     }
 }
