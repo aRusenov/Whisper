@@ -1,6 +1,6 @@
 package com.example.nasko.whisper.data.listeners;
 
-public abstract class OnErrorListener<TError> {
+public interface OnErrorListener<TError> {
 
-    public abstract void onError(TError error);
+    void onError(TError error);
 }

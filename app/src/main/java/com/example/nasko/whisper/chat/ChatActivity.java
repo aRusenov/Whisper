@@ -86,6 +86,10 @@ public class ChatActivity extends AppCompatActivity {
 
             @Override
             public void onMessagesLoaded(List<Message> messages) {
+                if (messages.isEmpty()) {
+                    return;
+                }
+
                 // Insert messages at top
                 adapter.addAllAt(0, messages);
                 int lastLoadedMessageSeq = messages.get(0).getSeq();
@@ -94,7 +98,6 @@ public class ChatActivity extends AppCompatActivity {
                 // Maintain scroll position
                 int index = layoutManager.findFirstVisibleItemPosition() + messages.size();
                 View topmostView = messageList.getChildAt(0);
-                int top = (topmostView == null) ? 0 : (topmostView.getTop() - messageList.getPaddingTop());
                 messageList.scrollToPosition(index);
             }
         });

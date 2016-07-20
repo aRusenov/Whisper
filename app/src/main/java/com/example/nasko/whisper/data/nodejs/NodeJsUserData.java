@@ -119,7 +119,12 @@ public class NodeJsUserData implements UserData {
                         }
                     });
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            errorListener.onError(new Error(e.getMessage()));
+                        }
+                    });
                 }
             }
         });

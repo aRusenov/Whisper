@@ -3,7 +3,6 @@ package com.example.nasko.whisper.login;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -12,11 +11,8 @@ import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.User;
 import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.contacts.ContactsActivity;
-import com.example.nasko.whisper.data.Error;
 import com.example.nasko.whisper.data.LocalUserRepository;
 import com.example.nasko.whisper.data.UserData;
-import com.example.nasko.whisper.data.listeners.OnErrorListener;
-import com.example.nasko.whisper.data.listeners.OnSuccessListener;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -45,70 +41,44 @@ public class LoginActivity extends AppCompatActivity {
         editEmail.setText("Az");
         editPassword.setText("123");
 
-        this.loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String username = editEmail.getText().toString();
-                String password = editPassword.getText().toString();
-                login(username, password);
-            }
+        this.loginButton.setOnClickListener(v -> {
+            String username = editEmail.getText().toString();
+            String password = editPassword.getText().toString();
+            login(username, password);
         });
 
-        this.regButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String username = editEmail.getText().toString();
-                String password = editPassword.getText().toString();
-                register(username, password);
-            }
+        this.regButton.setOnClickListener(v -> {
+            String username = editEmail.getText().toString();
+            String password = editPassword.getText().toString();
+            register(username, password);
         });
     }
 
     private void login(final String username, String password) {
 
         this.userData.login(username, password)
-                .onSuccess(new OnSuccessListener<User>() {
-                    @Override
-                    public void onSuccess(User user) {
-                        tryConnect(user);
-                    }
-                }).onError(new OnErrorListener<Error>() {
-                    @Override
-                    public void onError(Error error) {
-                        displayToast(error.getMessage());
-                    }
-                }).execute();
+                .onSuccess(user -> tryConnect(user))
+                .onError(error -> displayToast(error.getMessage()))
+                .execute();
     }
 
     private void register(final String username, String password) {
 
         this.userData.register(username, password)
-                .onSuccess(new OnSuccessListener<User>() {
-                    @Override
-                    public void onSuccess(User user) {
-                        tryConnect(user);
-                    }
-                }).onError(new OnErrorListener<Error>() {
-                    @Override
-                    public void onError(Error error) {
-                        displayToast(error.getMessage());
-                    }
-                }).execute();
+                .onSuccess(user -> tryConnect(user))
+                .onError(error -> displayToast(error.getMessage()))
+                .execute();
     }
 
     private void tryConnect(User user) {
         localUserRepository.saveLoginData(user);
-        userData.connect(user.getSessionToken(), new OnSuccessListener<User>() {
-            @Override
-            public void onSuccess(User user) {
-                goToContacts();
-            }
-        }, new OnErrorListener<Error>() {
-            @Override
-            public void onError(Error error) {
-                displayToast(error.getMessage());
-            }
-        });
+        userData.connect(user.getSessionToken(),
+                result -> {
+                    goToContacts();
+                },
+                error ->  {
+                    displayToast(error.getMessage());
+                });
     }
 
     private void displayToast(String message) {
