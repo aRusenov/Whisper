@@ -1,45 +1,44 @@
 package com.example.nasko.whisper.activities;
 
 import android.content.Intent;
-import android.os.*;
+import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
 import com.example.nasko.whisper.R;
-import com.example.nasko.whisper.models.Error;
+import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.managers.LocalUserRepository;
+import com.example.nasko.whisper.models.Error;
 import com.example.nasko.whisper.models.User;
-import com.example.nasko.whisper.network.UserData;
-import com.example.nasko.whisper.network.listeners.OnErrorListener;
-import com.example.nasko.whisper.network.listeners.OnSuccessListener;
-import com.example.nasko.whisper.network.impl.NodeJsService;
+import com.example.nasko.whisper.network.listeners.OnAuthenticatedListener;
+import com.example.nasko.whisper.network.notifications.SocketService;
 
 public class MainActivity extends AppCompatActivity {
 
     private LocalUserRepository localUserRepository;
-    private UserData userData;
+    private SocketService socketService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        this.localUserRepository = new LocalUserRepository(this);
-        this.userData = NodeJsService.getInstance().getUserData();
+        localUserRepository = new LocalUserRepository(this);
+        socketService = WhisperApplication.getInstance().getSocketService();
         User loggedUser = localUserRepository.getLoggedUser();
 
         if (loggedUser.getSessionToken() == null) {
             startActivity(LoginActivity.class, false);
         } else {
-            userData.setCurrentUser(loggedUser);
-            userData.connect(loggedUser.getSessionToken(), new OnSuccessListener<User>() {
+            socketService.setAuthenticatedListener(new OnAuthenticatedListener() {
                 @Override
-                public void onSuccess(User user) {
+                public void onAuthenticated(User user) {
+                    socketService.setCurrentUser(loggedUser);
                     startActivity(ContactsActivity.class, true);
                 }
-            }, new OnErrorListener<Error>() {
+
                 @Override
-                public void onError(Error error) {
+                public void onUnauthorized(Error error) {
                     localUserRepository.logout();
                     Toast toast = Toast.makeText(MainActivity.this, "You must relog", Toast.LENGTH_SHORT);
                     toast.show();
@@ -47,6 +46,9 @@ public class MainActivity extends AppCompatActivity {
                     startActivity(LoginActivity.class, true);
                 }
             });
+
+            socketService.connect();
+            socketService.authenticate(loggedUser.getSessionToken());
         }
     }
 

@@ -10,7 +10,7 @@ import com.example.nasko.whisper.views.listeners.OnItemClickListener;
 import com.example.nasko.whisper.models.Chat;
 import com.example.nasko.whisper.utils.DateProvider;
 import com.example.nasko.whisper.R;
-import com.example.nasko.whisper.network.listeners.ChatsEventListener;
+import com.example.nasko.whisper.network.listeners.ContactsEventListener;
 import com.squareup.picasso.Picasso;
 
 import java.text.DateFormat;
@@ -20,7 +20,7 @@ import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class ChatAdapter extends ArrayRecyclerViewAdapter<Chat, ChatAdapter.ChatViewHolder> implements ChatsEventListener {
+public class ChatAdapter extends ArrayRecyclerViewAdapter<Chat, ChatAdapter.ChatViewHolder> implements ContactsEventListener {
 
     class ChatViewHolder extends RecyclerView.ViewHolder {
 

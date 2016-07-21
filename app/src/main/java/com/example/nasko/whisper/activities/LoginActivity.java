@@ -9,13 +9,17 @@ import android.widget.Toast;
 
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.WhisperApplication;
+import com.example.nasko.whisper.models.Error;
 import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.managers.LocalUserRepository;
-import com.example.nasko.whisper.network.UserData;
+import com.example.nasko.whisper.network.listeners.OnAuthenticatedListener;
+import com.example.nasko.whisper.network.notifications.SocketService;
+import com.example.nasko.whisper.network.rest.UserService;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private UserData userData;
+    private UserService userService;
+    private SocketService socketService;
     private LocalUserRepository localUserRepository;
 
     private Button regButton;
@@ -28,9 +32,26 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        this.localUserRepository = new LocalUserRepository(this);
-        this.userData = WhisperApplication.getInstance().getChatService().getUserData();
+        localUserRepository = new LocalUserRepository(this);
+        userService = WhisperApplication.getInstance().getUserService();
+        socketService = WhisperApplication.getInstance().getSocketService();
 
+        initUi();
+        socketService.setAuthenticatedListener(new OnAuthenticatedListener() {
+            @Override
+            public void onAuthenticated(User user) {
+                socketService.setCurrentUser(user);
+                goToContacts();
+            }
+
+            @Override
+            public void onUnauthorized(Error error) {
+                displayToast(error.getMessage());
+            }
+        });
+    }
+
+    private void initUi() {
         this.regButton = (Button) this.findViewById(R.id.btn_reg);
         this.loginButton = (Button) this.findViewById(R.id.btn_login);
         this.editEmail = (EditText) this.findViewById(R.id.edit_email);
@@ -55,7 +76,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void login(final String username, String password) {
 
-        this.userData.login(username, password)
+        this.userService.login(username, password)
                 .onSuccess(user -> tryConnect(user))
                 .onError(error -> displayToast(error.getMessage()))
                 .execute();
@@ -63,7 +84,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void register(final String username, String password) {
 
-        this.userData.register(username, password)
+        this.userService.register(username, password)
                 .onSuccess(user -> tryConnect(user))
                 .onError(error -> displayToast(error.getMessage()))
                 .execute();
@@ -71,13 +92,8 @@ public class LoginActivity extends AppCompatActivity {
 
     private void tryConnect(User user) {
         localUserRepository.saveLoginData(user);
-        userData.connect(user.getSessionToken(),
-                result -> {
-                    goToContacts();
-                },
-                error ->  {
-                    displayToast(error.getMessage());
-                });
+        socketService.connect();
+        socketService.authenticate(user.getSessionToken());
     }
 
     private void displayToast(String message) {

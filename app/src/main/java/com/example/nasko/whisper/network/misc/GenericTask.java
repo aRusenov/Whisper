@@ -1,4 +1,4 @@
-package com.example.nasko.whisper.managers;
+package com.example.nasko.whisper.network.misc;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -6,13 +6,13 @@ import android.os.Looper;
 import com.example.nasko.whisper.network.listeners.OnErrorListener;
 import com.example.nasko.whisper.network.listeners.OnSuccessListener;
 
-public abstract class Task<R, E> {
+public abstract class GenericTask<R, E> {
 
     private OnSuccessListener<R> successListener;
     private OnErrorListener<E> errorListener;
     private boolean executeOnUiThread;
 
-    public Task(boolean executeOnUiThread) {
+    public GenericTask(boolean executeOnUiThread) {
         this.executeOnUiThread = executeOnUiThread;
     }
 
@@ -20,7 +20,7 @@ public abstract class Task<R, E> {
         return successListener;
     }
 
-    public Task<R, E> onSuccess(final OnSuccessListener<R> successListener) {
+    public GenericTask<R, E> onSuccess(final OnSuccessListener<R> successListener) {
         if (executeOnUiThread) {
             // Wrap success listener in a UI callback
             this.successListener = result -> new Handler(Looper.getMainLooper()).post(() -> successListener.onSuccess(result));
@@ -35,9 +35,9 @@ public abstract class Task<R, E> {
         return errorListener;
     }
 
-    public Task<R, E> onError(final OnErrorListener<E> errorListener) {
+    public GenericTask<R, E> onError(final OnErrorListener<E> errorListener) {
         if (executeOnUiThread) {
-            // Wrap success listener in a UI callback
+            // Wrap error listener in a UI callback
             this.errorListener = e -> new Handler(Looper.getMainLooper()).post(() -> errorListener.onError(e));
         } else {
             this.errorListener = errorListener;

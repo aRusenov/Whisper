@@ -14,14 +14,15 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
-import com.example.nasko.whisper.views.listeners.EndlessUpScrollListener;
-import com.example.nasko.whisper.views.adapters.MessageAdapter;
-import com.example.nasko.whisper.models.Message;
 import com.example.nasko.whisper.R;
+import com.example.nasko.whisper.WhisperApplication;
+import com.example.nasko.whisper.models.Message;
 import com.example.nasko.whisper.models.User;
-import com.example.nasko.whisper.network.ChatData;
 import com.example.nasko.whisper.network.listeners.MessagesEventListener;
-import com.example.nasko.whisper.network.impl.NodeJsService;
+import com.example.nasko.whisper.network.notifications.MessagesService;
+import com.example.nasko.whisper.network.notifications.SocketService;
+import com.example.nasko.whisper.views.adapters.MessageAdapter;
+import com.example.nasko.whisper.views.listeners.EndlessUpScrollListener;
 
 import java.util.List;
 
@@ -30,7 +31,8 @@ public class ChatActivity extends AppCompatActivity {
     private static final int PAGE_SIZE = 10;
 
     private User currentUser;
-    private ChatData chatData;
+    private MessagesService messagesService;
+    private SocketService socketService;
     private EditText messageEdit;
     private String chatId;
 
@@ -39,8 +41,10 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        this.chatData = NodeJsService.getInstance().getChatData();
-        this.currentUser = NodeJsService.getInstance().getUserData().getCurrentUser();
+        socketService = WhisperApplication.getInstance().getSocketService();
+        messagesService = socketService.getMessagesService();
+        currentUser = socketService.getCurrentUser();
+
         this.getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
@@ -62,13 +66,13 @@ public class ChatActivity extends AppCompatActivity {
                 }
 
                 Log.i("LOADING", "actually loading now");
-                chatData.requestMessages(currentUser.getUsername(), chatId, lastLoadedItemId, PAGE_SIZE);
+                messagesService.loadMessages(chatId, lastLoadedItemId, PAGE_SIZE);
             }
         };
 
         messageList.addOnScrollListener(endlessScrollListener);
 
-        this.chatData.setMessagesEventListener(new MessagesEventListener() {
+        this.messagesService.setMessagesEventListener(new MessagesEventListener() {
             @Override
             public void onMessageAdded(Message message) {
                 if (! message.getChatId().equals(chatId)) {
@@ -105,16 +109,11 @@ public class ChatActivity extends AppCompatActivity {
         });
 
         // Request initial messages
-        this.chatData.requestMessages(currentUser.getUsername(), chatId, -1, PAGE_SIZE * 2);
+        this.messagesService.loadMessages(chatId, -1, PAGE_SIZE * 2);
 
         this.messageEdit = (EditText) this.findViewById(R.id.edit_newMessage);
         ImageButton sendButton = (ImageButton) this.findViewById(R.id.btn_send_message);
-        sendButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                sendMessage();
-            }
-        });
+        sendButton.setOnClickListener(v -> sendMessage());
 
 //        this.messageEdit.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 //            @Override
@@ -129,6 +128,12 @@ public class ChatActivity extends AppCompatActivity {
 //        });
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        socketService.clearMessagesService();
+    }
+
     private void playNewMessageSound() {
         Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         Ringtone r = RingtoneManager.getRingtone(this, notification);
@@ -141,7 +146,7 @@ public class ChatActivity extends AppCompatActivity {
             return;
         }
 
-        this.chatData.sendMessage(currentUser.getUsername(), chatId, text);
+        this.messagesService.sendMessage(chatId, text);
         this.messageEdit.setText("");
     }
 }

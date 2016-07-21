@@ -10,7 +10,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,33 +18,28 @@ import android.widget.TextView;
 
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.WhisperApplication;
-import com.example.nasko.whisper.views.listeners.OnItemClickListener;
+import com.example.nasko.whisper.managers.LocalUserRepository;
 import com.example.nasko.whisper.models.Chat;
 import com.example.nasko.whisper.models.Contact;
 import com.example.nasko.whisper.models.User;
-import com.example.nasko.whisper.network.ContactsData;
-import com.example.nasko.whisper.models.Error;
-import com.example.nasko.whisper.managers.LocalUserRepository;
-import com.example.nasko.whisper.network.UserData;
-import com.example.nasko.whisper.network.listeners.OnErrorListener;
-import com.example.nasko.whisper.network.listeners.OnSuccessListener;
-import com.example.nasko.whisper.network.impl.NodeJsService;
+import com.example.nasko.whisper.network.notifications.ContactsService;
+import com.example.nasko.whisper.network.notifications.SocketService;
 import com.example.nasko.whisper.utils.DateProvider;
 import com.example.nasko.whisper.views.adapters.ChatAdapter;
 import com.example.nasko.whisper.views.adapters.ContactQueryAdapter;
+import com.example.nasko.whisper.views.listeners.OnItemClickListener;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 public class ContactsActivity extends AppCompatActivity implements DateProvider {
 
-    public static final String KEY_CHAT_ID = "chatId";
+    private static final String KEY_CHAT_ID = "chatId";
     private static DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
+    private ContactsService contactsService;
     private User currentUser;
-    private ContactsData contactsData;
     private ChatAdapter adapter;
     private Date today = new Date();
 
@@ -54,17 +48,16 @@ public class ContactsActivity extends AppCompatActivity implements DateProvider 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contacts);
 
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
-        myToolbar.setBackground(new ColorDrawable(Color.parseColor("#26A69A")));
-        setSupportActionBar(myToolbar);
+        displayToolbar();
 
-        UserData userData = WhisperApplication.getInstance().getChatService().getUserData();
-        this.currentUser = userData.getCurrentUser();
-        this.contactsData = NodeJsService.getInstance().getContactsData();
+
+        SocketService socketService = WhisperApplication.getInstance().getSocketService();
+        contactsService = socketService.getContactsService();
+        currentUser = socketService.getCurrentUser();
 
         RecyclerView contactsView = (RecyclerView) this.findViewById(R.id.contactsView);
         this.adapter = new ChatAdapter(this, this);
-        this.contactsData.setContactsEventListener(this.adapter);
+        this.contactsService.setContactsEventListener(this.adapter);
         this.adapter.setItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(int position) {
@@ -83,18 +76,25 @@ public class ContactsActivity extends AppCompatActivity implements DateProvider 
         contactsView.setLayoutManager(new LinearLayoutManager(this));
     }
 
+    private void displayToolbar() {
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        myToolbar.setBackground(new ColorDrawable(Color.parseColor("#26A69A")));
+        setSupportActionBar(myToolbar);
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
 
         this.today = new Date();
         this.adapter.clear();
-        this.contactsData.getContacts(this.currentUser.getUsername());
+        this.contactsService.loadContacts();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         this.getMenuInflater().inflate(R.menu.bar_actions, menu);;
+
 
         MenuItem searchItem = menu.findItem(R.id.action_add_contact);
         final SearchView searchView =
@@ -106,7 +106,7 @@ public class ContactsActivity extends AppCompatActivity implements DateProvider 
             public void onItemClick(int position) {
                 // TODO: send add request
                 Contact contact = adapter.getItem(position);
-                contactsData.addContact(currentUser.getSessionToken(), contact.getUsername());
+                contactsService.addContact(contact.getUsername());
             }
         });
 
@@ -116,6 +116,18 @@ public class ContactsActivity extends AppCompatActivity implements DateProvider 
         final TextView tvQueryMessage = (TextView) findViewById(R.id.query_message);
         final RelativeLayout queryContainer = (RelativeLayout) findViewById(R.id.new_contacts_container);
 
+        contactsService.setContactsQueryEventListener(contacts -> {
+            if (contacts.size() == 0) {
+                tvQueryMessage.setVisibility(View.VISIBLE);
+                tvQueryMessage.setText("No results");
+            } else {
+                tvQueryMessage.setVisibility(View.GONE);
+            }
+
+            adapter.clear();
+            adapter.addAll(contacts);
+        });
+
         searchView.setQueryHint(getString(R.string.add_contact_hint));
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -124,25 +136,7 @@ public class ContactsActivity extends AppCompatActivity implements DateProvider 
                     return true;
                 }
 
-                contactsData.queryContacts(query, new OnSuccessListener<List<Contact>>() {
-                    @Override
-                    public void onSuccess(List<Contact> contacts) {
-                        if (contacts.size() == 0) {
-                            tvQueryMessage.setVisibility(View.VISIBLE);
-                            tvQueryMessage.setText("No results");
-                        } else {
-                            tvQueryMessage.setVisibility(View.GONE);
-                        }
-
-                        adapter.clear();
-                        adapter.addAll(contacts);
-                    }
-                }, new OnErrorListener<Error>() {
-                    @Override
-                    public void onError(Error error) {
-                        Log.e("ERROR", error.toString());
-                    }
-                });
+                contactsService.searchContacts(query);
 
                 return true;
             }

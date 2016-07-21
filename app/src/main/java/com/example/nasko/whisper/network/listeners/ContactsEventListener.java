@@ -4,7 +4,7 @@ import com.example.nasko.whisper.models.Chat;
 
 import java.util.List;
 
-public interface ChatsEventListener {
+public interface ContactsEventListener {
 
     void onContactsLoaded(List<Chat> chats);
 
