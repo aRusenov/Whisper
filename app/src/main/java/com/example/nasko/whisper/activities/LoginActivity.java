@@ -102,7 +102,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void goToContacts() {
-        Intent intent = new Intent(this, ContactsActivity.class);
+        Intent intent = new Intent(this, ChatsActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         this.startActivity(intent);
     }

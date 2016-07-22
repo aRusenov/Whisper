@@ -2,6 +2,7 @@ package com.example.nasko.whisper.network.notifications;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.models.Chat;
@@ -77,19 +78,21 @@ public class HerokuContactsService implements ContactsService {
                 e.printStackTrace();
             }
         }).on("query contacts", args -> {
-            JSONArray jsonArr = (JSONArray) args[0];
-            final List<Contact> contacts = new ArrayList<Contact>(jsonArr.length());
+            JSONObject rootObj = (JSONObject) args[0];
             try {
-                for (int i = 0; i < jsonArr.length(); i++) {
-                    Contact contact = new Contact(jsonArr.getJSONObject(i));
+                String query = rootObj.getString("search");
+                JSONArray contactsArr = rootObj.getJSONArray("contacts");
+                final List<Contact> contacts = new ArrayList<Contact>(contactsArr.length());
+                for (int i = 0; i < contactsArr.length(); i++) {
+                    Contact contact = new Contact(contactsArr.getJSONObject(i));
                     contacts.add(contact);
                 }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
 
-            new Handler(Looper.getMainLooper()).post(() ->
-                    contactsQueryEventListener.onContactsLoaded(contacts));
+                new Handler(Looper.getMainLooper()).post(() ->
+                        contactsQueryEventListener.onContactsLoaded(contacts, query));
+            } catch (JSONException e) {
+                Log.e("ContactService", "Error parsing JSON");
+            }
         });
     }
 

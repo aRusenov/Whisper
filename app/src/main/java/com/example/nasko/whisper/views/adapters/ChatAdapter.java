@@ -6,21 +6,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.example.nasko.whisper.views.listeners.OnItemClickListener;
+import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.models.Chat;
 import com.example.nasko.whisper.utils.DateProvider;
-import com.example.nasko.whisper.R;
-import com.example.nasko.whisper.network.listeners.ContactsEventListener;
+import com.example.nasko.whisper.views.listeners.OnItemClickListener;
 import com.squareup.picasso.Picasso;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class ChatAdapter extends ArrayRecyclerViewAdapter<Chat, ChatAdapter.ChatViewHolder> implements ContactsEventListener {
+public class ChatAdapter extends ArrayRecyclerViewAdapter<Chat, ChatAdapter.ChatViewHolder> {
 
     class ChatViewHolder extends RecyclerView.ViewHolder {
 
@@ -88,18 +86,7 @@ public class ChatAdapter extends ArrayRecyclerViewAdapter<Chat, ChatAdapter.Chat
         }
     }
 
-    @Override
-    public void onContactAdded(Chat chat) {
-        this.add(chat);
-    }
-
-    @Override
-    public void onContactsLoaded(List<Chat> chats) {
-        this.addAll(chats);
-    }
-
-    @Override
-    public void onContactUpdated(Chat chat) {
+    public void update(Chat chat) {
         // Remove item from old position
         int oldPosition = this.items.indexOf(chat);
         Chat oldChat = this.items.remove(oldPosition);

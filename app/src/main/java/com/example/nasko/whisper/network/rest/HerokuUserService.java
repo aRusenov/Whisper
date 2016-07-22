@@ -95,6 +95,12 @@ public class HerokuUserService implements UserService {
 
     @Override
     public Task<ProfileData> editProfile(String token, ProfileData newProfileData) {
-        return null;
+        return new Task<ProfileData>(true) {
+
+            @Override
+            public void execute() {
+                
+            }
+        };
     }
 }

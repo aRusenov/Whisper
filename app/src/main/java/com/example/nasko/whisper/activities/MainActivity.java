@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onAuthenticated(User user) {
                     socketService.setCurrentUser(loggedUser);
-                    startActivity(ContactsActivity.class, true);
+                    startActivity(ChatsActivity.class, true);
                 }
 
                 @Override

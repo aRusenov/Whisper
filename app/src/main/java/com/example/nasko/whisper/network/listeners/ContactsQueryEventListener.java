@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface ContactsQueryEventListener {
 
-    void onContactsLoaded(List<Contact> chats);
+    void onContactsLoaded(List<Contact> chats, String query);
 }

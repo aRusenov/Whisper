@@ -1,6 +1,6 @@
 package com.example.nasko.whisper.network.listeners;
 
-public interface OnSocketStateListener {
+public interface SocketStateListener {
 
     void onConnect();
 

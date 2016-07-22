@@ -26,7 +26,7 @@ import com.example.nasko.whisper.views.listeners.EndlessUpScrollListener;
 
 import java.util.List;
 
-public class ChatActivity extends AppCompatActivity {
+public class ChatroomActivity extends AppCompatActivity {
 
     private static final int PAGE_SIZE = 10;
 

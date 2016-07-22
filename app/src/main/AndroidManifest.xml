@@ -25,8 +25,8 @@
         </activity>
         <activity android:name=".activities.LoginActivity" />
         <activity android:name=".activities.RegisterActivity" />
-        <activity android:name=".activities.ContactsActivity" />
-        <activity android:name=".activities.ChatActivity" />
+        <activity android:name=".activities.ChatsActivity" />
+        <activity android:name=".activities.ChatroomActivity" />
         <activity
             android:name=".activities.EditProfileActivity"
             android:label="@string/title_activity_edit_profile"

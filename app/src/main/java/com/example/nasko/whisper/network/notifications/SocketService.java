@@ -7,7 +7,7 @@ import android.util.Log;
 import com.example.nasko.whisper.models.Error;
 import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.network.listeners.OnAuthenticatedListener;
-import com.example.nasko.whisper.network.listeners.OnSocketStateListener;
+import com.example.nasko.whisper.network.listeners.SocketStateListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,7 +24,7 @@ public class SocketService {
     private User currentUser;
     private String endpoint;
     private Socket socket;
-    private OnSocketStateListener socketStateListener;
+    private SocketStateListener socketStateListener;
     private OnAuthenticatedListener authenticatedListener;
     private ContactsService contactsService;
     private MessagesService messagesService;
@@ -38,14 +38,6 @@ public class SocketService {
         }
 
         this.registerSocketStateListeners();
-    }
-
-    public void setCurrentUser(User user) {
-        currentUser = user;
-    }
-
-    public User getCurrentUser() {
-        return currentUser;
     }
 
     private void registerSocketStateListeners() {
@@ -87,11 +79,23 @@ public class SocketService {
                 authenticatedListener.onUnauthorized(new Error("Invalid session token"))));
     }
 
-    public OnSocketStateListener getSocketStateListener() {
+    public boolean connected() {
+        return socket.connected();
+    }
+
+    public void setCurrentUser(User user) {
+        currentUser = user;
+    }
+
+    public User getCurrentUser() {
+        return currentUser;
+    }
+
+    public SocketStateListener getSocketStateListener() {
         return socketStateListener;
     }
 
-    public void setSocketStateListener(OnSocketStateListener socketStateListener) {
+    public void setSocketStateListener(SocketStateListener socketStateListener) {
         this.socketStateListener = socketStateListener;
     }
 
@@ -135,12 +139,16 @@ public class SocketService {
     }
 
     public void clearContactsService() {
-        contactsService.clearListeners();
-        contactsService = null;
+        if (contactsService != null) {
+            contactsService.clearListeners();
+            contactsService = null;
+        }
     }
 
     public void clearMessagesService() {
-        messagesService.clearListeners();
-        messagesService = null;
+        if (messagesService != null) {
+            messagesService.clearListeners();
+            messagesService = null;
+        }
     }
 }
