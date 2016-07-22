@@ -99,7 +99,7 @@ public class HerokuUserService implements UserService {
 
             @Override
             public void execute() {
-                
+
             }
         };
     }

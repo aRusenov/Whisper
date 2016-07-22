@@ -9,7 +9,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -21,20 +20,25 @@ import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.network.listeners.MessagesEventListener;
 import com.example.nasko.whisper.network.notifications.MessagesService;
 import com.example.nasko.whisper.network.notifications.SocketService;
+import com.example.nasko.whisper.utils.DateFormatter;
 import com.example.nasko.whisper.views.adapters.MessageAdapter;
 import com.example.nasko.whisper.views.listeners.EndlessUpScrollListener;
 
+import java.util.Date;
 import java.util.List;
 
 public class ChatroomActivity extends AppCompatActivity {
 
     private static final int PAGE_SIZE = 10;
 
-    private User currentUser;
     private MessagesService messagesService;
     private SocketService socketService;
+    private User currentUser;
+
     private EditText messageEdit;
+
     private String chatId;
+    private Date today = new Date();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +100,7 @@ public class ChatroomActivity extends AppCompatActivity {
                     return;
                 }
 
+                addTimeLabels(messages);
                 // Insert messages at top
                 adapter.addAllAt(0, messages);
                 int lastLoadedMessageSeq = messages.get(0).getSeq();
@@ -103,7 +108,6 @@ public class ChatroomActivity extends AppCompatActivity {
 
                 // Maintain scroll position
                 int index = layoutManager.findFirstVisibleItemPosition() + messages.size();
-                View topmostView = messageList.getChildAt(0);
                 messageList.scrollToPosition(index);
             }
         });
@@ -126,6 +130,19 @@ public class ChatroomActivity extends AppCompatActivity {
 //                return false;
 //            }
 //        });
+    }
+
+    private void addTimeLabels(List<Message> messages) {
+        for (int i = messages.size() - 2; i >= 0; i--) {
+            Message prev = messages.get(i + 1);
+            Message current = messages.get(i);
+            // If message is posted on different date than previous -> add a dummy message as separator
+            if (prev.getDate().getDay() != current.getDate().getDay()) {
+                String dateString = DateFormatter.getStringFormat(today, current.getDate());
+                Message label = Message.createDummy(dateString);
+                messages.add(i + 1, label);
+            }
+        }
     }
 
     @Override

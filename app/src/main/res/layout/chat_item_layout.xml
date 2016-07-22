@@ -31,6 +31,8 @@
                 android:text="Gosho"
                 android:textSize="25sp"
                 android:textColor="#000"
+                android:maxLines="1"
+                android:ellipsize="end"
                 android:id="@+id/contact_name" />
 
             <TextView
@@ -38,6 +40,9 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/last_message"
                 android:textSize="20sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:scrollHorizontally="false"
                 android:text="Hey, buddy!" />
 
         </LinearLayout>

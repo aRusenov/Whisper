@@ -19,6 +19,8 @@ public class Message {
     private boolean seen;
     private int seq;
     private String chatId;
+    private boolean isDummy;
+    private String label;
 
     public Message(JSONObject json, String chatId) throws JSONException {
         this.authorId = (String) json.get("createdBy");
@@ -42,6 +44,23 @@ public class Message {
         this.date = date;
         this.authorId = authorId;
         this.text = text;
+    }
+
+    private Message(String label) {
+        this.isDummy = true;
+        this.label = label;
+    }
+
+    public static Message createDummy(String label) {
+        return new Message(label);
+    }
+
+    public boolean isDummy() {
+        return isDummy;
+    }
+
+    public String getLabel() {
+        return label;
     }
 
     public int getSeq() {
