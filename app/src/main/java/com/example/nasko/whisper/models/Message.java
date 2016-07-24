@@ -23,11 +23,11 @@ public class Message {
     private String label;
 
     public Message(JSONObject json, String chatId) throws JSONException {
-        this.authorId = (String) json.get("createdBy");
+        this.authorId = json.getString("createdBy");
         this.seq = json.getInt("seq");
-        this.text = (String) json.get("text");
+        this.text = json.getString("text");
         this.chatId = chatId;
-        String dateString = (String) json.get("createdAt");
+        String dateString = json.getString("createdAt");
         try {
             this.date = dateFormat.parse(dateString);
         } catch (ParseException e) {

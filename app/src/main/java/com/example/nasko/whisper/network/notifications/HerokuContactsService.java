@@ -24,6 +24,8 @@ import io.socket.client.Socket;
 
 public class HerokuContactsService implements ContactsService {
 
+    private static final String TAG = "ContactsService";
+
     private Socket socket;
     private User currentUser;
     private ContactsEventListener contactsEventListener;
@@ -36,7 +38,18 @@ public class HerokuContactsService implements ContactsService {
 
     private void registerEventListeners() {
         socket.on("new contact", args -> {
-            // TODO: add chat
+            JSONObject rootObj = (JSONObject) args[0];
+            try {
+                JSONObject chatJson = rootObj.getJSONObject("chat");
+                JSONObject contactJson = rootObj.getJSONArray("participants").getJSONObject(0);
+                Contact contact = new Contact(contactJson);
+                Chat chat = new Chat(chatJson, contact);
+                new Handler(Looper.getMainLooper()).post(() ->
+                        contactsEventListener.onContactAdded(chat));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            Log.d(TAG, "New contact added");
         }).on("show chats", args -> {
             // Temporary workaround
             String myId = WhisperApplication.getInstance().getSocketService().getCurrentUser().getUId();
@@ -127,7 +140,7 @@ public class HerokuContactsService implements ContactsService {
     public void addContact(String contactId) {
         JSONObject data = new JSONObject();
         try {
-            data.put("contactId", contactId);
+            data.put("contact", contactId);
         } catch (JSONException e) {
             e.printStackTrace();
         }

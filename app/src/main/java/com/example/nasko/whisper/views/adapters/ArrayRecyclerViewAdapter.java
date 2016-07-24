@@ -57,6 +57,11 @@ public abstract class ArrayRecyclerViewAdapter<E, VH extends RecyclerView.ViewHo
         this.notifyItemInserted(this.getItemCount());
     }
 
+    public void add(int position, E item) {
+        this.items.add(position, item);
+        this.notifyItemInserted(position);
+    }
+
     public void addAll(Collection<E> elements) {
         this.items.addAll(elements);
         this.notifyDataSetChanged();

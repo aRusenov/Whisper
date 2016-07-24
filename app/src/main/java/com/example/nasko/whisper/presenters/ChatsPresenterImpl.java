@@ -16,6 +16,7 @@ import com.example.nasko.whisper.network.notifications.ContactsService;
 import com.example.nasko.whisper.network.notifications.SocketService;
 import com.example.nasko.whisper.views.contracts.ChatsActionBarView;
 import com.example.nasko.whisper.views.contracts.ChatsView;
+import com.example.nasko.whisper.views.contracts.ChatsViewNavigator;
 
 import java.util.List;
 
@@ -26,6 +27,7 @@ public class ChatsPresenterImpl implements ChatsPresenter {
     private Context context;
     private ChatsView chatsView;
     private ChatsActionBarView chatsActionBarView;
+    private ChatsViewNavigator chatsViewNavigator;
     private ContactsService contactsService;
     private SocketService socketService;
 
@@ -61,6 +63,9 @@ public class ChatsPresenterImpl implements ChatsPresenter {
             public void onContactAdded(Chat chat) {
                 if (chatsView != null) {
                     chatsView.addChat(chat);
+                }
+                if (chatsActionBarView != null) {
+                    chatsActionBarView.markContactAsFriend(chat.getOtherContact());
                 }
             }
         });
@@ -113,14 +118,23 @@ public class ChatsPresenterImpl implements ChatsPresenter {
     }
 
     @Override
-    public void onTakeViews(ChatsView chatsView, ChatsActionBarView actionBarView) {
+    public void onTakeChatsViewNavigator(ChatsViewNavigator chatsViewNavigator) {
+        this.chatsViewNavigator = chatsViewNavigator;
+    }
+
+    @Override
+    public void onTakeChatsView(ChatsView chatsView) {
         this.chatsView = chatsView;
+    }
+
+    @Override
+    public void onTakeContactsSearchView(ChatsActionBarView actionBarView) {
         this.chatsActionBarView = actionBarView;
     }
 
     @Override
     public void onChatClicked(Chat clickedChat) {
-        chatsView.navigateToChatroom(clickedChat);
+        chatsViewNavigator.navigateToChatroom(clickedChat);
     }
 
     @Override
@@ -139,7 +153,8 @@ public class ChatsPresenterImpl implements ChatsPresenter {
 
     @Override
     public void onContactSendRequestClick(Contact contact) {
-
+        Log.d(TAG, "Performing add contact query");
+        contactsService.addContact(contact.getId());
     }
 
     @Override
@@ -149,7 +164,9 @@ public class ChatsPresenterImpl implements ChatsPresenter {
         socketService.clearContactsService();
         socketService.clearMessagesService();
         socketService.setCurrentUser(null);
-        chatsView.navigateToLoginScreen();
+        socketService.disconnect();
+
+        chatsViewNavigator.navigateToLoginScreen();
     }
 
     @Override
@@ -162,6 +179,11 @@ public class ChatsPresenterImpl implements ChatsPresenter {
             Log.d(TAG, "Directly loading contacts");
             contactsService.loadContacts();
         }
+    }
+
+    @Override
+    public void onDestroy() {
+
     }
 
     @Override

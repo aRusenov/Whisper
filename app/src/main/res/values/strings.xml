@@ -19,4 +19,5 @@
     <string name="action_logout">Logout</string>
     <string name="add_contact_hint">New contact name</string>
     <string name="title_activity_edit_profile">EditProfileActivity</string>
+    <string name="search_contact">Search for people</string>
 </resources>

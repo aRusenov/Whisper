@@ -27,6 +27,9 @@ public class HerokuMessagesService implements MessagesService {
     }
 
     private void registerEventListeners() {
+        Log.d("MessagesService", "Has listeners? " + socket.hasListeners("show messages"));
+        Log.d("MessagesService", "Attaching event listeners");
+
         socket.on("show messages", args -> {
             JSONObject data = (JSONObject) args[0];
             try {
@@ -91,6 +94,7 @@ public class HerokuMessagesService implements MessagesService {
 
     @Override
     public void clearListeners() {
+        this.messagesEventListener = null;
         socket.off("show messages")
                 .off("new message");
     }

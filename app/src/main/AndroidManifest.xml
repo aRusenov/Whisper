@@ -12,7 +12,7 @@
     <application
         android:name=".WhisperApplication"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/icon"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
@@ -24,13 +24,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".activities.LoginActivity" />
-        <activity android:name=".activities.RegisterActivity" />
         <activity android:name=".activities.ChatsActivity" />
         <activity android:name=".activities.ChatroomActivity" />
-        <activity
-            android:name=".activities.EditProfileActivity"
-            android:label="@string/title_activity_edit_profile"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"></activity>
     </application>
 
 </manifest>

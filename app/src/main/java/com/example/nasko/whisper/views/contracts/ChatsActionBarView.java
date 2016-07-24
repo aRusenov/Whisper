@@ -8,5 +8,7 @@ public interface ChatsActionBarView {
 
     void loadQueryResults(List<Contact> contacts);
 
+    void markContactAsFriend(Contact contact);
+
     void displayInfoText(String text);
 }

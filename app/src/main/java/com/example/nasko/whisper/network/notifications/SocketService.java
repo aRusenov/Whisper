@@ -42,24 +42,29 @@ public class SocketService {
 
     private void registerSocketStateListeners() {
         socket.on(Socket.EVENT_CONNECT, args -> {
+            Log.d(TAG, "Socket connected");
             if (socketStateListener != null) {
                 socketStateListener.onConnect();
             }
         }).on(Socket.EVENT_CONNECT_TIMEOUT, args -> {
+            Log.d(TAG, "Socket timeout");
             if (socketStateListener != null) {
                 socketStateListener.onConnectionTimeout();
             }
         }).on(Socket.EVENT_CONNECT_ERROR, args -> {
+            Log.d(TAG, "Socket error");
             if (socketStateListener != null) {
                 socketStateListener.onConnectionError();
             }
         }).on(Socket.EVENT_DISCONNECT, args -> {
+            Log.d(TAG, "Socket disconnected");
             if (socketStateListener != null) {
                 socketStateListener.onDisconnect();
             }
         });
 
         this.socket.on("authenticated", args -> {
+            Log.d(TAG, "Socket authenticated");
             JSONObject response = (JSONObject) args[0];
             try {
                 User user = new User(
@@ -75,8 +80,10 @@ public class SocketService {
             }
         });
 
-        this.socket.on("unauthorized", args -> new Handler(Looper.getMainLooper()).post(() ->
-                authenticatedListener.onUnauthorized(new Error("Invalid session token"))));
+        this.socket.on("unauthorized", args -> new Handler(Looper.getMainLooper()).post(() -> {
+            Log.d(TAG, "Unauthorized");
+            authenticatedListener.onUnauthorized(new Error("Invalid session token"));
+        }));
     }
 
     public boolean connected() {
@@ -125,6 +132,10 @@ public class SocketService {
 
     public void connect() {
         socket.connect();
+    }
+
+    public void disconnect() {
+        socket.disconnect();
     }
 
     public void authenticate(String token) {

@@ -13,8 +13,4 @@ public interface ChatsView {
     void updateChat(Chat chat);
 
     void clearChats();
-
-    void navigateToChatroom(Chat chat);
-
-    void navigateToLoginScreen();
 }

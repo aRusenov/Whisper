@@ -29,13 +29,10 @@ public class ContactQueryAdapter extends ArrayRecyclerViewAdapter<Contact, Conta
             this.name = (TextView) itemView.findViewById(R.id.contact_name);
             this.inviteIcon = (ImageView) itemView.findViewById(R.id.invite_icon);
 
-            inviteIcon.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    OnItemClickListener listener = getInvitationIconClickListener();
-                    if (listener != null) {
-                        listener.onItemClick(getAdapterPosition());
-                    }
+            inviteIcon.setOnClickListener(v -> {
+                OnItemClickListener listener = getInvitationIconClickListener();
+                if (listener != null) {
+                    listener.onItemClick(getAdapterPosition());
                 }
             });
         }
@@ -69,13 +66,34 @@ public class ContactQueryAdapter extends ArrayRecyclerViewAdapter<Contact, Conta
         holder.name.setText(contact.getName());
         Picasso.with(this.getContext())
                 .load(contact.getImageUrl())
+                .placeholder(R.drawable.blank_pic)
                 .into(holder.image);
 
         boolean isContactUser = currentUser.getUId().equals(contact.getId());
-        if (!contact.isFriend() && !isContactUser) {
-            holder.inviteIcon.setVisibility(View.VISIBLE);
+        if (isContactUser) {
+            holder.inviteIcon.setVisibility(View.INVISIBLE);
         } else {
-            holder.inviteIcon.setVisibility(View.GONE);
+            holder.inviteIcon.setVisibility(View.VISIBLE);
+            if (contact.isFriend()) {
+                holder.inviteIcon.setImageResource(R.drawable.sucess_tick);
+            } else {
+                holder.inviteIcon.setImageResource(R.drawable.letter);
+            }
+        }
+    }
+
+    public void setContactToFriend(Contact contact) {
+        int i;
+        for (i = 0; i < this.items.size(); i++) {
+            if (items.get(i).equals(contact)) {
+                break;
+            }
+        }
+
+        if (i < items.size()) {
+            Contact contactRef = this.items.get(i);
+            contactRef.setFriend(true);
+            this.notifyItemChanged(i);
         }
     }
 }

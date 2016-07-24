@@ -21,6 +21,7 @@ import com.example.nasko.whisper.network.listeners.MessagesEventListener;
 import com.example.nasko.whisper.network.notifications.MessagesService;
 import com.example.nasko.whisper.network.notifications.SocketService;
 import com.example.nasko.whisper.utils.DateFormatter;
+import com.example.nasko.whisper.utils.MessageSeparatorDateFormatter;
 import com.example.nasko.whisper.views.adapters.MessageAdapter;
 import com.example.nasko.whisper.views.listeners.EndlessUpScrollListener;
 
@@ -31,6 +32,7 @@ public class ChatroomActivity extends AppCompatActivity {
 
     private static final int PAGE_SIZE = 10;
 
+    private DateFormatter dateFormatter;
     private MessagesService messagesService;
     private SocketService socketService;
     private User currentUser;
@@ -45,6 +47,7 @@ public class ChatroomActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
+        dateFormatter = new MessageSeparatorDateFormatter();
         socketService = WhisperApplication.getInstance().getSocketService();
         messagesService = socketService.getMessagesService();
         currentUser = socketService.getCurrentUser();
@@ -138,7 +141,7 @@ public class ChatroomActivity extends AppCompatActivity {
             Message current = messages.get(i);
             // If message is posted on different date than previous -> add a dummy message as separator
             if (prev.getDate().getDay() != current.getDate().getDay()) {
-                String dateString = DateFormatter.getStringFormat(today, current.getDate());
+                String dateString = dateFormatter.getStringFormat(today, current.getDate());
                 Message label = Message.createDummy(dateString);
                 messages.add(i + 1, label);
             }

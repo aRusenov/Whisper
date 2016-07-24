@@ -34,13 +34,10 @@ public class ChatAdapter extends ArrayRecyclerViewAdapter<Chat, ChatAdapter.Chat
             this.lastMessage = (TextView) itemView.findViewById(R.id.last_message);
             this.profileImg = (CircleImageView) itemView.findViewById(R.id.profile_image);
 
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    OnItemClickListener listener = getItemClickListener();
-                    if (listener != null) {
-                        listener.onItemClick(getAdapterPosition());
-                    }
+            itemView.setOnClickListener(v -> {
+                OnItemClickListener listener1 = getItemClickListener();
+                if (listener1 != null) {
+                    listener1.onItemClick(getAdapterPosition());
                 }
             });
         }
@@ -72,6 +69,7 @@ public class ChatAdapter extends ArrayRecyclerViewAdapter<Chat, ChatAdapter.Chat
         holder.lastMessage.setText(chat.getLastMessage().getText());
         Picasso.with(this.getContext())
                 .load(chat.getOtherContact().getImageUrl())
+                .placeholder(R.drawable.blank_pic)
                 .into(holder.profileImg);
     }
 

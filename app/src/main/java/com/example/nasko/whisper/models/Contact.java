@@ -16,7 +16,10 @@ public class Contact {
         this.username = json.getString("username");
         this.name = json.has("name") ? json.getString("name") : this.username;
         if (json.has("image")) {
-            this.imageUrl = json.getJSONObject("image").getString("url");
+            JSONObject image = json.getJSONObject("image");
+            if (image.has("url")) {
+                this.imageUrl = image.getString("url");
+            }
         }
 
         if (json.has("isFriend")) {
@@ -70,5 +73,11 @@ public class Contact {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        Contact other = (Contact) o;
+        return this.id.equals(other.getId());
     }
 }
