@@ -10,10 +10,8 @@ import android.widget.Toast;
 
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.WhisperApplication;
-import com.example.nasko.whisper.models.Error;
-import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.managers.LocalUserRepository;
-import com.example.nasko.whisper.network.listeners.OnAuthenticatedListener;
+import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.network.notifications.SocketService;
 import com.example.nasko.whisper.network.rest.UserService;
 
@@ -37,22 +35,22 @@ public class LoginActivity extends AppCompatActivity {
                 WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
         localUserRepository = new LocalUserRepository(this);
-        userService = WhisperApplication.getInstance().getUserService();
-        socketService = WhisperApplication.getInstance().getSocketService();
+        userService = WhisperApplication.instance().getUserService();
+//        socketService = WhisperApplication.instance().getSocketService();
 
         initUi();
-        socketService.setAuthenticatedListener(new OnAuthenticatedListener() {
-            @Override
-            public void onAuthenticated(User user) {
-                socketService.setCurrentUser(user);
-                goToContacts();
-            }
-
-            @Override
-            public void onUnauthorized(Error error) {
-                displayToast(error.getMessage());
-            }
-        });
+//        socketService.setAuthenticatedListener(new AuthenticationListener() {
+//            @Override
+//            public void onAuthenticated(User user) {
+//                socketService.setCurrentUser(user);
+//                goToContacts();
+//            }
+//
+//            @Override
+//            public void onUnauthorized(Error error) {
+//                displayToast(error.getMessage());
+//            }
+//        });
     }
 
     private void initUi() {
@@ -81,7 +79,7 @@ public class LoginActivity extends AppCompatActivity {
     private void login(final String username, String password) {
 
         this.userService.login(username, password)
-                .onSuccess(user -> tryConnect(user))
+                .onSuccess(user -> goToContacts(user))
                 .onError(error -> displayToast(error.getMessage()))
                 .execute();
     }
@@ -89,7 +87,7 @@ public class LoginActivity extends AppCompatActivity {
     private void register(final String username, String password) {
 
         this.userService.register(username, password)
-                .onSuccess(user -> tryConnect(user))
+                .onSuccess(user -> goToContacts(user))
                 .onError(error -> displayToast(error.getMessage()))
                 .execute();
     }
@@ -105,7 +103,9 @@ public class LoginActivity extends AppCompatActivity {
         errorToast.show();
     }
 
-    private void goToContacts() {
+    private void goToContacts(User user) {
+        localUserRepository.saveLoginData(user);
+        WhisperApplication.instance().setCurrentUser(user);
         Intent intent = new Intent(this, ChatsActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         this.startActivity(intent);

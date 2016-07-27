@@ -1,12 +1,10 @@
 package com.example.nasko.whisper.network.notifications;
 
-import android.os.Handler;
-import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 
-import com.example.nasko.whisper.models.Error;
 import com.example.nasko.whisper.models.User;
-import com.example.nasko.whisper.network.listeners.OnAuthenticatedListener;
+import com.example.nasko.whisper.network.listeners.AuthenticationListener;
 import com.example.nasko.whisper.network.listeners.SocketStateListener;
 
 import org.json.JSONException;
@@ -25,11 +23,13 @@ public class SocketService {
     private String endpoint;
     private Socket socket;
     private SocketStateListener socketStateListener;
-    private OnAuthenticatedListener authenticatedListener;
+    private AuthenticationListener authenticatedListener;
     private ContactsService contactsService;
     private MessagesService messagesService;
+    private MessageBroadcaster messageBroadcaster;
 
-    public SocketService(String endpoint) {
+    public SocketService(String endpoint, MessageBroadcaster messageBroadcaster) {
+        this.messageBroadcaster = messageBroadcaster;
         this.endpoint = endpoint;
         try {
             this.socket = IO.socket(endpoint);
@@ -37,34 +37,41 @@ public class SocketService {
             Log.d(TAG, ex.getMessage());
         }
 
+        contactsService = new HerokuContactsService(socket, messageBroadcaster);
+        messagesService = new HerokuMessagesService(socket, messageBroadcaster);
         this.registerSocketStateListeners();
     }
 
     private void registerSocketStateListeners() {
         socket.on(Socket.EVENT_CONNECT, args -> {
             Log.d(TAG, "Socket connected");
-            if (socketStateListener != null) {
-                socketStateListener.onConnect();
-            }
+//            if (socketStateListener != null) {
+//                new Handler(Looper.getMainLooper()).post(() ->
+//                        socketStateListener.onConnect());
+//            }
         }).on(Socket.EVENT_CONNECT_TIMEOUT, args -> {
             Log.d(TAG, "Socket timeout");
-            if (socketStateListener != null) {
-                socketStateListener.onConnectionTimeout();
-            }
+//            if (socketStateListener != null) {
+//                new Handler(Looper.getMainLooper()).post(() ->
+//                    socketStateListener.onConnectionTimeout());
+//            }
         }).on(Socket.EVENT_CONNECT_ERROR, args -> {
             Log.d(TAG, "Socket error");
-            if (socketStateListener != null) {
-                socketStateListener.onConnectionError();
-            }
+//            if (socketStateListener != null) {
+//                new Handler(Looper.getMainLooper()).post(() ->
+//                    socketStateListener.onConnectionError());
+//            }
         }).on(Socket.EVENT_DISCONNECT, args -> {
             Log.d(TAG, "Socket disconnected");
-            if (socketStateListener != null) {
-                socketStateListener.onDisconnect();
-            }
+//            if (socketStateListener != null) {
+//                new Handler(Looper.getMainLooper()).post(() ->
+//                    socketStateListener.onDisconnect());
+//            }
         });
 
         this.socket.on("authenticated", args -> {
             Log.d(TAG, "Socket authenticated");
+            contactsService.loadContacts();
             JSONObject response = (JSONObject) args[0];
             try {
                 User user = new User(
@@ -72,18 +79,27 @@ public class SocketService {
                         response.getString("uId"),
                         response.getString("token"));
 
-                new Handler(Looper.getMainLooper()).post(() ->
-                        authenticatedListener.onAuthenticated(user));
+                setCurrentUser(user);
+                Message msg = Message.obtain(null, MessageTypes.MSG_AUTHENTICATED, user);
+                messageBroadcaster.sendMessage(msg);
+//                new Handler(Looper.getMainLooper()).post(() ->
+//                        authenticatedListener.onAuthenticated(user));
             } catch (JSONException e) {
-                new Handler(Looper.getMainLooper()).post(() ->
-                        authenticatedListener.onUnauthorized(new Error(e.getMessage())));
+                Message msg = Message.obtain(null, MessageTypes.MSG_UNAUTHORIZED);
+                messageBroadcaster.sendMessage(msg);
+//                new Handler(Looper.getMainLooper()).post(() ->
+//                        authenticatedListener.onUnauthorized(new Error(e.getMessage())));
             }
         });
 
-        this.socket.on("unauthorized", args -> new Handler(Looper.getMainLooper()).post(() -> {
+        this.socket.on("unauthorized", args -> {
             Log.d(TAG, "Unauthorized");
-            authenticatedListener.onUnauthorized(new Error("Invalid session token"));
-        }));
+            Message msg = Message.obtain(null, MessageTypes.MSG_UNAUTHORIZED);
+            messageBroadcaster.sendMessage(msg);
+//                new Handler(Looper.getMainLooper()).post(() -> {
+//            );
+//            authenticatedListener.onUnauthorized(new Error("Invalid session token"));
+        });
     }
 
     public boolean connected() {
@@ -92,6 +108,8 @@ public class SocketService {
 
     public void setCurrentUser(User user) {
         currentUser = user;
+        messagesService.setCurrentUser(user);
+        contactsService.setCurrentUser(user);
     }
 
     public User getCurrentUser() {
@@ -106,27 +124,19 @@ public class SocketService {
         this.socketStateListener = socketStateListener;
     }
 
-    public OnAuthenticatedListener getAuthenticatedListener() {
+    public AuthenticationListener getAuthenticatedListener() {
         return authenticatedListener;
     }
 
-    public void setAuthenticatedListener(OnAuthenticatedListener authenticatedListener) {
+    public void setAuthenticatedListener(AuthenticationListener authenticatedListener) {
         this.authenticatedListener = authenticatedListener;
     }
 
     public ContactsService getContactsService() {
-        if (contactsService == null) {
-            contactsService = new HerokuContactsService(socket);
-        }
-
         return contactsService;
     }
 
     public MessagesService getMessagesService() {
-        if (messagesService == null) {
-            messagesService = new HerokuMessagesService(socket);
-        }
-
         return messagesService;
     }
 
@@ -152,14 +162,19 @@ public class SocketService {
     public void clearContactsService() {
         if (contactsService != null) {
             contactsService.clearListeners();
-            contactsService = null;
+//            contactsService = null;
         }
     }
 
     public void clearMessagesService() {
         if (messagesService != null) {
             messagesService.clearListeners();
-            messagesService = null;
+//            messagesService = null;
         }
+    }
+
+    public void dispose() {
+        clearMessagesService();
+        clearContactsService();
     }
 }

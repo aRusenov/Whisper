@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -16,6 +17,8 @@ import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.models.Chat;
 import com.example.nasko.whisper.presenters.ChatsPresenter;
 import com.example.nasko.whisper.presenters.ChatsPresenterImpl;
+import com.example.nasko.whisper.presenters.PresenterCache;
+import com.example.nasko.whisper.presenters.PresenterFactory;
 import com.example.nasko.whisper.utils.DateProvider;
 import com.example.nasko.whisper.views.adapters.MenuFragmentPageAdapter;
 import com.example.nasko.whisper.views.contracts.ChatsViewNavigator;
@@ -28,36 +31,39 @@ public class ChatsActivity extends AppCompatActivity implements DateProvider, Ch
     private static final String KEY_CHAT_ID = "chatId";
     private static final int[] TAB_DRAWABLES = new int[] { R.drawable.home, R.drawable.search, R.drawable.settings };
 
-    private MenuFragmentPageAdapter pageAdapter;
-    private ViewPager viewPager;
-    private Date today = new Date();
     private ChatsPresenter chatsPresenter;
+    private PresenterFactory<ChatsPresenter> presenterFactory = () -> new ChatsPresenterImpl();
+
+    private ViewPager viewPager;
+    private MenuFragmentPageAdapter pageAdapter;
+    private Date today = new Date();
+
+    private boolean isBeingDestroyed;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contacts);
-        Log.d(TAG, "Creating activity");
 
-        chatsPresenter = new ChatsPresenterImpl(this);
+        Log.d(TAG, "Creating activity");
+        chatsPresenter = PresenterCache.instance().getPresenter("Chats", presenterFactory);
+        chatsPresenter.setContext(getApplicationContext());
         chatsPresenter.onTakeChatsViewNavigator(this);
 
-        pageAdapter = new MenuFragmentPageAdapter(
-                getSupportFragmentManager(), chatsPresenter);
+        pageAdapter = new MenuFragmentPageAdapter(getSupportFragmentManager());
         viewPager = (ViewPager) findViewById(R.id.pager);
         viewPager.setAdapter(pageAdapter);
         viewPager.setOffscreenPageLimit(2);
 
+        setToolbar();
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
         for (int i = 0; i < TAB_DRAWABLES.length; i++) {
             tabLayout.getTabAt(i).setIcon(TAB_DRAWABLES[i]);
         }
-
-        loadToolbar();
     }
 
-    private void loadToolbar() {
+    private void setToolbar() {
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         myToolbar.setBackground(new ColorDrawable(Color.parseColor("#26A69A")));
         setSupportActionBar(myToolbar);
@@ -75,6 +81,13 @@ public class ChatsActivity extends AppCompatActivity implements DateProvider, Ch
         Log.d(TAG, "Resuming activity");
         this.today = new Date();
         chatsPresenter.onResume();
+        isBeingDestroyed = false;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        super.onSaveInstanceState(outState, outPersistentState);
+        isBeingDestroyed = true;
     }
 
     @Override
@@ -82,6 +95,9 @@ public class ChatsActivity extends AppCompatActivity implements DateProvider, Ch
         super.onDestroy();
         Log.d(TAG, "Destroying activity");
         chatsPresenter.onDestroy();
+        if (isBeingDestroyed) {
+            PresenterCache.instance().removePresenter("Chats");
+        }
     }
 
     @Override
@@ -98,6 +114,11 @@ public class ChatsActivity extends AppCompatActivity implements DateProvider, Ch
     @Override
     public Date getDate() {
         return this.today;
+    }
+
+    @Override
+    public void setNetworkStatus(String message) {
+        getSupportActionBar().setTitle(message);
     }
 
     @Override

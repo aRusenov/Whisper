@@ -7,10 +7,10 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.nasko.whisper.views.listeners.OnItemClickListener;
-import com.example.nasko.whisper.models.Contact;
 import com.example.nasko.whisper.R;
-import com.example.nasko.whisper.models.User;
+import com.example.nasko.whisper.models.Contact;
+import com.example.nasko.whisper.presenters.UserProvider;
+import com.example.nasko.whisper.views.listeners.OnItemClickListener;
 import com.squareup.picasso.Picasso;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -38,12 +38,12 @@ public class ContactQueryAdapter extends ArrayRecyclerViewAdapter<Contact, Conta
         }
     }
 
-    private User currentUser;
+    private UserProvider userProvider;
     private OnItemClickListener invitationIconClickListener;
 
-    public ContactQueryAdapter(Context context, User currentUser) {
+    public ContactQueryAdapter(Context context, UserProvider userProvider) {
         super(context);
-        this.currentUser = currentUser;
+        this.userProvider = userProvider;
     }
 
     public OnItemClickListener getInvitationIconClickListener() {
@@ -69,7 +69,7 @@ public class ContactQueryAdapter extends ArrayRecyclerViewAdapter<Contact, Conta
                 .placeholder(R.drawable.blank_pic)
                 .into(holder.image);
 
-        boolean isContactUser = currentUser.getUId().equals(contact.getId());
+        boolean isContactUser = userProvider.getCurrentUser().getUId().equals(contact.getId());
         if (isContactUser) {
             holder.inviteIcon.setVisibility(View.INVISIBLE);
         } else {

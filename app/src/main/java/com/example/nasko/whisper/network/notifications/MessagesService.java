@@ -1,8 +1,11 @@
 package com.example.nasko.whisper.network.notifications;
 
+import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.network.listeners.MessagesEventListener;
 
 public interface MessagesService {
+
+    void setCurrentUser(User user);
 
     void setMessagesEventListener(MessagesEventListener listener);
 

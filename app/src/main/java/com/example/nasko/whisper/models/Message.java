@@ -22,6 +22,11 @@ public class Message {
     private boolean isDummy;
     private String label;
 
+    public Message(String text, String chatId) {
+        this.text = text;
+        this.chatId = chatId;
+    }
+
     public Message(JSONObject json, String chatId) throws JSONException {
         this.authorId = json.getString("createdBy");
         this.seq = json.getInt("seq");

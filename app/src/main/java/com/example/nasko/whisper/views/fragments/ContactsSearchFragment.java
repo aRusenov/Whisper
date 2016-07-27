@@ -16,12 +16,13 @@ import android.widget.TextView;
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.models.Contact;
 import com.example.nasko.whisper.presenters.ChatsPresenter;
+import com.example.nasko.whisper.presenters.PresenterCache;
 import com.example.nasko.whisper.views.adapters.ContactQueryAdapter;
-import com.example.nasko.whisper.views.contracts.ChatsActionBarView;
+import com.example.nasko.whisper.views.contracts.ContactsSearchView;
 
 import java.util.List;
 
-public class ContactsSearchFragment extends Fragment implements ChatsActionBarView {
+public class ContactsSearchFragment extends Fragment implements ContactsSearchView {
 
     private ChatsPresenter chatsPresenter;
     private ContactQueryAdapter contactQueryAdapter;
@@ -33,12 +34,15 @@ public class ContactsSearchFragment extends Fragment implements ChatsActionBarVi
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        chatsPresenter = PresenterCache.instance().getPresenter("Chats", null);
+        chatsPresenter.onTakeContactsSearchView(this);
+
         View view = inflater.inflate(R.layout.fragment_search_contacts, container, false);
         editSearch = (EditText) view.findViewById(R.id.edit_query);
         rvContacts = (RecyclerView) view.findViewById(R.id.rv_new_contacts);
         tvQueryMessage = (TextView) view.findViewById(R.id.tv_query_message);
 
-        contactQueryAdapter = new ContactQueryAdapter(getContext(), chatsPresenter.getCurrentUser());
+        contactQueryAdapter = new ContactQueryAdapter(getContext(), chatsPresenter);
         contactQueryAdapter.setInvitationIconClickListener(position -> {
             Contact contact = contactQueryAdapter.getItem(position);
             if (!contact.isFriend()) {
@@ -64,8 +68,6 @@ public class ContactsSearchFragment extends Fragment implements ChatsActionBarVi
 
             }
         });
-
-        chatsPresenter.onTakeContactsSearchView(this);
 
         return view;
     }

@@ -1,6 +1,20 @@
 package com.example.nasko.whisper.presenters;
 
-public interface ChatroomPresenter {
+import android.os.Bundle;
 
-    void rryaa();
+import com.example.nasko.whisper.views.contracts.ChatroomView;
+
+public interface ChatroomPresenter extends Presenter {
+
+    void onTakeChatroomView(ChatroomView view, String chatId);
+
+    void onMessageSend(String text);
+
+    void onScrollToTop();
+
+    void onSaveInstanceState(Bundle outBundle);
+
+    void onRestoreInstanceState(Bundle savedInstanceState);
+
+    void onDestroy();
 }

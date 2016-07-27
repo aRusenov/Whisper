@@ -1,10 +1,10 @@
 package com.example.nasko.whisper.network.notifications;
 
-import android.os.Handler;
-import android.os.Looper;
+import android.os.Messenger;
 import android.util.Log;
 
 import com.example.nasko.whisper.models.Message;
+import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.network.listeners.MessagesEventListener;
 
 import org.json.JSONArray;
@@ -18,10 +18,16 @@ import io.socket.client.Socket;
 
 public class HerokuMessagesService implements MessagesService {
 
+    private static final String TAG = "HerokuMessagesService";
+
+    private User currentUser;
     private Socket socket;
     private MessagesEventListener messagesEventListener;
+    private Messenger messenger;
+    private MessageBroadcaster messageBroadcaster;
 
-    public HerokuMessagesService(Socket socket) {
+    public HerokuMessagesService(Socket socket, MessageBroadcaster messageBroadcaster) {
+        this.messageBroadcaster = messageBroadcaster;
         this.socket = socket;
         this.registerEventListeners();
     }
@@ -31,6 +37,7 @@ public class HerokuMessagesService implements MessagesService {
         Log.d("MessagesService", "Attaching event listeners");
 
         socket.on("show messages", args -> {
+            Log.d(TAG, "Showing messages");
             JSONObject data = (JSONObject) args[0];
             try {
                 String chatId = (String) data.get("chatId");
@@ -42,22 +49,32 @@ public class HerokuMessagesService implements MessagesService {
                     messages.add(new Message(json, chatId));
                 }
 
-                new Handler(Looper.getMainLooper()).post(() ->
-                        messagesEventListener.onMessagesLoaded(messages));
+                android.os.Message msg = android.os.Message.obtain(null, MessageTypes.MSG_MESSAGES_LOADED, messages);
+                messageBroadcaster.sendMessage(msg);
+//                if (messagesEventListener != null) {
+//                    new Handler(Looper.getMainLooper()).post(() ->
+//                            messagesEventListener.onMessagesLoaded(messages));
+//                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }).on("new message", args -> {
-            Log.d("SOCKET", "new message");
+            Log.d(TAG, "New message");
             JSONObject json = (JSONObject) args[0];
             try {
                 final Message message = new Message(json);
-                new Handler(Looper.getMainLooper()).post(() ->
-                        messagesEventListener.onMessageAdded(message));
+                android.os.Message msg = android.os.Message.obtain(null, MessageTypes.MSG_NEW_MESSAGE, message);
+                Log.d(TAG, "Sending new message to client");
+                messageBroadcaster.sendMessage(msg);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         });
+    }
+
+    @Override
+    public void setCurrentUser(User user) {
+        currentUser = user;
     }
 
     @Override
@@ -95,7 +112,7 @@ public class HerokuMessagesService implements MessagesService {
     @Override
     public void clearListeners() {
         this.messagesEventListener = null;
-        socket.off("show messages")
-                .off("new message");
+//        socket.off("show messages")
+//                .off("new message");
     }
 }

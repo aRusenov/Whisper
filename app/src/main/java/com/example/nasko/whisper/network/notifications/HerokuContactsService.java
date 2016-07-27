@@ -1,10 +1,7 @@
 package com.example.nasko.whisper.network.notifications;
 
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 
-import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.models.Chat;
 import com.example.nasko.whisper.models.Contact;
 import com.example.nasko.whisper.models.User;
@@ -30,29 +27,34 @@ public class HerokuContactsService implements ContactsService {
     private User currentUser;
     private ContactsEventListener contactsEventListener;
     private ContactsQueryEventListener contactsQueryEventListener;
+    private MessageBroadcaster messageBroadcaster;
 
-    public HerokuContactsService(Socket socket) {
+    public HerokuContactsService(Socket socket, MessageBroadcaster messageBroadcaster) {
+        this.messageBroadcaster = messageBroadcaster;
         this.socket = socket;
         this.registerEventListeners();
     }
 
     private void registerEventListeners() {
         socket.on("new contact", args -> {
+            Log.d(TAG, "New contact");
             JSONObject rootObj = (JSONObject) args[0];
             try {
                 JSONObject chatJson = rootObj.getJSONObject("chat");
                 JSONObject contactJson = rootObj.getJSONArray("participants").getJSONObject(0);
                 Contact contact = new Contact(contactJson);
                 Chat chat = new Chat(chatJson, contact);
-                new Handler(Looper.getMainLooper()).post(() ->
-                        contactsEventListener.onContactAdded(chat));
+                android.os.Message msg = android.os.Message.obtain(null, MessageTypes.MSG_ADD_CONTACT, chat);
+                messageBroadcaster.sendMessage(msg);
+//                new Handler(Looper.getMainLooper()).post(() ->
+//                        contactsEventListener.onContactAdded(chat));
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            Log.d(TAG, "New contact added");
         }).on("show chats", args -> {
+            Log.d(TAG, "Show chats");
             // Temporary workaround
-            String myId = WhisperApplication.getInstance().getSocketService().getCurrentUser().getUId();
+            String myId = currentUser.getUId();
             JSONObject rootObj = (JSONObject) args[0];
             try {
                 final Map<String, Contact> contactsData = new HashMap<>();
@@ -75,22 +77,25 @@ public class HerokuContactsService implements ContactsService {
                     Contact contact = contactsData.get(participantId);
                     chats.add(new Chat(json, contact));
                 }
-
-                new Handler(Looper.getMainLooper()).post(() ->
-                        contactsEventListener.onContactsLoaded(chats));
+                android.os.Message msg = android.os.Message.obtain(null, MessageTypes.MSG_CHATS_LOADED, chats);
+                messageBroadcaster.sendMessage(msg);
+//                new Handler(Looper.getMainLooper()).post(() ->
+//                        contactsEventListener.onContactsLoaded(chats));
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }).on("contact update", args -> {
+            Log.d(TAG, "Contact updated");
             JSONObject json = (JSONObject) args[0];
             try {
                 final Chat chat = new Chat(json);
-                new Handler(Looper.getMainLooper()).post(() ->
-                        contactsEventListener.onContactUpdated(chat));
+                android.os.Message msg = android.os.Message.obtain(null, MessageTypes.MSG_CHAT_UPDATED, chat);
+                messageBroadcaster.sendMessage(msg);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }).on("query contacts", args -> {
+            Log.d(TAG, "Contact query returned results");
             JSONObject rootObj = (JSONObject) args[0];
             try {
                 String query = rootObj.getString("search");
@@ -101,12 +106,18 @@ public class HerokuContactsService implements ContactsService {
                     contacts.add(contact);
                 }
 
-                new Handler(Looper.getMainLooper()).post(() ->
-                        contactsQueryEventListener.onContactsLoaded(contacts, query));
+                android.os.Message msg = android.os.Message.obtain(null, MessageTypes.MSG_ADD_CONTACT, contacts);
+                messageBroadcaster.sendMessage(msg);
+//                new Handler(Looper.getMainLooper()).post(() ->
+//                        contactsQueryEventListener.onContactsLoaded(contacts, query));
             } catch (JSONException e) {
                 Log.e("ContactService", "Error parsing JSON");
             }
         });
+    }
+
+    public void setCurrentUser(User currentUser) {
+        this.currentUser = currentUser;
     }
 
     @Override

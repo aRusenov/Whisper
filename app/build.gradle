@@ -30,7 +30,6 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:24.0.0-beta1'
-    compile 'com.firebaseui:firebase-ui:0.4.0'
     compile 'com.android.support:design:23.4.0'
     compile 'com.android.volley:volley:1.0.0'
     compile('io.socket:socket.io-client:0.7.0') {
@@ -39,12 +38,8 @@ dependencies {
     }
     compile 'de.hdodenhof:circleimageview:2.0.0'
     compile 'com.squareup.picasso:picasso:2.5.2'
-    compile 'io.reactivex:rxandroid:1.2.1'
-    // Because RxAndroid releases are few and far between, it is recommended you also
-    // explicitly depend on RxJava's latest version for bug fixes and new features.
-    compile 'io.reactivex:rxjava:1.1.6'
+    compile 'com.google.code.gson:gson:2.6.2'
 }
 
-apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.android.application' //or apply plugin: 'java'
 apply plugin: 'me.tatarka.retrolambda'

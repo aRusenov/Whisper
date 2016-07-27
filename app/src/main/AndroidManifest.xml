@@ -16,16 +16,24 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-        <activity android:name=".activities.MainActivity">
+        <activity android:name=".activities.ChatsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity android:name=".activities.LoginActivity" />
-        <activity android:name=".activities.ChatsActivity" />
         <activity android:name=".activities.ChatroomActivity" />
+
+        <service
+            android:name=".network.notifications.BackgroundSocketService"
+            android:enabled="true"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="START_SERVICE" />
+            </intent-filter>
+        </service>
+
     </application>
 
 </manifest>

@@ -10,7 +10,6 @@ public abstract class EndlessUpScrollListener extends RecyclerView.OnScrollListe
 
     private boolean loading = true;
     private int previousTotalItemCount;
-    private int lastLoadedItemId = -1;
 
     private LinearLayoutManager linearLayoutManager;
     private int loadThreshold;
@@ -22,10 +21,6 @@ public abstract class EndlessUpScrollListener extends RecyclerView.OnScrollListe
 
     public EndlessUpScrollListener(LinearLayoutManager linearLayoutManager) {
         this(linearLayoutManager, LOAD_THRESHOLD);
-    }
-
-    public void setLastLoadedItemId(int itemId) {
-        this.lastLoadedItemId = itemId;
     }
 
     @Override
@@ -48,9 +43,9 @@ public abstract class EndlessUpScrollListener extends RecyclerView.OnScrollListe
         if (!loading && itemsAboveFirstVisibleItem - loadThreshold <= 0) {
             loading = true;
             Log.v("LOADING", "Loading fresh messages");
-            onLoadMore(lastLoadedItemId);
+            onLoadMore();
         }
     }
 
-    public abstract void onLoadMore(int lastLoadedItemId);
+    public abstract void onLoadMore();
 }

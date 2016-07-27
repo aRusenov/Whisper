@@ -4,7 +4,7 @@ import com.example.nasko.whisper.models.Contact;
 
 import java.util.List;
 
-public interface ChatsActionBarView {
+public interface ContactsSearchView {
 
     void loadQueryResults(List<Contact> contacts);
 

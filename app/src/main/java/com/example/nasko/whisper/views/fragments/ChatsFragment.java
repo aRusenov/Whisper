@@ -9,10 +9,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.models.Chat;
 import com.example.nasko.whisper.presenters.ChatsPresenter;
+import com.example.nasko.whisper.presenters.PresenterCache;
 import com.example.nasko.whisper.utils.DateProvider;
 import com.example.nasko.whisper.views.adapters.ChatAdapter;
 import com.example.nasko.whisper.views.contracts.ChatsView;
@@ -28,13 +30,16 @@ public class ChatsFragment extends Fragment implements DateProvider, ChatsView {
 
     private ChatAdapter chatsAdapter;
     private RecyclerView contactsView;
-    private Date now;
+    private LinearLayoutManager chatsLayoutManager;
+    private ProgressBar loadingBar;
+    private Date now = new Date();
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_chats, container, false);
         contactsView = (RecyclerView) view.findViewById(R.id.rv_chats);
+        loadingBar = (ProgressBar) view.findViewById(R.id.progress_loading);
         chatsAdapter = new ChatAdapter(getContext(), this);
         chatsAdapter.setItemClickListener(position -> {
             Chat selectedChat = chatsAdapter.getItem(position);
@@ -42,8 +47,10 @@ public class ChatsFragment extends Fragment implements DateProvider, ChatsView {
         });
 
         contactsView.setAdapter(this.chatsAdapter);
-        contactsView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        chatsLayoutManager = new LinearLayoutManager(getActivity());
+        contactsView.setLayoutManager(chatsLayoutManager);
 
+        chatsPresenter = PresenterCache.instance().getPresenter("Chats", null);
         chatsPresenter.onTakeChatsView(this);
         return view;
     }
@@ -52,6 +59,11 @@ public class ChatsFragment extends Fragment implements DateProvider, ChatsView {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "OnCreate called");
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
     }
 
     public void setChatsPresenter(ChatsPresenter presenter) {
@@ -73,6 +85,7 @@ public class ChatsFragment extends Fragment implements DateProvider, ChatsView {
 
     @Override
     public void loadChats(List<Chat> chats) {
+        loadingBar.setVisibility(View.GONE);
         chatsAdapter.addAll(chats);
     }
 
@@ -84,6 +97,9 @@ public class ChatsFragment extends Fragment implements DateProvider, ChatsView {
     @Override
     public void updateChat(Chat chat) {
         chatsAdapter.update(chat);
+        if (chatsLayoutManager.findFirstVisibleItemPosition() == 0) {
+            contactsView.scrollToPosition(0);
+        }
     }
 
     @Override
