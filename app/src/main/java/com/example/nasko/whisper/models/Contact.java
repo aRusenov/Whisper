@@ -27,6 +27,11 @@ public class Contact {
         }
     }
 
+    public Contact(String id, String username) {
+        this.id = id;
+        this.username = username;
+    }
+
     public boolean isFriend() {
         return isFriend;
     }

@@ -12,6 +12,7 @@ import android.util.Log;
 
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.activities.ChatroomActivity;
+import com.example.nasko.whisper.activities.ChatsActivity;
 import com.example.nasko.whisper.models.Message;
 
 public class NotificationController {
@@ -25,8 +26,8 @@ public class NotificationController {
     public void createMessageNotification(Message message) {
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(context)
-                        .setSmallIcon(R.drawable.icon)
-                        .setContentTitle(message.getFrom())
+                        .setSmallIcon(R.drawable.profile)
+                        .setContentTitle(message.getAuthor().getUsername())
                         .setContentText(message.getText());
 
         Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
@@ -40,7 +41,7 @@ public class NotificationController {
         // your application to the Home screen.
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
         // Adds the back stack for the Intent (but not the Intent itself)
-        stackBuilder.addParentStack(ChatroomActivity.class);
+        stackBuilder.addParentStack(ChatsActivity.class);
         // Adds the Intent that starts the Activity to the top of the stack
         stackBuilder.addNextIntent(resultIntent);
         PendingIntent resultPendingIntent =

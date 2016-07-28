@@ -1,6 +1,5 @@
 package com.example.nasko.whisper.network.notifications;
 
-import android.os.Messenger;
 import android.util.Log;
 
 import com.example.nasko.whisper.models.Message;
@@ -23,11 +22,8 @@ public class HerokuMessagesService implements MessagesService {
     private User currentUser;
     private Socket socket;
     private MessagesEventListener messagesEventListener;
-    private Messenger messenger;
-    private MessageBroadcaster messageBroadcaster;
 
-    public HerokuMessagesService(Socket socket, MessageBroadcaster messageBroadcaster) {
-        this.messageBroadcaster = messageBroadcaster;
+    public HerokuMessagesService(Socket socket) {
         this.socket = socket;
         this.registerEventListeners();
     }
@@ -49,12 +45,9 @@ public class HerokuMessagesService implements MessagesService {
                     messages.add(new Message(json, chatId));
                 }
 
-                android.os.Message msg = android.os.Message.obtain(null, MessageTypes.MSG_MESSAGES_LOADED, messages);
-                messageBroadcaster.sendMessage(msg);
-//                if (messagesEventListener != null) {
-//                    new Handler(Looper.getMainLooper()).post(() ->
-//                            messagesEventListener.onMessagesLoaded(messages));
-//                }
+                if (messagesEventListener != null) {
+                     messagesEventListener.onMessagesLoaded(messages);
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -63,9 +56,9 @@ public class HerokuMessagesService implements MessagesService {
             JSONObject json = (JSONObject) args[0];
             try {
                 final Message message = new Message(json);
-                android.os.Message msg = android.os.Message.obtain(null, MessageTypes.MSG_NEW_MESSAGE, message);
-                Log.d(TAG, "Sending new message to client");
-                messageBroadcaster.sendMessage(msg);
+                if (messagesEventListener != null) {
+                    messagesEventListener.onMessageAdded(message);
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -111,8 +104,6 @@ public class HerokuMessagesService implements MessagesService {
 
     @Override
     public void clearListeners() {
-        this.messagesEventListener = null;
-//        socket.off("show messages")
-//                .off("new message");
+        messagesEventListener = null;
     }
 }

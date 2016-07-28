@@ -3,7 +3,7 @@ package com.example.nasko.whisper;
 import android.app.Application;
 
 import com.example.nasko.whisper.models.User;
-import com.example.nasko.whisper.network.notifications.SocketServiceReceiver;
+import com.example.nasko.whisper.network.notifications.SocketServiceConsumer;
 import com.example.nasko.whisper.network.rest.HerokuUserService;
 import com.example.nasko.whisper.network.rest.UserService;
 
@@ -11,7 +11,7 @@ public class WhisperApplication extends Application {
 
     private User currentUser;
     private UserService userService;
-    private SocketServiceReceiver serviceReceiver;
+    private SocketServiceConsumer serviceReceiver;
 
     private static WhisperApplication instance;
 
@@ -21,7 +21,7 @@ public class WhisperApplication extends Application {
         instance = this;
 
         userService = new HerokuUserService(getApplicationContext());
-        serviceReceiver = new SocketServiceReceiver(getApplicationContext());
+        serviceReceiver = new SocketServiceConsumer(getApplicationContext());
     }
 
     public User getCurrentUser() {
@@ -36,7 +36,7 @@ public class WhisperApplication extends Application {
         return userService;
     }
 
-    public SocketServiceReceiver getServiceReceiver() {
+    public SocketServiceConsumer getServiceReceiver() {
         return serviceReceiver;
     }
 

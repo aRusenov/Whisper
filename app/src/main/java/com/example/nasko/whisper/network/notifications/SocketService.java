@@ -1,8 +1,8 @@
 package com.example.nasko.whisper.network.notifications;
 
-import android.os.Message;
 import android.util.Log;
 
+import com.example.nasko.whisper.models.Error;
 import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.network.listeners.AuthenticationListener;
 import com.example.nasko.whisper.network.listeners.SocketStateListener;
@@ -20,25 +20,21 @@ public class SocketService {
     private static final String TAG = "SocketService";
 
     private User currentUser;
-    private String endpoint;
     private Socket socket;
     private SocketStateListener socketStateListener;
     private AuthenticationListener authenticatedListener;
     private ContactsService contactsService;
     private MessagesService messagesService;
-    private MessageBroadcaster messageBroadcaster;
 
-    public SocketService(String endpoint, MessageBroadcaster messageBroadcaster) {
-        this.messageBroadcaster = messageBroadcaster;
-        this.endpoint = endpoint;
+    public SocketService(String endpoint) {
         try {
             this.socket = IO.socket(endpoint);
         } catch (URISyntaxException ex) {
             Log.d(TAG, ex.getMessage());
         }
 
-        contactsService = new HerokuContactsService(socket, messageBroadcaster);
-        messagesService = new HerokuMessagesService(socket, messageBroadcaster);
+        contactsService = new HerokuContactsService(socket);
+        messagesService = new HerokuMessagesService(socket);
         this.registerSocketStateListeners();
     }
 
@@ -62,6 +58,7 @@ public class SocketService {
 //                    socketStateListener.onConnectionError());
 //            }
         }).on(Socket.EVENT_DISCONNECT, args -> {
+            setCurrentUser(null);
             Log.d(TAG, "Socket disconnected");
 //            if (socketStateListener != null) {
 //                new Handler(Looper.getMainLooper()).post(() ->
@@ -71,7 +68,6 @@ public class SocketService {
 
         this.socket.on("authenticated", args -> {
             Log.d(TAG, "Socket authenticated");
-            contactsService.loadContacts();
             JSONObject response = (JSONObject) args[0];
             try {
                 User user = new User(
@@ -80,25 +76,22 @@ public class SocketService {
                         response.getString("token"));
 
                 setCurrentUser(user);
-                Message msg = Message.obtain(null, MessageTypes.MSG_AUTHENTICATED, user);
-                messageBroadcaster.sendMessage(msg);
-//                new Handler(Looper.getMainLooper()).post(() ->
-//                        authenticatedListener.onAuthenticated(user));
+                if (authenticatedListener != null) {
+                    authenticatedListener.onAuthenticated(user);
+                }
             } catch (JSONException e) {
-                Message msg = Message.obtain(null, MessageTypes.MSG_UNAUTHORIZED);
-                messageBroadcaster.sendMessage(msg);
-//                new Handler(Looper.getMainLooper()).post(() ->
-//                        authenticatedListener.onUnauthorized(new Error(e.getMessage())));
+                if (authenticatedListener != null) {
+                    authenticatedListener.onUnauthorized(new Error(e.getMessage()));
+                }
             }
         });
 
         this.socket.on("unauthorized", args -> {
             Log.d(TAG, "Unauthorized");
-            Message msg = Message.obtain(null, MessageTypes.MSG_UNAUTHORIZED);
-            messageBroadcaster.sendMessage(msg);
-//                new Handler(Looper.getMainLooper()).post(() -> {
-//            );
-//            authenticatedListener.onUnauthorized(new Error("Invalid session token"));
+            setCurrentUser(null);
+            if (authenticatedListener != null) {
+                authenticatedListener.onUnauthorized(new Error("Invalid session token"));
+            }
         });
     }
 
@@ -162,14 +155,12 @@ public class SocketService {
     public void clearContactsService() {
         if (contactsService != null) {
             contactsService.clearListeners();
-//            contactsService = null;
         }
     }
 
     public void clearMessagesService() {
         if (messagesService != null) {
             messagesService.clearListeners();
-//            messagesService = null;
         }
     }
 

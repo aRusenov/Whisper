@@ -21,6 +21,11 @@ public class Message {
     private String chatId;
     private boolean isDummy;
     private String label;
+    private Contact author;
+
+    public Contact getAuthor() {
+        return author;
+    }
 
     public Message(String text, String chatId) {
         this.text = text;
@@ -28,7 +33,13 @@ public class Message {
     }
 
     public Message(JSONObject json, String chatId) throws JSONException {
-        this.authorId = json.getString("createdBy");
+        if (json.has("author")) {
+            JSONObject authorJson = json.getJSONObject("author");
+            author = new Contact(authorJson.getString("_id"), authorJson.getString("username"));
+            authorId = author.getId();
+        } else {
+            this.authorId = json.getString("createdBy");
+        }
         this.seq = json.getInt("seq");
         this.text = json.getString("text");
         this.chatId = chatId;

@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -49,6 +48,7 @@ public class ChatsActivity extends AppCompatActivity implements DateProvider, Ch
         chatsPresenter = PresenterCache.instance().getPresenter("Chats", presenterFactory);
         chatsPresenter.setContext(getApplicationContext());
         chatsPresenter.onTakeChatsViewNavigator(this);
+        chatsPresenter.onCreate();
 
         pageAdapter = new MenuFragmentPageAdapter(getSupportFragmentManager());
         viewPager = (ViewPager) findViewById(R.id.pager);
@@ -85,8 +85,8 @@ public class ChatsActivity extends AppCompatActivity implements DateProvider, Ch
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
-        super.onSaveInstanceState(outState, outPersistentState);
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
         isBeingDestroyed = true;
     }
 

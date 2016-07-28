@@ -5,7 +5,7 @@ import android.os.Bundle;
 import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.models.Message;
 import com.example.nasko.whisper.network.listeners.MessagesEventListener;
-import com.example.nasko.whisper.network.notifications.SocketServiceReceiver;
+import com.example.nasko.whisper.network.notifications.SocketServiceConsumer;
 import com.example.nasko.whisper.views.contracts.ChatroomView;
 
 import java.util.List;
@@ -17,7 +17,7 @@ public class ChatroomPresenterImpl implements ChatroomPresenter {
 
     private ChatroomView chatroomView;
 
-    private SocketServiceReceiver serviceReceiver;
+    private SocketServiceConsumer serviceReceiver;
     private String chatId;
     private int lastLoadedMessageSeq = -1;
     private boolean loadingMessages;

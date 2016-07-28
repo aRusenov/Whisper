@@ -27,10 +27,8 @@ public class HerokuContactsService implements ContactsService {
     private User currentUser;
     private ContactsEventListener contactsEventListener;
     private ContactsQueryEventListener contactsQueryEventListener;
-    private MessageBroadcaster messageBroadcaster;
 
-    public HerokuContactsService(Socket socket, MessageBroadcaster messageBroadcaster) {
-        this.messageBroadcaster = messageBroadcaster;
+    public HerokuContactsService(Socket socket) {
         this.socket = socket;
         this.registerEventListeners();
     }
@@ -44,16 +42,14 @@ public class HerokuContactsService implements ContactsService {
                 JSONObject contactJson = rootObj.getJSONArray("participants").getJSONObject(0);
                 Contact contact = new Contact(contactJson);
                 Chat chat = new Chat(chatJson, contact);
-                android.os.Message msg = android.os.Message.obtain(null, MessageTypes.MSG_ADD_CONTACT, chat);
-                messageBroadcaster.sendMessage(msg);
-//                new Handler(Looper.getMainLooper()).post(() ->
-//                        contactsEventListener.onContactAdded(chat));
+                if (contactsEventListener != null) {
+                    contactsEventListener.onContactAdded(chat);
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }).on("show chats", args -> {
-            Log.d(TAG, "Show chats");
-            // Temporary workaround
+            Log.d(TAG, "Loading chats");
             String myId = currentUser.getUId();
             JSONObject rootObj = (JSONObject) args[0];
             try {
@@ -77,10 +73,9 @@ public class HerokuContactsService implements ContactsService {
                     Contact contact = contactsData.get(participantId);
                     chats.add(new Chat(json, contact));
                 }
-                android.os.Message msg = android.os.Message.obtain(null, MessageTypes.MSG_CHATS_LOADED, chats);
-                messageBroadcaster.sendMessage(msg);
-//                new Handler(Looper.getMainLooper()).post(() ->
-//                        contactsEventListener.onContactsLoaded(chats));
+                if (contactsEventListener != null) {
+                    contactsEventListener.onContactsLoaded(chats);
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -89,8 +84,9 @@ public class HerokuContactsService implements ContactsService {
             JSONObject json = (JSONObject) args[0];
             try {
                 final Chat chat = new Chat(json);
-                android.os.Message msg = android.os.Message.obtain(null, MessageTypes.MSG_CHAT_UPDATED, chat);
-                messageBroadcaster.sendMessage(msg);
+                if (contactsEventListener != null) {
+                    contactsEventListener.onContactUpdated(chat);
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -105,13 +101,11 @@ public class HerokuContactsService implements ContactsService {
                     Contact contact = new Contact(contactsArr.getJSONObject(i));
                     contacts.add(contact);
                 }
-
-                android.os.Message msg = android.os.Message.obtain(null, MessageTypes.MSG_ADD_CONTACT, contacts);
-                messageBroadcaster.sendMessage(msg);
-//                new Handler(Looper.getMainLooper()).post(() ->
-//                        contactsQueryEventListener.onContactsLoaded(contacts, query));
+                if (contactsQueryEventListener != null) {
+                    contactsQueryEventListener.onContactsLoaded(contacts, query);
+                }
             } catch (JSONException e) {
-                Log.e("ContactService", "Error parsing JSON");
+                Log.e(TAG, "Error parsing JSON");
             }
         });
     }
@@ -161,9 +155,7 @@ public class HerokuContactsService implements ContactsService {
 
     @Override
     public void clearListeners() {
-        socket.off("new contact")
-                .off("show chats")
-                .off("contact update")
-                .off("query contacts");
+        contactsEventListener = null;
+        contactsQueryEventListener = null;
     }
 }
