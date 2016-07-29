@@ -1,4 +1,4 @@
-package com.example.nasko.whisper.network.notifications;
+package com.example.nasko.whisper.network.notifications.service;
 
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -13,8 +13,16 @@ import android.util.Log;
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.managers.ConfigLoader;
 import com.example.nasko.whisper.managers.NotificationController;
+import com.example.nasko.whisper.models.Message;
 
-public class BackgroundSocketService extends Service {
+public class BackgroundSocketService extends Service implements OnNewMessageListener {
+
+    @Override
+    public void onNewMessage(Message message) {
+        if (isPaused) {
+            notificationController.createMessageNotification(message);
+        }
+    }
 
     public class LocalBinder extends Binder {
         public BackgroundSocketService getService() {
@@ -24,23 +32,12 @@ public class BackgroundSocketService extends Service {
 
     private static final String TAG = BackgroundSocketService.class.getName();
 
+    private final IBinder binder = new LocalBinder();
     private NotificationController notificationController;
     private SocketService socketService;
     private String token;
-
-    private final IBinder binder = new LocalBinder();
-
-    public SocketService getSocketService() {
-        return socketService;
-    }
-
-    public ContactsService getContactsService() {
-        return socketService.getContactsService();
-    }
-
-    public MessagesService getMessagesService() {
-        return socketService.getMessagesService();
-    }
+    private boolean isBoundTo;
+    private boolean isPaused;
 
     @Override
     public void onCreate() {
@@ -48,6 +45,7 @@ public class BackgroundSocketService extends Service {
         String endpoint = ConfigLoader.getConfigValue(this, "api_url");
         socketService = new SocketService(endpoint);
         notificationController = new NotificationController(this);
+        socketService.getMessagesService().setNewMessageEventListener(this);
 
         Intent notificationIntent = new Intent(this, BackgroundSocketService.class);
 
@@ -64,10 +62,42 @@ public class BackgroundSocketService extends Service {
         startForeground(1, notification);
     }
 
+    public SocketService getSocketService() {
+        return socketService;
+    }
+
+    public ContactsService getContactsService() {
+        return socketService.getContactsService();
+    }
+
+    public MessagesService getMessagesService() {
+        return socketService.getMessagesService();
+    }
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return binder;
+    }
+
+    public void onBind() {
+        isBoundTo = true;
+    }
+
+    public void pause() {
+        isPaused = true;
+    }
+
+    public void resume() {
+        isPaused = false;
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        isBoundTo = false;
+        detachListeners();
+
+        return super.onUnbind(intent);
     }
 
     @Override
@@ -76,7 +106,7 @@ public class BackgroundSocketService extends Service {
         token = intent.getStringExtra("token");
 
         Log.d(TAG, "Service started");
-        if (socketService.getCurrentUser() == null) {
+        if (! socketService.connected()) {
             socketService.connect();
             socketService.authenticate(token);
         }

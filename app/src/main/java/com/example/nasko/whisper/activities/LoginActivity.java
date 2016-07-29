@@ -12,7 +12,7 @@ import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.managers.LocalUserRepository;
 import com.example.nasko.whisper.models.User;
-import com.example.nasko.whisper.network.notifications.SocketService;
+import com.example.nasko.whisper.network.notifications.service.SocketService;
 import com.example.nasko.whisper.network.rest.UserService;
 
 public class LoginActivity extends AppCompatActivity {

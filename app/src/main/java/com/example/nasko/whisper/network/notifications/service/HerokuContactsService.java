@@ -1,4 +1,4 @@
-package com.example.nasko.whisper.network.notifications;
+package com.example.nasko.whisper.network.notifications.service;
 
 import android.util.Log;
 

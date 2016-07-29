@@ -70,6 +70,12 @@ public class ChatsActivity extends AppCompatActivity implements DateProvider, Ch
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        chatsPresenter.onPause();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         this.getMenuInflater().inflate(R.menu.bar_actions, menu);
         return true;

@@ -5,7 +5,7 @@ import android.os.Bundle;
 import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.models.Message;
 import com.example.nasko.whisper.network.listeners.MessagesEventListener;
-import com.example.nasko.whisper.network.notifications.SocketServiceConsumer;
+import com.example.nasko.whisper.network.notifications.consumer.SocketServiceConsumer;
 import com.example.nasko.whisper.views.contracts.ChatroomView;
 
 import java.util.List;
@@ -84,6 +84,16 @@ public class ChatroomPresenterImpl implements ChatroomPresenter {
         if (savedInstanceState.containsKey(LAST_MESSAGE_SEQ)) {
             lastLoadedMessageSeq = savedInstanceState.getInt(LAST_MESSAGE_SEQ);
         }
+    }
+
+    @Override
+    public void onPause() {
+        serviceReceiver.pause();
+    }
+
+    @Override
+    public void onResume() {
+        serviceReceiver.resume();
     }
 
     @Override

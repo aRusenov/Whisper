@@ -29,6 +29,8 @@ public interface ChatsPresenter extends UserProvider, Presenter {
 
     void onResume();
 
+    void onPause();
+
     void onDestroy();
 
     User getCurrentUser();

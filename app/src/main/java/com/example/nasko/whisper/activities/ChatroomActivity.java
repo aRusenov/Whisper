@@ -164,6 +164,18 @@ public class ChatroomActivity extends AppCompatActivity implements ChatroomView 
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        presenter.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        presenter.onResume();
+    }
+
+    @Override
     public void loadMessages(List<Message> messages) {
         if (messages.isEmpty()) {
             return;

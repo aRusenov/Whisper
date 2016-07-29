@@ -16,5 +16,9 @@ public interface ChatroomPresenter extends Presenter {
 
     void onRestoreInstanceState(Bundle savedInstanceState);
 
+    void onPause();
+
+    void onResume();
+
     void onDestroy();
 }

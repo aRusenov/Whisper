@@ -12,7 +12,7 @@ import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.network.listeners.AuthenticationListener;
 import com.example.nasko.whisper.network.listeners.ContactsEventListener;
 import com.example.nasko.whisper.network.listeners.OnSuccessListener;
-import com.example.nasko.whisper.network.notifications.SocketServiceConsumer;
+import com.example.nasko.whisper.network.notifications.consumer.SocketServiceConsumer;
 import com.example.nasko.whisper.views.contracts.ChatsView;
 import com.example.nasko.whisper.views.contracts.ChatsViewNavigator;
 import com.example.nasko.whisper.views.contracts.ContactsSearchView;
@@ -184,15 +184,15 @@ public class ChatsPresenterImpl implements ChatsPresenter, OnSuccessListener<Obj
                 onLogout();
             } else {
                 setCurrentUser(loggedUser);
-                socketServiceConsumer.start(loggedUser.getSessionToken());
+                //socketServiceConsumer.start(loggedUser.getSessionToken());
             }
-        } else {
-            if (socketServiceConsumer.isBound()) {
-                socketServiceConsumer.loadContacts();
-            } else {
-                socketServiceConsumer.start(currentUser.getSessionToken());
-            }
-        }
+        } //else {
+//            if (socketServiceConsumer.isBound()) {
+//                socketServiceConsumer.loadContacts();
+//            } else {
+//                socketServiceConsumer.start(currentUser.getSessionToken());
+//            }
+//        }
     }
 
     @Override
@@ -202,9 +202,21 @@ public class ChatsPresenterImpl implements ChatsPresenter, OnSuccessListener<Obj
 
     @Override
     public void onResume() {
+        socketServiceConsumer.resume();
+        if (getCurrentUser() == null) {
+            return;
+        }
+
         if (socketServiceConsumer.isBound()) {
             socketServiceConsumer.loadContacts();
+        } else {
+            socketServiceConsumer.start(getCurrentUser().getSessionToken());
         }
+    }
+
+    @Override
+    public void onPause() {
+        socketServiceConsumer.pause();
     }
 
     @Override

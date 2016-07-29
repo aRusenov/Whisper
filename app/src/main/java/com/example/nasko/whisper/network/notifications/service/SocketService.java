@@ -1,4 +1,4 @@
-package com.example.nasko.whisper.network.notifications;
+package com.example.nasko.whisper.network.notifications.service;
 
 import android.util.Log;
 
@@ -53,6 +53,8 @@ public class SocketService {
 //            }
         }).on(Socket.EVENT_CONNECT_ERROR, args -> {
             Log.d(TAG, "Socket error");
+            socket.connect();
+            Log.d(TAG, "Attempting reconnect..");
 //            if (socketStateListener != null) {
 //                new Handler(Looper.getMainLooper()).post(() ->
 //                    socketStateListener.onConnectionError());
@@ -60,6 +62,8 @@ public class SocketService {
         }).on(Socket.EVENT_DISCONNECT, args -> {
             setCurrentUser(null);
             Log.d(TAG, "Socket disconnected");
+            socket.connect();
+            Log.d(TAG, "Attempting reconnect..");
 //            if (socketStateListener != null) {
 //                new Handler(Looper.getMainLooper()).post(() ->
 //                    socketStateListener.onDisconnect());

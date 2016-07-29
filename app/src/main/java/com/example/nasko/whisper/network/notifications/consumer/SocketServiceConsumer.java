@@ -1,4 +1,4 @@
-package com.example.nasko.whisper.network.notifications;
+package com.example.nasko.whisper.network.notifications.consumer;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -19,6 +19,7 @@ import com.example.nasko.whisper.network.listeners.ContactsEventListener;
 import com.example.nasko.whisper.network.listeners.ContactsQueryEventListener;
 import com.example.nasko.whisper.network.listeners.MessagesEventListener;
 import com.example.nasko.whisper.network.listeners.OnSuccessListener;
+import com.example.nasko.whisper.network.notifications.service.BackgroundSocketService;
 
 import java.util.List;
 
@@ -42,6 +43,7 @@ public class SocketServiceConsumer {
             Log.d(TAG, "Connected to service");
             service = ((BackgroundSocketService.LocalBinder) binder).getService();
             isBound = true;
+            service.onBind();
 
             if (onConnectedListener != null) {
                 onConnectedListener.onSuccess(null);
@@ -160,14 +162,18 @@ public class SocketServiceConsumer {
     }
 
     public void stop(boolean closeService) {
+        if (isBound) {
+            service.detachListeners();
+            context.unbindService(connection);
+        }
         if (closeService) {
             Intent intent = new Intent("START_SERVICE");
             intent.setPackage(context.getPackageName());
-            context.unbindService(connection);
-            context.stopService(intent);
-        } else if (isBound) {
-            service.detachListeners();
-            context.unbindService(connection);
+            try {
+                context.stopService(intent);
+            } catch (IllegalArgumentException e) {
+                // Service is not registered -> do nothing
+            }
         }
 
         isBound = false;
@@ -201,6 +207,18 @@ public class SocketServiceConsumer {
     private void validateState() {
         if (!isBound) {
             throw new UnsupportedOperationException(TAG + " is not bound to service");
+        }
+    }
+
+    public void resume() {
+        if (service != null) {
+            service.resume();
+        }
+    }
+
+    public void pause() {
+        if (service != null) {
+            service.pause();
         }
     }
 }

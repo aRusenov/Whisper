@@ -26,7 +26,7 @@
         <activity android:name=".activities.ChatroomActivity" />
 
         <service
-            android:name=".network.notifications.BackgroundSocketService"
+            android:name=".network.notifications.service.BackgroundSocketService"
             android:enabled="true"
             android:exported="true" >
             <intent-filter>

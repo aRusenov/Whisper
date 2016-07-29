@@ -1,4 +1,4 @@
-package com.example.nasko.whisper.network.notifications;
+package com.example.nasko.whisper.network.notifications.service;
 
 import android.util.Log;
 
@@ -22,6 +22,7 @@ public class HerokuMessagesService implements MessagesService {
     private User currentUser;
     private Socket socket;
     private MessagesEventListener messagesEventListener;
+    private OnNewMessageListener newMessageListener;
 
     public HerokuMessagesService(Socket socket) {
         this.socket = socket;
@@ -59,6 +60,8 @@ public class HerokuMessagesService implements MessagesService {
                 if (messagesEventListener != null) {
                     messagesEventListener.onMessageAdded(message);
                 }
+
+                newMessageListener.onNewMessage(message);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -73,6 +76,11 @@ public class HerokuMessagesService implements MessagesService {
     @Override
     public void setMessagesEventListener(MessagesEventListener listener) {
         this.messagesEventListener = listener;
+    }
+
+    @Override
+    public void setNewMessageEventListener(OnNewMessageListener listener) {
+        this.newMessageListener = listener;
     }
 
     @Override
