@@ -20,6 +20,7 @@ public class SocketService {
     private static final String TAG = "SocketService";
 
     private User currentUser;
+    private String token;
     private Socket socket;
     private SocketStateListener socketStateListener;
     private AuthenticationListener authenticatedListener;
@@ -38,9 +39,16 @@ public class SocketService {
         this.registerSocketStateListeners();
     }
 
+    public void setToken(String token) {
+        this.token = token;
+    }
+
     private void registerSocketStateListeners() {
         socket.on(Socket.EVENT_CONNECT, args -> {
             Log.d(TAG, "Socket connected");
+            if (token != null) {
+                authenticate(token);
+            }
 //            if (socketStateListener != null) {
 //                new Handler(Looper.getMainLooper()).post(() ->
 //                        socketStateListener.onConnect());
@@ -53,8 +61,6 @@ public class SocketService {
 //            }
         }).on(Socket.EVENT_CONNECT_ERROR, args -> {
             Log.d(TAG, "Socket error");
-            socket.connect();
-            Log.d(TAG, "Attempting reconnect..");
 //            if (socketStateListener != null) {
 //                new Handler(Looper.getMainLooper()).post(() ->
 //                    socketStateListener.onConnectionError());
@@ -62,8 +68,6 @@ public class SocketService {
         }).on(Socket.EVENT_DISCONNECT, args -> {
             setCurrentUser(null);
             Log.d(TAG, "Socket disconnected");
-            socket.connect();
-            Log.d(TAG, "Attempting reconnect..");
 //            if (socketStateListener != null) {
 //                new Handler(Looper.getMainLooper()).post(() ->
 //                    socketStateListener.onDisconnect());
@@ -92,7 +96,7 @@ public class SocketService {
 
         this.socket.on("unauthorized", args -> {
             Log.d(TAG, "Unauthorized");
-            setCurrentUser(null);
+//            setCurrentUser(null);
             if (authenticatedListener != null) {
                 authenticatedListener.onUnauthorized(new Error("Invalid session token"));
             }
@@ -141,6 +145,11 @@ public class SocketService {
         socket.connect();
     }
 
+    public void reconnect() {
+        socket.disconnect();
+        socket.connect();
+    }
+
     public void disconnect() {
         socket.disconnect();
     }
@@ -171,5 +180,6 @@ public class SocketService {
     public void dispose() {
         clearMessagesService();
         clearContactsService();
+        disconnect();
     }
 }

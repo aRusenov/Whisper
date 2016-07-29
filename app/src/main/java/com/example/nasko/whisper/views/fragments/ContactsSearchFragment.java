@@ -45,10 +45,9 @@ public class ContactsSearchFragment extends Fragment implements ContactsSearchVi
         contactQueryAdapter = new ContactQueryAdapter(getContext(), chatsPresenter);
         contactQueryAdapter.setInvitationIconClickListener(position -> {
             Contact contact = contactQueryAdapter.getItem(position);
-            if (!contact.isFriend()) {
-                chatsPresenter.onContactSendRequestClick(contact);
-            }
+            chatsPresenter.onContactSendRequestClick(contact);
         });
+
         rvContacts.setAdapter(contactQueryAdapter);
         rvContacts.setLayoutManager(new LinearLayoutManager(getContext()));
         editSearch.addTextChangedListener(new TextWatcher() {

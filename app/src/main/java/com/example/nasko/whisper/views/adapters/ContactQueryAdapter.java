@@ -76,8 +76,10 @@ public class ContactQueryAdapter extends ArrayRecyclerViewAdapter<Contact, Conta
             holder.inviteIcon.setVisibility(View.VISIBLE);
             if (contact.isFriend()) {
                 holder.inviteIcon.setImageResource(R.drawable.sucess_tick);
+                holder.inviteIcon.setClickable(false);
             } else {
                 holder.inviteIcon.setImageResource(R.drawable.letter);
+                holder.inviteIcon.setClickable(true);
             }
         }
     }
@@ -90,7 +92,7 @@ public class ContactQueryAdapter extends ArrayRecyclerViewAdapter<Contact, Conta
             }
         }
 
-        if (i < items.size()) {
+        if (i != -1 && i < items.size()) {
             Contact contactRef = this.items.get(i);
             contactRef.setFriend(true);
             this.notifyItemChanged(i);

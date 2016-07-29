@@ -15,12 +15,18 @@ import com.example.nasko.whisper.managers.ConfigLoader;
 import com.example.nasko.whisper.managers.NotificationController;
 import com.example.nasko.whisper.models.Message;
 
-public class BackgroundSocketService extends Service implements OnNewMessageListener {
+public class BackgroundSocketService extends Service implements OnNewMessageListener{
 
     @Override
     public void onNewMessage(Message message) {
         if (isPaused) {
             notificationController.createMessageNotification(message);
+        }
+    }
+
+    public void onBind() {
+        if (! socketService.connected() && token != null) {
+            socketService.reconnect();
         }
     }
 
@@ -34,18 +40,34 @@ public class BackgroundSocketService extends Service implements OnNewMessageList
 
     private final IBinder binder = new LocalBinder();
     private NotificationController notificationController;
+    private NetworkStateReceiver networkStateReceiver;
+
     private SocketService socketService;
     private String token;
-    private boolean isBoundTo;
     private boolean isPaused;
 
     @Override
     public void onCreate() {
         super.onCreate();
         String endpoint = ConfigLoader.getConfigValue(this, "api_url");
+
         socketService = new SocketService(endpoint);
-        notificationController = new NotificationController(this);
         socketService.getMessagesService().setNewMessageEventListener(this);
+        notificationController = new NotificationController(this);
+        networkStateReceiver = new NetworkStateReceiver(this) {
+            @Override
+            public void onNetworkConnected() {
+                if (! socketService.connected() && token != null) {
+                    socketService.reconnect();
+                }
+            }
+
+            @Override
+            public void onNoNetworkConnectivity() {
+                // TODO: Report
+            }
+        };
+        networkStateReceiver.start();
 
         Intent notificationIntent = new Intent(this, BackgroundSocketService.class);
 
@@ -55,7 +77,7 @@ public class BackgroundSocketService extends Service implements OnNewMessageList
         Notification notification = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.icon)
                 .setContentTitle("Whisper")
-                .setContentText("is whispering for you..")
+                .setContentText("is listening.")
                 .setContentIntent(pendingIntent)
                 .build();
 
@@ -80,10 +102,6 @@ public class BackgroundSocketService extends Service implements OnNewMessageList
         return binder;
     }
 
-    public void onBind() {
-        isBoundTo = true;
-    }
-
     public void pause() {
         isPaused = true;
     }
@@ -94,7 +112,6 @@ public class BackgroundSocketService extends Service implements OnNewMessageList
 
     @Override
     public boolean onUnbind(Intent intent) {
-        isBoundTo = false;
         detachListeners();
 
         return super.onUnbind(intent);
@@ -104,11 +121,11 @@ public class BackgroundSocketService extends Service implements OnNewMessageList
     public int onStartCommand(Intent intent, int flags, int startId) {
         notificationController = new NotificationController(this);
         token = intent.getStringExtra("token");
+        socketService.setToken(token);
 
         Log.d(TAG, "Service started");
         if (! socketService.connected()) {
             socketService.connect();
-            socketService.authenticate(token);
         }
 
         return START_REDELIVER_INTENT;
@@ -118,6 +135,7 @@ public class BackgroundSocketService extends Service implements OnNewMessageList
     public void onDestroy() {
         super.onDestroy();
         socketService.dispose();
+        networkStateReceiver.stop();
         Log.d(TAG, "Service destroyed");
     }
 

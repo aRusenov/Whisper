@@ -163,7 +163,9 @@ public class ChatsPresenterImpl implements ChatsPresenter, OnSuccessListener<Obj
     @Override
     public void onContactSendRequestClick(Contact contact) {
         Log.d(TAG, "Performing add contact query");
-        socketServiceConsumer.addContact(contact.getId());
+        if (! contact.isFriend()) {
+            socketServiceConsumer.addContact(contact.getId());
+        }
     }
 
     @Override
