@@ -34,8 +34,14 @@ public class HerokuContactsService implements ContactsService {
     private void registerEventListeners() {
         socket.on("new contact", args -> {
             Log.d(TAG,"New contact");
-            if (contactsEventListener != null) {
-//                contactsEventListener.onContactAdded(chat);
+            String json = args[0].toString();
+            try {
+                Chat newChat = deserializer.deserialize(json, Chat.class);
+                if (contactsEventListener != null) {
+                    contactsEventListener.onContactAdded(newChat);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }).on("show chats", args -> {
             Log.d(TAG, "Loading chats");

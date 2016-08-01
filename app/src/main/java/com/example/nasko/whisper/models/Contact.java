@@ -7,7 +7,8 @@ public class Contact {
     private String name;
     @JsonProperty("_id")
     private String id;
-    private String imageUrl;
+    @JsonProperty("image")
+    private Image image;
     @JsonProperty("isFriend")
     private boolean isFriend;
 
@@ -51,11 +52,11 @@ public class Contact {
     }
 
     public String getImageUrl() {
-        return imageUrl;
-    }
+        if (image != null) {
+            return image.getUrl();
+        }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+        return null;
     }
 
     @Override
