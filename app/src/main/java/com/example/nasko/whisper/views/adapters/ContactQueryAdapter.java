@@ -26,7 +26,7 @@ public class ContactQueryAdapter extends ArrayRecyclerViewAdapter<Contact, Conta
         ContactViewHolder(View itemView) {
             super(itemView);
             this.image = (CircleImageView) itemView.findViewById(R.id.profile_image);
-            this.name = (TextView) itemView.findViewById(R.id.contact_name);
+            this.name = (TextView) itemView.findViewById(R.id.tv_contact_name);
             this.inviteIcon = (ImageView) itemView.findViewById(R.id.invite_icon);
 
             inviteIcon.setOnClickListener(v -> {
@@ -56,7 +56,7 @@ public class ContactQueryAdapter extends ArrayRecyclerViewAdapter<Contact, Conta
 
     @Override
     public ContactViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = this.getInflater().inflate(R.layout.contact_query_item, parent, false);
+        View view = this.getInflater().inflate(R.layout.item_contact_query, parent, false);
         return new ContactViewHolder(view);
     }
 

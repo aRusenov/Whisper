@@ -3,6 +3,7 @@ package com.example.nasko.whisper.presenters;
 import android.os.Bundle;
 
 import com.example.nasko.whisper.WhisperApplication;
+import com.example.nasko.whisper.models.Chat;
 import com.example.nasko.whisper.models.Message;
 import com.example.nasko.whisper.models.MessagesQueryResponse;
 import com.example.nasko.whisper.network.listeners.MessagesEventListener;
@@ -19,7 +20,7 @@ public class ChatroomPresenterImpl implements ChatroomPresenter {
     private ChatroomView chatroomView;
 
     private SocketServiceConsumer serviceReceiver;
-    private String chatId;
+    private Chat chat;
     private int lastLoadedMessageSeq = -1;
     private boolean loadingMessages;
 
@@ -32,7 +33,7 @@ public class ChatroomPresenterImpl implements ChatroomPresenter {
         serviceReceiver.setMessagesEventListener(new MessagesEventListener() {
             @Override
             public void onMessageAdded(Message message) {
-                if (message.getChatId().equals(chatId)) {
+                if (message.getChatId().equals(chat.getId())) {
                     chatroomView.addMessage(message);
                 }
             }
@@ -40,7 +41,7 @@ public class ChatroomPresenterImpl implements ChatroomPresenter {
             @Override
             public void onMessagesLoaded(MessagesQueryResponse response) {
                 loadingMessages = false;
-                if (! response.getChatId().equals(chatId)) {
+                if (! response.getChatId().equals(chat.getId())) {
                     // For another chat room
                     return;
                 }
@@ -57,16 +58,16 @@ public class ChatroomPresenterImpl implements ChatroomPresenter {
     }
 
     @Override
-    public void onTakeChatroomView(ChatroomView view, String chatId) {
+    public void onTakeChatroomView(ChatroomView view, Chat chat) {
         chatroomView = view;
-        this.chatId = chatId;
-        serviceReceiver.loadMessages(chatId, lastLoadedMessageSeq, PAGE_SIZE * 2);
+        this.chat = chat;
+        serviceReceiver.loadMessages(chat.getId(), lastLoadedMessageSeq, PAGE_SIZE * 2);
         loadingMessages = true;
     }
 
     @Override
     public void onMessageSend(String text) {
-        serviceReceiver.sendMessage(text, chatId);
+        serviceReceiver.sendMessage(text, chat.getId());
     }
 
     @Override
@@ -76,7 +77,7 @@ public class ChatroomPresenterImpl implements ChatroomPresenter {
         }
 
         if (!loadingMessages) {
-            serviceReceiver.loadMessages(chatId, lastLoadedMessageSeq, PAGE_SIZE);
+            serviceReceiver.loadMessages(chat.getId(), lastLoadedMessageSeq, PAGE_SIZE);
         }
     }
 

@@ -47,7 +47,7 @@ public class MessageAdapter extends ArrayRecyclerViewAdapter<Message, MessageAda
 
     @Override
     public MessageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = this.getInflater().inflate(R.layout.chat_message_layout, parent, false);
+        View view = this.getInflater().inflate(R.layout.item_chat_message, parent, false);
         return new MessageViewHolder(view);
     }
 

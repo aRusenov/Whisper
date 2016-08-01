@@ -14,7 +14,9 @@ import android.widget.ProgressBar;
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.models.Chat;
 import com.example.nasko.whisper.presenters.ChatsPresenter;
+import com.example.nasko.whisper.presenters.ChatsPresenterImpl;
 import com.example.nasko.whisper.presenters.PresenterCache;
+import com.example.nasko.whisper.presenters.PresenterFactory;
 import com.example.nasko.whisper.utils.DateProvider;
 import com.example.nasko.whisper.views.adapters.ChatAdapter;
 import com.example.nasko.whisper.views.contracts.ChatsView;
@@ -27,12 +29,20 @@ public class ChatsFragment extends Fragment implements DateProvider, ChatsView {
     private  static final String TAG = "ChatsFragment";
 
     private ChatsPresenter chatsPresenter;
+    private PresenterFactory<ChatsPresenter> presenterFactory = () -> new ChatsPresenterImpl();
 
     private ChatAdapter chatsAdapter;
     private RecyclerView contactsView;
     private LinearLayoutManager chatsLayoutManager;
     private ProgressBar loadingBar;
     private Date now = new Date();
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        chatsPresenter = PresenterCache.instance().getPresenter("Chats", presenterFactory);
+        chatsPresenter.onTakeChatsView(this);
+    }
 
     @Nullable
     @Override
@@ -50,24 +60,7 @@ public class ChatsFragment extends Fragment implements DateProvider, ChatsView {
         chatsLayoutManager = new LinearLayoutManager(getActivity());
         contactsView.setLayoutManager(chatsLayoutManager);
 
-        chatsPresenter = PresenterCache.instance().getPresenter("Chats", null);
-        chatsPresenter.onTakeChatsView(this);
         return view;
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Log.d(TAG, "OnCreate called");
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-    }
-
-    public void setChatsPresenter(ChatsPresenter presenter) {
-        this.chatsPresenter = presenter;
     }
 
     @Override

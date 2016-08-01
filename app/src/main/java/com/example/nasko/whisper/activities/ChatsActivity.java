@@ -1,8 +1,6 @@
 package com.example.nasko.whisper.activities;
 
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
@@ -14,6 +12,7 @@ import android.view.MenuItem;
 
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.models.Chat;
+import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.presenters.ChatsPresenter;
 import com.example.nasko.whisper.presenters.ChatsPresenterImpl;
 import com.example.nasko.whisper.presenters.PresenterCache;
@@ -26,9 +25,10 @@ import java.util.Date;
 
 public class ChatsActivity extends AppCompatActivity implements DateProvider, ChatsViewNavigator {
 
-    private static final String TAG = "ChatsActivity";
-    private static final String KEY_CHAT_ID = "chatId";
+    private static final String TAG = ChatsActivity.class.getName();
     private static final int[] TAB_DRAWABLES = new int[] { R.drawable.home, R.drawable.search, R.drawable.settings };
+    private static final String KEY_CHAT_EXTRA = "chat";
+    private static final String KEY_USER_EXTRA = "user";
 
     private ChatsPresenter chatsPresenter;
     private PresenterFactory<ChatsPresenter> presenterFactory = () -> new ChatsPresenterImpl();
@@ -42,7 +42,7 @@ public class ChatsActivity extends AppCompatActivity implements DateProvider, Ch
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_contacts);
+        setContentView(R.layout.activity_chats);
 
         Log.d(TAG, "Creating activity");
         chatsPresenter = PresenterCache.instance().getPresenter("Chats", presenterFactory);
@@ -65,7 +65,6 @@ public class ChatsActivity extends AppCompatActivity implements DateProvider, Ch
 
     private void setToolbar() {
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
-        myToolbar.setBackground(new ColorDrawable(Color.parseColor("#26A69A")));
         setSupportActionBar(myToolbar);
     }
 
@@ -128,11 +127,10 @@ public class ChatsActivity extends AppCompatActivity implements DateProvider, Ch
     }
 
     @Override
-    public void navigateToChatroom(Chat chat) {
+    public void navigateToChatroom(Chat chat, User user) {
         Intent intent = new Intent(ChatsActivity.this, ChatroomActivity.class);
-        intent.putExtra(KEY_CHAT_ID, chat.getId());
-        // TODO: Remove
-        intent.putExtra("lastMessageSeq", chat.getLastMessage().getSeq());
+        intent.putExtra(KEY_CHAT_EXTRA, chat);
+        intent.putExtra(KEY_USER_EXTRA, user);
 
         startActivity(intent);
     }

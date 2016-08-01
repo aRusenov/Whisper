@@ -30,7 +30,7 @@ public class ChatAdapter extends ArrayRecyclerViewAdapter<Chat, ChatAdapter.Chat
         ChatViewHolder(View itemView) {
             super(itemView);
             this.msgDate = (TextView) itemView.findViewById(R.id.message_date);
-            this.contactName = (TextView) itemView.findViewById(R.id.contact_name);
+            this.contactName = (TextView) itemView.findViewById(R.id.tv_contact_name);
             this.lastMessage = (TextView) itemView.findViewById(R.id.last_message);
             this.profileImg = (CircleImageView) itemView.findViewById(R.id.profile_image);
 
@@ -55,7 +55,7 @@ public class ChatAdapter extends ArrayRecyclerViewAdapter<Chat, ChatAdapter.Chat
 
     @Override
     public ChatViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = this.getInflater().inflate(R.layout.chat_item_layout, parent, false);
+        View view = this.getInflater().inflate(R.layout.item_chat, parent, false);
         return new ChatViewHolder(view);
     }
 

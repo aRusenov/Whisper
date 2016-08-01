@@ -29,7 +29,7 @@
             android:textColor="#000"
             android:maxLines="1"
             android:ellipsize="end"
-            android:id="@+id/contact_name" />
+            android:id="@+id/tv_contact_name" />
 
         <TextView
             android:layout_width="match_parent"

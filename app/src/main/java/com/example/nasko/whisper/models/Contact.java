@@ -1,8 +1,11 @@
 package com.example.nasko.whisper.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Contact {
+public class Contact implements Parcelable {
     private String username;
     private String name;
     @JsonProperty("_id")
@@ -63,5 +66,39 @@ public class Contact {
     public boolean equals(Object o) {
         Contact other = (Contact) o;
         return this.id.equals(other.getId());
+    }
+
+    protected Contact(Parcel in) {
+        username = in.readString();
+        name = in.readString();
+        id = in.readString();
+        image = in.readParcelable(Image.class.getClassLoader());
+        isFriend = in.readByte() != 0;
+    }
+
+    public static final Creator<Contact> CREATOR = new Creator<Contact>() {
+        @Override
+        public Contact createFromParcel(Parcel in) {
+            return new Contact(in);
+        }
+
+        @Override
+        public Contact[] newArray(int size) {
+            return new Contact[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(username);
+        dest.writeString(name);
+        dest.writeString(id);
+        dest.writeParcelable(image, flags);
+        dest.writeByte((byte) (isFriend ? 1 : 0));
     }
 }

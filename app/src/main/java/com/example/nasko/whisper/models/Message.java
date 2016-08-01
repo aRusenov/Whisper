@@ -1,10 +1,13 @@
 package com.example.nasko.whisper.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Date;
 
-public class Message {
+public class Message implements Parcelable {
 
     @JsonProperty("_id")
     private String id;
@@ -17,6 +20,28 @@ public class Message {
 
     private boolean isDummy;
     private String label;
+
+    protected Message(Parcel in) {
+        id = in.readString();
+        text = in.readString();
+        chatId = in.readString();
+        author = in.readParcelable(Contact.class.getClassLoader());
+        seq = in.readInt();
+        isDummy = in.readByte() != 0;
+        label = in.readString();
+    }
+
+    public static final Creator<Message> CREATOR = new Creator<Message>() {
+        @Override
+        public Message createFromParcel(Parcel in) {
+            return new Message(in);
+        }
+
+        @Override
+        public Message[] newArray(int size) {
+            return new Message[size];
+        }
+    };
 
     public Contact getAuthor() {
         return author;
@@ -72,5 +97,21 @@ public class Message {
 
     public void setChatId(String chatId) {
         this.chatId = chatId;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
+        dest.writeString(text);
+        dest.writeString(chatId);
+        dest.writeParcelable(author, flags);
+        dest.writeInt(seq);
+        dest.writeByte((byte) (isDummy ? 1 : 0));
+        dest.writeString(label);
     }
 }

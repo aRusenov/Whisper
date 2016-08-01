@@ -162,7 +162,7 @@ public class ChatsPresenterImpl implements ChatsPresenter, OnSuccessListener<Obj
 
     @Override
     public void onChatClicked(Chat clickedChat) {
-        chatsViewNavigator.navigateToChatroom(clickedChat);
+        chatsViewNavigator.navigateToChatroom(clickedChat, getCurrentUser());
     }
 
     @Override
