@@ -6,6 +6,7 @@ import com.example.nasko.whisper.models.Error;
 import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.network.listeners.AuthenticationListener;
 import com.example.nasko.whisper.network.listeners.SocketStateListener;
+import com.example.nasko.whisper.network.misc.JsonDeserializer;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,10 +23,14 @@ public class SocketService {
     private User currentUser;
     private String token;
     private Socket socket;
+    private boolean isAuthenticated;
+
     private SocketStateListener socketStateListener;
     private AuthenticationListener authenticatedListener;
     private ContactsService contactsService;
     private MessagesService messagesService;
+
+    private JsonDeserializer deserializer;
 
     public SocketService(String endpoint) {
         try {
@@ -34,13 +39,18 @@ public class SocketService {
             Log.d(TAG, ex.getMessage());
         }
 
-        contactsService = new HerokuContactsService(socket);
-        messagesService = new HerokuMessagesService(socket);
+        deserializer = new JsonDeserializer();
+        contactsService = new HerokuContactsService(socket, deserializer);
+        messagesService = new HerokuMessagesService(socket, deserializer);
         this.registerSocketStateListeners();
     }
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public boolean isAuthenticated() {
+        return isAuthenticated;
     }
 
     private void registerSocketStateListeners() {
@@ -84,10 +94,12 @@ public class SocketService {
                         response.getString("token"));
 
                 setCurrentUser(user);
+                isAuthenticated = true;
                 if (authenticatedListener != null) {
                     authenticatedListener.onAuthenticated(user);
                 }
             } catch (JSONException e) {
+                isAuthenticated = false;
                 if (authenticatedListener != null) {
                     authenticatedListener.onUnauthorized(new Error(e.getMessage()));
                 }
@@ -97,6 +109,7 @@ public class SocketService {
         this.socket.on("unauthorized", args -> {
             Log.d(TAG, "Unauthorized");
 //            setCurrentUser(null);
+            isAuthenticated = false;
             if (authenticatedListener != null) {
                 authenticatedListener.onUnauthorized(new Error("Invalid session token"));
             }
@@ -109,8 +122,6 @@ public class SocketService {
 
     public void setCurrentUser(User user) {
         currentUser = user;
-        messagesService.setCurrentUser(user);
-        contactsService.setCurrentUser(user);
     }
 
     public User getCurrentUser() {

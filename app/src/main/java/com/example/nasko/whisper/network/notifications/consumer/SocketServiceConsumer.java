@@ -10,9 +10,10 @@ import android.os.Looper;
 import android.util.Log;
 
 import com.example.nasko.whisper.models.Chat;
-import com.example.nasko.whisper.models.Contact;
+import com.example.nasko.whisper.models.ContactQueryResponse;
 import com.example.nasko.whisper.models.Error;
 import com.example.nasko.whisper.models.Message;
+import com.example.nasko.whisper.models.MessagesQueryResponse;
 import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.network.listeners.AuthenticationListener;
 import com.example.nasko.whisper.network.listeners.ContactsEventListener;
@@ -101,8 +102,8 @@ public class SocketServiceConsumer {
     public void setContactsQueryEventListener(ContactsQueryEventListener contactsQueryEventListener) {
         this.contactsQueryEventListener = new ContactsQueryEventListener() {
             @Override
-            public void onContactsLoaded(List<Contact> chats, String query) {
-                runOnMain(() -> contactsQueryEventListener.onContactsLoaded(chats, query));
+            public void onContactsLoaded(ContactQueryResponse response) {
+                runOnMain(() -> contactsQueryEventListener.onContactsLoaded(response));
             }
         };
 
@@ -119,7 +120,7 @@ public class SocketServiceConsumer {
             }
 
             @Override
-            public void onMessagesLoaded(List<Message> messages) {
+            public void onMessagesLoaded(MessagesQueryResponse messages) {
                 runOnMain(() -> messagesEventListener.onMessagesLoaded(messages));
             }
         };

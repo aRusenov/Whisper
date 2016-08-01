@@ -1,10 +1,8 @@
 package com.example.nasko.whisper.network.listeners;
 
-import com.example.nasko.whisper.models.Contact;
-
-import java.util.List;
+import com.example.nasko.whisper.models.ContactQueryResponse;
 
 public interface ContactsQueryEventListener {
 
-    void onContactsLoaded(List<Contact> chats, String query);
+    void onContactsLoaded(ContactQueryResponse response);
 }

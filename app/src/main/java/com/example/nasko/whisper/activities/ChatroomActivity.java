@@ -8,9 +8,11 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.WhisperApplication;
@@ -41,6 +43,7 @@ public class ChatroomActivity extends AppCompatActivity implements ChatroomView 
     private RecyclerView messageList;
     private EndlessUpScrollListener endlessScrollListener;
     private MessageAdapter adapter;
+    private ProgressBar loadingBar;
     private String chatId;
     private Date today = new Date();
 
@@ -53,7 +56,6 @@ public class ChatroomActivity extends AppCompatActivity implements ChatroomView 
         this.chatId = intent.getStringExtra("chatId");
 
         presenter = PresenterCache.instance().getPresenter("Chatroom", presenterFactory);
-
         presenter.onTakeChatroomView(this, chatId);
 
         dateFormatter = new MessageSeparatorDateFormatter();
@@ -68,6 +70,8 @@ public class ChatroomActivity extends AppCompatActivity implements ChatroomView 
         layoutManager.setStackFromEnd(true);
         messageList.setAdapter(adapter);
         messageList.setLayoutManager(layoutManager);
+        loadingBar = (ProgressBar) findViewById(R.id.progress_loading);
+        loadingBar.setVisibility(View.VISIBLE);
 
         endlessScrollListener = new EndlessUpScrollListener(layoutManager) {
             @Override
@@ -104,8 +108,8 @@ public class ChatroomActivity extends AppCompatActivity implements ChatroomView 
             Message prev = messages.get(i + 1);
             Message current = messages.get(i);
             // If message is posted on different date than previous -> add a dummy message as separator
-            if (prev.getDate().getDay() != current.getDate().getDay()) {
-                String dateString = dateFormatter.getStringFormat(today, current.getDate());
+            if (prev.getCreatedAt().getDay() != current.getCreatedAt().getDay()) {
+                String dateString = dateFormatter.getStringFormat(today, current.getCreatedAt());
                 Message label = Message.createDummy(dateString);
                 messages.add(i + 1, label);
             }
@@ -146,7 +150,7 @@ public class ChatroomActivity extends AppCompatActivity implements ChatroomView 
 
         if (scrollToBottom) {
             messageList.getLayoutManager().scrollToPosition(adapter.getItemCount() - 1);
-        } else if (! currentUser.getUId().equals(message.getFrom())) {
+        } else if (! currentUser.getUId().equals(message.getAuthor().getId())) {
             playNewMessageSound();
         }
     }
@@ -177,6 +181,8 @@ public class ChatroomActivity extends AppCompatActivity implements ChatroomView 
 
     @Override
     public void loadMessages(List<Message> messages) {
+        loadingBar.setVisibility(View.INVISIBLE);
+
         if (messages.isEmpty()) {
             return;
         }

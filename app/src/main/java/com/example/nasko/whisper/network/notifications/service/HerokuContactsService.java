@@ -3,19 +3,16 @@ package com.example.nasko.whisper.network.notifications.service;
 import android.util.Log;
 
 import com.example.nasko.whisper.models.Chat;
-import com.example.nasko.whisper.models.Contact;
-import com.example.nasko.whisper.models.User;
+import com.example.nasko.whisper.models.ContactQueryResponse;
 import com.example.nasko.whisper.network.listeners.ContactsEventListener;
 import com.example.nasko.whisper.network.listeners.ContactsQueryEventListener;
+import com.example.nasko.whisper.network.misc.JsonDeserializer;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 import io.socket.client.Socket;
 
@@ -24,94 +21,57 @@ public class HerokuContactsService implements ContactsService {
     private static final String TAG = "ContactsService";
 
     private Socket socket;
-    private User currentUser;
     private ContactsEventListener contactsEventListener;
     private ContactsQueryEventListener contactsQueryEventListener;
+    private JsonDeserializer deserializer;
 
-    public HerokuContactsService(Socket socket) {
+    public HerokuContactsService(Socket socket, JsonDeserializer deserializer) {
+        this.deserializer = deserializer;
         this.socket = socket;
         this.registerEventListeners();
     }
 
     private void registerEventListeners() {
         socket.on("new contact", args -> {
-            Log.d(TAG, "New contact");
-            JSONObject rootObj = (JSONObject) args[0];
-            try {
-                JSONObject chatJson = rootObj.getJSONObject("chat");
-                JSONObject contactJson = rootObj.getJSONArray("participants").getJSONObject(0);
-                Contact contact = new Contact(contactJson);
-                Chat chat = new Chat(chatJson, contact);
-                if (contactsEventListener != null) {
-                    contactsEventListener.onContactAdded(chat);
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
+            Log.d(TAG,"New contact");
+            if (contactsEventListener != null) {
+//                contactsEventListener.onContactAdded(chat);
             }
         }).on("show chats", args -> {
             Log.d(TAG, "Loading chats");
-            String myId = currentUser.getUId();
-            JSONObject rootObj = (JSONObject) args[0];
+            String json = args[0].toString();
             try {
-                final Map<String, Contact> contactsData = new HashMap<>();
-                JSONArray participants = rootObj.getJSONArray("participants");
-                for (int i = 0; i < participants.length(); i++) {
-                    Contact contact = new Contact(participants.getJSONObject(i));
-                    contactsData.put(contact.getId(), contact);
-                }
+                List<Chat> chats = deserializer.deserializeCollection(json, List.class, Chat.class);
 
-                JSONArray chatsJson = rootObj.getJSONArray("chats");
-                final List<Chat> chats = new ArrayList<>(chatsJson.length());
-                for (int i = 0; i < chatsJson.length(); i++) {
-                    JSONObject json = (JSONObject) chatsJson.get(i);
-                    JSONArray chatParticipants = json.getJSONArray("participants");
-                    String participantId = chatParticipants.getString(0);
-                    if (participantId.equals(myId) && chatParticipants.length() > 1) {
-                        participantId = chatParticipants.getString(1);
-                    }
-
-                    Contact contact = contactsData.get(participantId);
-                    chats.add(new Chat(json, contact));
-                }
                 if (contactsEventListener != null) {
                     contactsEventListener.onContactsLoaded(chats);
                 }
-            } catch (JSONException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }).on("contact update", args -> {
             Log.d(TAG, "Contact updated");
-            JSONObject json = (JSONObject) args[0];
+            String json = args[0].toString();
             try {
-                final Chat chat = new Chat(json);
+                Chat chat = deserializer.deserialize(json, Chat.class);
                 if (contactsEventListener != null) {
                     contactsEventListener.onContactUpdated(chat);
                 }
-            } catch (JSONException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }).on("query contacts", args -> {
             Log.d(TAG, "Contact query returned results");
-            JSONObject rootObj = (JSONObject) args[0];
+            String json = args[0].toString();
             try {
-                String query = rootObj.getString("search");
-                JSONArray contactsArr = rootObj.getJSONArray("contacts");
-                final List<Contact> contacts = new ArrayList<Contact>(contactsArr.length());
-                for (int i = 0; i < contactsArr.length(); i++) {
-                    Contact contact = new Contact(contactsArr.getJSONObject(i));
-                    contacts.add(contact);
-                }
+                ContactQueryResponse response = deserializer.deserialize(json, ContactQueryResponse.class);
                 if (contactsQueryEventListener != null) {
-                    contactsQueryEventListener.onContactsLoaded(contacts, query);
+                    contactsQueryEventListener.onContactsLoaded(response);
                 }
-            } catch (JSONException e) {
-                Log.e(TAG, "Error parsing JSON");
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         });
-    }
-
-    public void setCurrentUser(User currentUser) {
-        this.currentUser = currentUser;
     }
 
     @Override

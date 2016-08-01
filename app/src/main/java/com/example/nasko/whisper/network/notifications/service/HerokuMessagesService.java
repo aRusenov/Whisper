@@ -1,17 +1,14 @@
 package com.example.nasko.whisper.network.notifications.service;
 
-import android.util.Log;
-
 import com.example.nasko.whisper.models.Message;
-import com.example.nasko.whisper.models.User;
+import com.example.nasko.whisper.models.MessagesQueryResponse;
 import com.example.nasko.whisper.network.listeners.MessagesEventListener;
+import com.example.nasko.whisper.network.misc.JsonDeserializer;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
 
 import io.socket.client.Socket;
 
@@ -19,58 +16,44 @@ public class HerokuMessagesService implements MessagesService {
 
     private static final String TAG = "HerokuMessagesService";
 
-    private User currentUser;
     private Socket socket;
     private MessagesEventListener messagesEventListener;
     private OnNewMessageListener newMessageListener;
+    private JsonDeserializer deserializer;
 
-    public HerokuMessagesService(Socket socket) {
+    public HerokuMessagesService(Socket socket, JsonDeserializer deserializer) {
+        this.deserializer = deserializer;
         this.socket = socket;
         this.registerEventListeners();
     }
 
     private void registerEventListeners() {
-        Log.d("MessagesService", "Has listeners? " + socket.hasListeners("show messages"));
-        Log.d("MessagesService", "Attaching event listeners");
-
         socket.on("show messages", args -> {
-            Log.d(TAG, "Showing messages");
-            JSONObject data = (JSONObject) args[0];
+            String json = args[0].toString();
             try {
-                String chatId = (String) data.get("chatId");
-                JSONArray msgArr = data.getJSONArray("messages");
-                final List<Message> messages = new ArrayList<>(msgArr.length());
-                for (int i = msgArr.length() - 1; i >= 0; i--) {
-
-                    JSONObject json = (JSONObject) msgArr.get(i);
-                    messages.add(new Message(json, chatId));
-                }
-
+                MessagesQueryResponse messages = deserializer.deserialize(json, MessagesQueryResponse.class);
                 if (messagesEventListener != null) {
-                     messagesEventListener.onMessagesLoaded(messages);
+                    messagesEventListener.onMessagesLoaded(messages);
                 }
-            } catch (JSONException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }).on("new message", args -> {
-            Log.d(TAG, "New message");
-            JSONObject json = (JSONObject) args[0];
+            String json = args[0].toString();
+            Message newMessage = null;
             try {
-                final Message message = new Message(json);
+                newMessage = deserializer.deserialize(json, Message.class);
                 if (messagesEventListener != null) {
-                    messagesEventListener.onMessageAdded(message);
+                    messagesEventListener.onMessageAdded(newMessage);
                 }
 
-                newMessageListener.onNewMessage(message);
-            } catch (JSONException e) {
+                if (newMessageListener != null) {
+                    newMessageListener.onNewMessage(newMessage);
+                }
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         });
-    }
-
-    @Override
-    public void setCurrentUser(User user) {
-        currentUser = user;
     }
 
     @Override

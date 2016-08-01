@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.models.Message;
+import com.example.nasko.whisper.models.MessagesQueryResponse;
 import com.example.nasko.whisper.network.listeners.MessagesEventListener;
 import com.example.nasko.whisper.network.notifications.consumer.SocketServiceConsumer;
 import com.example.nasko.whisper.views.contracts.ChatroomView;
@@ -37,15 +38,20 @@ public class ChatroomPresenterImpl implements ChatroomPresenter {
             }
 
             @Override
-            public void onMessagesLoaded(List<Message> messages) {
+            public void onMessagesLoaded(MessagesQueryResponse response) {
+                loadingMessages = false;
+                if (! response.getChatId().equals(chatId)) {
+                    // For another chat room
+                    return;
+                }
+
+                List<Message> messages = response.getMessages();
                 if (messages.size() > 0) {
                     int messageSeq = messages.get(0).getSeq();
                     lastLoadedMessageSeq = messageSeq;
 
                     chatroomView.loadMessages(messages);
                 }
-
-                loadingMessages = false;
             }
         });
     }

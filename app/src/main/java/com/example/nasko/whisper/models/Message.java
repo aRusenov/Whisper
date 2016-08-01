@@ -1,65 +1,32 @@
 package com.example.nasko.whisper.models;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class Message {
 
-    private static DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-
-    private Date date;
-    private String authorId;
-    private String authorName;
+    @JsonProperty("_id")
+    private String id;
+    private Date createdAt;
     private String text;
-    private boolean seen;
-    private int seq;
     private String chatId;
+    @JsonProperty("createdBy")
+    private Contact author;
+    private int seq;
+
     private boolean isDummy;
     private String label;
-    private Contact author;
 
     public Contact getAuthor() {
         return author;
     }
 
+    public Message() { }
+
     public Message(String text, String chatId) {
         this.text = text;
         this.chatId = chatId;
-    }
-
-    public Message(JSONObject json, String chatId) throws JSONException {
-        if (json.has("author")) {
-            JSONObject authorJson = json.getJSONObject("author");
-            author = new Contact(authorJson.getString("_id"), authorJson.getString("username"));
-            authorId = author.getId();
-        } else {
-            this.authorId = json.getString("createdBy");
-        }
-        this.seq = json.getInt("seq");
-        this.text = json.getString("text");
-        this.chatId = chatId;
-        String dateString = json.getString("createdAt");
-        try {
-            this.date = dateFormat.parse(dateString);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public Message(JSONObject json) throws JSONException {
-        this(json, null);
-        this.chatId = (String) json.get("chatId");
-    }
-
-    public Message(Date date, String authorId, String text) {
-        this.date = date;
-        this.authorId = authorId;
-        this.text = text;
     }
 
     private Message(String label) {
@@ -83,22 +50,12 @@ public class Message {
         return seq;
     }
 
-    public Date getDate() {
-        return date;
+    public Date getCreatedAt() {
+        return createdAt;
     }
 
-    public void setDate(Date date) {
-        this.date = date;
-    }
-
-    public String getFrom() {
-        return authorId;
-    }
-
-    public String getAuthorName() { return authorName; }
-
-    public void setFrom(String authorId) {
-        this.authorId = authorId;
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
 
     public String getText() {
@@ -107,14 +64,6 @@ public class Message {
 
     public void setText(String message) {
         this.text = message;
-    }
-
-    public boolean isSeen() {
-        return seen;
-    }
-
-    public void setSeen(boolean seen) {
-        this.seen = seen;
     }
 
     public String getChatId() {

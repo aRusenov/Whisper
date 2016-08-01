@@ -51,6 +51,10 @@ public class ChatsPresenterImpl implements ChatsPresenter, OnSuccessListener<Obj
             public void onContactsLoaded(List<Chat> chats) {
                 Log.d(TAG, "Loading fresh chats");
                 if (chatsView != null) {
+                    for (int i = 0; i < chats.size(); i++) {
+                        setOtherContact(chats.get(i));
+                    }
+
                     chatsView.clearChats();
                     chatsView.loadChats(chats);
                 }
@@ -65,6 +69,7 @@ public class ChatsPresenterImpl implements ChatsPresenter, OnSuccessListener<Obj
 
             @Override
             public void onContactAdded(Chat chat) {
+                setOtherContact(chat);
                 if (chatsView != null) {
                     chatsView.addChat(chat);
                 }
@@ -74,15 +79,15 @@ public class ChatsPresenterImpl implements ChatsPresenter, OnSuccessListener<Obj
             }
         });
 
-        socketServiceConsumer.setContactsQueryEventListener((contacts, query) -> {
-            if (contactQuery.equals(query)) {
+        socketServiceConsumer.setContactsQueryEventListener((response) -> {
+            if (contactQuery.equals(response.getSearch())) {
                 hasPendingContactQuery = false;
             } else {
                 socketServiceConsumer.searchContacts(contactQuery);
                 Log.d(TAG, "Performing contact query: " + contactQuery);
             }
 
-            contactsSearchView.loadQueryResults(contacts);
+            contactsSearchView.loadQueryResults(response.getContacts());
         });
 
         socketServiceConsumer.setAuthenticationListener(new AuthenticationListener() {
@@ -98,6 +103,20 @@ public class ChatsPresenterImpl implements ChatsPresenter, OnSuccessListener<Obj
                 Log.e(TAG, error.getMessage());
             }
         });
+    }
+
+    private void setOtherContact(Chat chat) {
+        List<Contact> participants = chat.getParticipants();
+        int i;
+        for (i = 0; i < participants.size(); i++) {
+            String participantId = participants.get(i).getId();
+            if (! participantId.equals(getCurrentUser().getUId())) {
+                break;
+            }
+        }
+
+        chat.setOtherContact(participants.get(i));
+    }
 
 //        socketServiceConsumer.setSocketStateListener(new SocketStateListener() {
 //            @Override
@@ -124,7 +143,7 @@ public class ChatsPresenterImpl implements ChatsPresenter, OnSuccessListener<Obj
 //                chatsViewNavigator.setNetworkStatus("Connecting...");
 //            }
 //        });
-    }
+//    }
 
     @Override
     public void onTakeChatsViewNavigator(ChatsViewNavigator chatsViewNavigator) {
@@ -186,15 +205,8 @@ public class ChatsPresenterImpl implements ChatsPresenter, OnSuccessListener<Obj
                 onLogout();
             } else {
                 setCurrentUser(loggedUser);
-                //socketServiceConsumer.start(loggedUser.getSessionToken());
             }
-        } //else {
-//            if (socketServiceConsumer.isBound()) {
-//                socketServiceConsumer.loadContacts();
-//            } else {
-//                socketServiceConsumer.start(currentUser.getSessionToken());
-//            }
-//        }
+        }
     }
 
     @Override

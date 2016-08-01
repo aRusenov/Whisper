@@ -66,12 +66,12 @@ public class MessageAdapter extends ArrayRecyclerViewAdapter<Message, MessageAda
             holder.labelContainer.setVisibility(View.GONE);
 
             holder.text.setText(message.getText() + "        ");
-            Date date = message.getDate();
+            Date date = message.getCreatedAt();
             String dateString = String.format("%02d:%02d", date.getHours(), date.getMinutes());
             holder.date.setText(dateString);
             holder.date.invalidate();
 
-            boolean isMyMessage = message.getFrom().equals(currentUser.getUId());
+            boolean isMyMessage = message.getAuthor().getId().equals(currentUser.getUId());
             int visibility = isMyMessage ? View.VISIBLE : View.GONE;
             int bgDrawable = isMyMessage ? R.drawable.blue_bg : R.drawable.white_bg;
             holder.offsetView.setVisibility(visibility);

@@ -103,10 +103,18 @@ public class BackgroundSocketService extends Service implements OnNewMessageList
     }
 
     public void pause() {
+        if (networkStateReceiver.isConnected() && !socketService.connected()) {
+            socketService.reconnect();
+        }
+
         isPaused = true;
     }
 
     public void resume() {
+        if (networkStateReceiver.isConnected() && !socketService.connected()) {
+            socketService.reconnect();
+        }
+
         isPaused = false;
     }
 

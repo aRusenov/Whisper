@@ -1,31 +1,17 @@
 package com.example.nasko.whisper.models;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Contact {
     private String username;
     private String name;
+    @JsonProperty("_id")
     private String id;
-    private String updatedAt;
     private String imageUrl;
+    @JsonProperty("isFriend")
     private boolean isFriend;
 
-    public Contact(JSONObject json) throws JSONException {
-        this.id = json.getString("_id");
-        this.username = json.getString("username");
-        this.name = json.has("name") ? json.getString("name") : this.username;
-        if (json.has("image")) {
-            JSONObject image = json.getJSONObject("image");
-            if (image.has("url")) {
-                this.imageUrl = image.getString("url");
-            }
-        }
-
-        if (json.has("isFriend")) {
-            this.isFriend = json.getBoolean("isFriend");
-        }
-    }
+    public Contact() { }
 
     public Contact(String id, String username) {
         this.id = id;
@@ -62,14 +48,6 @@ public class Contact {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(String updatedAt) {
-        this.updatedAt = updatedAt;
     }
 
     public String getImageUrl() {

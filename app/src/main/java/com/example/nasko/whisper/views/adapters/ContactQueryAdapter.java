@@ -63,7 +63,12 @@ public class ContactQueryAdapter extends ArrayRecyclerViewAdapter<Contact, Conta
     @Override
     public void onBindViewHolder(ContactViewHolder holder, int position) {
         Contact contact = this.getItem(position);
-        holder.name.setText(contact.getName());
+        String name = contact.getName();
+        if (name == null) {
+            name = contact.getUsername();
+        }
+
+        holder.name.setText(name);
         Picasso.with(this.getContext())
                 .load(contact.getImageUrl())
                 .placeholder(R.drawable.blank_pic)

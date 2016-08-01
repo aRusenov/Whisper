@@ -63,9 +63,14 @@ public class ChatAdapter extends ArrayRecyclerViewAdapter<Chat, ChatAdapter.Chat
     public void onBindViewHolder(ChatViewHolder holder, int position) {
         Chat chat = this.items.get(position);
 
-        String dateText = getDisplayDate(chat.getLastMessage().getDate());
+        String dateText = getDisplayDate(chat.getLastMessage().getCreatedAt());
         holder.msgDate.setText(dateText);
-        holder.contactName.setText(chat.getOtherContact().getName());
+        String name = chat.getOtherContact().getName();
+        if (name == null) {
+            name = chat.getOtherContact().getUsername();
+        }
+
+        holder.contactName.setText(name);
         holder.lastMessage.setText(chat.getLastMessage().getText());
         Picasso.with(this.getContext())
                 .load(chat.getOtherContact().getImageUrl())

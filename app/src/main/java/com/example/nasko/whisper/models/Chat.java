@@ -1,28 +1,17 @@
 package com.example.nasko.whisper.models;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Chat {
+
+    @JsonProperty("_id")
     private String id;
     private Message lastMessage;
     private Contact otherContact;
-    private List<Contact> contacts;
-
-    public Chat(JSONObject jsonObject, Contact otherContact) throws JSONException {
-        this(jsonObject);
-        this.otherContact = otherContact;
-    }
-
-    public Chat(JSONObject jsonObject) throws JSONException {
-        JSONObject lastMessage = jsonObject.getJSONObject("lastMessage");
-        this.id = (String) jsonObject.get("_id");
-        this.lastMessage = new Message(lastMessage, this.id);
-        this.contacts = new ArrayList<>();
-    }
+    @JsonProperty("contacts")
+    private List<Contact> participants;
 
     public Contact getOtherContact() {
         return otherContact;
@@ -30,6 +19,14 @@ public class Chat {
 
     public void setOtherContact(Contact otherContact) {
         this.otherContact = otherContact;
+    }
+
+    public List<Contact> getParticipants() {
+        return participants;
+    }
+
+    public void setParticipants(List<Contact> participants) {
+        this.participants = participants;
     }
 
     public String getId() {
