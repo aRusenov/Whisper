@@ -23,7 +23,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".activities.LoginActivity" />
-        <activity android:name=".activities.ChatroomActivity" />
+        <activity android:name=".activities.ChatroomActivity"/>
 
         <service
             android:name=".network.notifications.service.BackgroundSocketService"

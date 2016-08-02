@@ -8,12 +8,15 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.models.Chat;
@@ -68,11 +71,10 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
         View view = inflater.inflate(R.layout.fragment_chatroom, container, false);
 
         adapter = new MessageAdapter(getContext(), user, chat.getId());
-        messageList = (RecyclerView) view.findViewById(R.id.message_list);
-        messageList.setAdapter(adapter);
-
         layoutManager = new LinearLayoutManager(getContext());
         layoutManager.setStackFromEnd(true);
+        messageList = (RecyclerView) view.findViewById(R.id.message_list);
+        messageList.setAdapter(adapter);
         messageList.setLayoutManager(layoutManager);
 
         loadingBar = (ProgressBar) view.findViewById(R.id.progress_loading_bar);
@@ -91,18 +93,17 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
         ImageButton sendButton = (ImageButton) view.findViewById(R.id.btn_send_message);
         sendButton.setOnClickListener(v -> sendMessage());
 
-//        this.messageEdit.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-//            @Override
-//            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-//                if (actionId == EditorInfo.IME_ACTION_DONE) {
-//                    sendMessage();
-//                    return true;
-//                }
-//
-//                return false;
-//            }
-//        });
+        this.messageEdit.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    sendMessage();
+                    return true;
+                }
 
+                return false;
+            }
+        });
 
         presenter.onTakeChatroomView(this, chat);
         return view;

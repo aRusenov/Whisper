@@ -38,7 +38,7 @@ public class ChatroomActivity extends AppCompatActivity {
         presenter = PresenterCache.instance().getPresenter("Chatroom", presenterFactory);
 
         this.getWindow().setSoftInputMode(
-                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         setToolbar();
 
         if (savedInstanceState != null) {
