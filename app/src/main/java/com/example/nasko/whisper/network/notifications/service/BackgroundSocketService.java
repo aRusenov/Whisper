@@ -15,20 +15,9 @@ import com.example.nasko.whisper.managers.ConfigLoader;
 import com.example.nasko.whisper.managers.NotificationController;
 import com.example.nasko.whisper.models.Message;
 
-public class BackgroundSocketService extends Service implements OnNewMessageListener{
+import java.net.URISyntaxException;
 
-    @Override
-    public void onNewMessage(Message message) {
-        if (isPaused) {
-            notificationController.createMessageNotification(message);
-        }
-    }
-
-    public void onBind() {
-        if (! socketService.connected() && token != null) {
-            reconnect();
-        }
-    }
+public class BackgroundSocketService extends Service{
 
     public class LocalBinder extends Binder {
         public BackgroundSocketService getService() {
@@ -41,8 +30,11 @@ public class BackgroundSocketService extends Service implements OnNewMessageList
     private final IBinder binder = new LocalBinder();
     private NotificationController notificationController;
     private NetworkStateReceiver networkStateReceiver;
+    private ConnectionService connectionService;
+    private MessagesService messagesService;
+    private ContactsService contactsService;
 
-    private SocketService socketService;
+    private SocketManager socketManager;
     private String token;
     private boolean isPaused;
     private boolean isClosing;
@@ -51,14 +43,23 @@ public class BackgroundSocketService extends Service implements OnNewMessageList
     public void onCreate() {
         super.onCreate();
         String endpoint = ConfigLoader.getConfigValue(this, "api_url");
+        try {
+            socketManager = new SocketManager(endpoint);
+        } catch (URISyntaxException e) {
+            Log.wtf(TAG, "Invalid socket endpoint :(");
+            stopSelf();
+        }
 
-        socketService = new SocketService(endpoint);
-        socketService.getMessagesService().setNewMessageEventListener(this);
+        connectionService = new HerokuConnectionService(socketManager);
+        contactsService = new HerokuContactsService(socketManager);
+        messagesService = new HerokuMessagesService(socketManager);
+        setOwnSocketListeners();
+
         notificationController = new NotificationController(this);
         networkStateReceiver = new NetworkStateReceiver(this) {
             @Override
             public void onNetworkConnected() {
-                if (! socketService.connected() && token != null) {
+                if (! socketManager.connected() && token != null) {
                     reconnect();
                 }
             }
@@ -68,8 +69,32 @@ public class BackgroundSocketService extends Service implements OnNewMessageList
                 // TODO: Report
             }
         };
-        networkStateReceiver.start();
 
+        networkStateReceiver.start();
+        startServiceInForeground();
+    }
+
+    private void setOwnSocketListeners() {
+        socketManager.on(HerokuConnectionService.EVENT_CONNECT, Object.class, args -> {
+            if (token != null) {
+                connectionService.authenticate(token);
+            }
+        });
+
+        socketManager.on(HerokuMessagesService.EVENT_NEW_MESSAGE, Message.class, message -> {
+            if (isPaused) {
+                notificationController.createMessageNotification(message);
+            }
+        });
+    }
+
+    public void onBind() {
+        if (! socketManager.connected() && token != null) {
+            reconnect();
+        }
+    }
+
+    private void startServiceInForeground() {
         Intent notificationIntent = new Intent(this, BackgroundSocketService.class);
 
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
@@ -85,16 +110,16 @@ public class BackgroundSocketService extends Service implements OnNewMessageList
         startForeground(1, notification);
     }
 
-    public SocketService getSocketService() {
-        return socketService;
+    public ConnectionService getConnectionService() {
+        return connectionService;
     }
 
     public ContactsService getContactsService() {
-        return socketService.getContactsService();
+        return contactsService;
     }
 
     public MessagesService getMessagesService() {
-        return socketService.getMessagesService();
+        return messagesService;
     }
 
     @Nullable
@@ -104,44 +129,39 @@ public class BackgroundSocketService extends Service implements OnNewMessageList
     }
 
     public void pause() {
-        if (networkStateReceiver.isConnected() && !socketService.connected()) {
+        isPaused = true;
+        if (networkStateReceiver.isConnected() && !socketManager.connected()) {
             reconnect();
         }
-
-        isPaused = true;
     }
 
     public void resume() {
-        if (networkStateReceiver.isConnected() && !socketService.connected()) {
+        isPaused = false;
+        if (networkStateReceiver.isConnected() && !socketManager.connected()) {
             reconnect();
         }
-
-        isPaused = false;
     }
 
     public void reconnect() {
         if (! isClosing) {
-            socketService.reconnect();
+            socketManager.connect();
         }
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
         detachListeners();
-
         return super.onUnbind(intent);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        isClosing = false;
-        notificationController = new NotificationController(this);
-        token = intent.getStringExtra("token");
-        socketService.setToken(token);
-
         Log.d(TAG, "Service started");
-        if (! socketService.connected()) {
-            socketService.connect();
+        isClosing = false;
+        token = intent.getStringExtra("token");
+
+        if (! socketManager.connected()) {
+            reconnect();
         }
 
         return START_REDELIVER_INTENT;
@@ -150,14 +170,17 @@ public class BackgroundSocketService extends Service implements OnNewMessageList
     @Override
     public void onDestroy() {
         super.onDestroy();
-        socketService.dispose();
+        detachListeners();
+        socketManager.disconnect();
         networkStateReceiver.stop();
         isClosing = true;
+
         Log.d(TAG, "Service destroyed");
     }
 
     public void detachListeners() {
-        socketService.getMessagesService().clearListeners();
-        socketService.getContactsService().clearListeners();
+        connectionService.clearListeners();
+        contactsService.clearListeners();
+        messagesService.clearListeners();
     }
 }

@@ -6,8 +6,6 @@ public interface MessagesService {
 
     void setMessagesEventListener(MessagesEventListener listener);
 
-    void setNewMessageEventListener(OnNewMessageListener listener);
-
     void loadMessages(String chatId, int offset, int limit);
 
     void sendMessage(String chatId, String message);

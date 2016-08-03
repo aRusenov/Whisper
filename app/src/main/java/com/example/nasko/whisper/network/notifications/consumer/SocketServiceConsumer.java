@@ -52,7 +52,7 @@ public class SocketServiceConsumer {
 
             service.getContactsService().setContactsEventListener(contactsEventListener);
             service.getContactsService().setContactsQueryEventListener(contactsQueryEventListener);
-            service.getSocketService().setAuthenticatedListener(authenticationListener);
+            service.getConnectionService().setAuthenticatedListener(authenticationListener);
             service.getMessagesService().setMessagesEventListener(messagesEventListener);
         }
 
@@ -144,7 +144,7 @@ public class SocketServiceConsumer {
         };
 
         if (isBound) {
-            service.getSocketService().setAuthenticatedListener(this.authenticationListener);
+            service.getConnectionService().setAuthenticatedListener(this.authenticationListener);
         }
     }
 

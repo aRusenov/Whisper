@@ -3,55 +3,35 @@ package com.example.nasko.whisper.network.notifications.service;
 import com.example.nasko.whisper.models.Message;
 import com.example.nasko.whisper.models.MessagesQueryResponse;
 import com.example.nasko.whisper.network.listeners.MessagesEventListener;
-import com.example.nasko.whisper.network.misc.JsonDeserializer;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-
-import io.socket.client.Socket;
-
 public class HerokuMessagesService implements MessagesService {
 
-    private static final String TAG = "HerokuMessagesService";
+    public static final String EMIT_SHOW_MESSAGES = "show messages";
+    public static final String EMIT_SEND_MESSAGE = "send message";
+    public static final String EVENT_SHOW_MESSAGES = "show messages";
+    public static final String EVENT_NEW_MESSAGE = "new message";
 
-    private Socket socket;
+    private static final String TAG = HerokuContactsService.class.getName();
+
+    private SocketManager socketManager;
     private MessagesEventListener messagesEventListener;
-    private OnNewMessageListener newMessageListener;
-    private JsonDeserializer deserializer;
 
-    public HerokuMessagesService(Socket socket, JsonDeserializer deserializer) {
-        this.deserializer = deserializer;
-        this.socket = socket;
-        this.registerEventListeners();
+    public HerokuMessagesService(SocketManager socketManager) {
+        this.socketManager = socketManager;
+        this.register();
     }
 
-    private void registerEventListeners() {
-        socket.on("show messages", args -> {
-            String json = args[0].toString();
-            try {
-                MessagesQueryResponse messages = deserializer.deserialize(json, MessagesQueryResponse.class);
-                if (messagesEventListener != null) {
-                    messagesEventListener.onMessagesLoaded(messages);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+    private void register() {
+        socketManager.on(EVENT_SHOW_MESSAGES, MessagesQueryResponse.class, messagesResponse -> {
+            if (messagesEventListener != null) {
+                messagesEventListener.onMessagesLoaded(messagesResponse);
             }
-        }).on("new message", args -> {
-            String json = args[0].toString();
-            Message newMessage = null;
-            try {
-                newMessage = deserializer.deserialize(json, Message.class);
-                if (messagesEventListener != null) {
-                    messagesEventListener.onMessageAdded(newMessage);
-                }
-
-                if (newMessageListener != null) {
-                    newMessageListener.onNewMessage(newMessage);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+        }).on(EVENT_NEW_MESSAGE, Message.class, newMessage -> {
+            if (messagesEventListener != null) {
+                messagesEventListener.onMessageAdded(newMessage);
             }
         });
     }
@@ -59,11 +39,6 @@ public class HerokuMessagesService implements MessagesService {
     @Override
     public void setMessagesEventListener(MessagesEventListener listener) {
         this.messagesEventListener = listener;
-    }
-
-    @Override
-    public void setNewMessageEventListener(OnNewMessageListener listener) {
-        this.newMessageListener = listener;
     }
 
     @Override
@@ -77,7 +52,7 @@ public class HerokuMessagesService implements MessagesService {
             e.printStackTrace();
         }
 
-        this.socket.emit("show messages", data);
+        socketManager.emit(EMIT_SHOW_MESSAGES, data);
     }
 
     @Override
@@ -90,7 +65,7 @@ public class HerokuMessagesService implements MessagesService {
             e.printStackTrace();
         }
 
-        this.socket.emit("send message", messageData);
+        socketManager.emit(EMIT_SEND_MESSAGE, messageData);
     }
 
     @Override
