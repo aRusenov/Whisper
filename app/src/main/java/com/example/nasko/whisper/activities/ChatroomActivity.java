@@ -80,11 +80,6 @@ public class ChatroomActivity extends AppCompatActivity {
         }
     }
 
-    public float pixelsToSp(float px) {
-        float scaledDensity = this.getResources().getDisplayMetrics().scaledDensity;
-        return px / scaledDensity;
-    }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();

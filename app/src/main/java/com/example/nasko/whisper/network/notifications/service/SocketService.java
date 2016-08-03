@@ -189,6 +189,7 @@ public class SocketService {
     }
 
     public void dispose() {
+        authenticatedListener = null;
         clearMessagesService();
         clearContactsService();
         disconnect();

@@ -7,6 +7,8 @@ public class Image implements Parcelable {
 
     private String url;
 
+    public Image() { }
+
     public String getUrl() {
         return url;
     }

@@ -26,7 +26,7 @@ public class BackgroundSocketService extends Service implements OnNewMessageList
 
     public void onBind() {
         if (! socketService.connected() && token != null) {
-            socketService.reconnect();
+            reconnect();
         }
     }
 
@@ -45,6 +45,7 @@ public class BackgroundSocketService extends Service implements OnNewMessageList
     private SocketService socketService;
     private String token;
     private boolean isPaused;
+    private boolean isClosing;
 
     @Override
     public void onCreate() {
@@ -58,7 +59,7 @@ public class BackgroundSocketService extends Service implements OnNewMessageList
             @Override
             public void onNetworkConnected() {
                 if (! socketService.connected() && token != null) {
-                    socketService.reconnect();
+                    reconnect();
                 }
             }
 
@@ -104,7 +105,7 @@ public class BackgroundSocketService extends Service implements OnNewMessageList
 
     public void pause() {
         if (networkStateReceiver.isConnected() && !socketService.connected()) {
-            socketService.reconnect();
+            reconnect();
         }
 
         isPaused = true;
@@ -112,10 +113,16 @@ public class BackgroundSocketService extends Service implements OnNewMessageList
 
     public void resume() {
         if (networkStateReceiver.isConnected() && !socketService.connected()) {
-            socketService.reconnect();
+            reconnect();
         }
 
         isPaused = false;
+    }
+
+    public void reconnect() {
+        if (! isClosing) {
+            socketService.reconnect();
+        }
     }
 
     @Override
@@ -127,6 +134,7 @@ public class BackgroundSocketService extends Service implements OnNewMessageList
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        isClosing = false;
         notificationController = new NotificationController(this);
         token = intent.getStringExtra("token");
         socketService.setToken(token);
@@ -144,6 +152,7 @@ public class BackgroundSocketService extends Service implements OnNewMessageList
         super.onDestroy();
         socketService.dispose();
         networkStateReceiver.stop();
+        isClosing = true;
         Log.d(TAG, "Service destroyed");
     }
 
