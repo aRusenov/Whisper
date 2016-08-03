@@ -12,13 +12,11 @@ import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.managers.LocalUserRepository;
 import com.example.nasko.whisper.models.User;
-import com.example.nasko.whisper.network.notifications.service.SocketService;
 import com.example.nasko.whisper.network.rest.UserService;
 
 public class LoginActivity extends AppCompatActivity {
 
     private UserService userService;
-    private SocketService socketService;
     private LocalUserRepository localUserRepository;
 
     private Button regButton;
@@ -36,21 +34,8 @@ public class LoginActivity extends AppCompatActivity {
 
         localUserRepository = new LocalUserRepository(this);
         userService = WhisperApplication.instance().getUserService();
-//        socketService = WhisperApplication.instance().getSocketService();
 
         initUi();
-//        socketService.setAuthenticatedListener(new AuthenticationListener() {
-//            @Override
-//            public void onAuthenticated(User user) {
-//                socketService.setCurrentUser(user);
-//                goToContacts();
-//            }
-//
-//            @Override
-//            public void onUnauthorized(Error error) {
-//                displayToast(error.getMessage());
-//            }
-//        });
     }
 
     private void initUi() {
@@ -60,8 +45,8 @@ public class LoginActivity extends AppCompatActivity {
         this.editPassword = (EditText) this.findViewById(R.id.edit_password);
 
         // Temporary set values
-        editEmail.setText("Az");
-        editPassword.setText("123");
+//        editEmail.setText("Az");
+//        editPassword.setText("123");
 
         this.loginButton.setOnClickListener(v -> {
             String username = editEmail.getText().toString();
@@ -90,12 +75,6 @@ public class LoginActivity extends AppCompatActivity {
                 .onSuccess(user -> goToContacts(user))
                 .onError(error -> displayToast(error.getMessage()))
                 .execute();
-    }
-
-    private void tryConnect(User user) {
-        localUserRepository.saveLoginData(user);
-        socketService.connect();
-        socketService.authenticate(user.getSessionToken());
     }
 
     private void displayToast(String message) {

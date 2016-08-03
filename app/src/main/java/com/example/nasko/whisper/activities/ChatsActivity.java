@@ -1,5 +1,6 @@
 package com.example.nasko.whisper.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -9,6 +10,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.inputmethod.InputMethodManager;
 
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.models.Chat;
@@ -54,6 +56,28 @@ public class ChatsActivity extends AppCompatActivity implements DateProvider, Ch
         viewPager = (ViewPager) findViewById(R.id.pager);
         viewPager.setAdapter(pageAdapter);
         viewPager.setOffscreenPageLimit(2);
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                if (position == 0) {
+                    // Hide keyboard if coming from ContactsSearchFragment
+                    if (getCurrentFocus() != null) {
+                        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+                    }
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
 
         setToolbar();
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
