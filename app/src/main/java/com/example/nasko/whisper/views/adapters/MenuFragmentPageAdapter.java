@@ -8,12 +8,11 @@ import android.view.ViewGroup;
 
 import com.example.nasko.whisper.views.fragments.ChatsFragment;
 import com.example.nasko.whisper.views.fragments.ContactsSearchFragment;
-import com.example.nasko.whisper.views.fragments.ProfileFragment;
 
 public class MenuFragmentPageAdapter extends FragmentPagerAdapter {
 
     private static final String TAG = "FragmentPageAdapter";
-    private static final int FRAGMENT_COUNT = 3;
+    private static final int FRAGMENT_COUNT = 2;
 
     public MenuFragmentPageAdapter(FragmentManager fm) {
         super(fm);
@@ -33,10 +32,6 @@ public class MenuFragmentPageAdapter extends FragmentPagerAdapter {
                 Log.d(TAG, "Creating ContactsSearchFragment");
                 ContactsSearchFragment fragment = new ContactsSearchFragment();
                 return fragment;
-            }
-            case 2:
-            {
-                return new ProfileFragment();
             }
             default:
                 throw new IllegalArgumentException("Invalid position");

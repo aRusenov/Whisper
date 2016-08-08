@@ -16,6 +16,7 @@ import com.example.nasko.whisper.presenters.ChatroomPresenterImpl;
 import com.example.nasko.whisper.presenters.PresenterCache;
 import com.example.nasko.whisper.presenters.PresenterFactory;
 import com.example.nasko.whisper.views.fragments.ChatroomFragment;
+import com.squareup.picasso.Picasso;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -69,6 +70,12 @@ public class ChatroomActivity extends AppCompatActivity {
             Toolbar.LayoutParams layoutParams = (Toolbar.LayoutParams) profileImage.getLayoutParams();
             layoutParams.height = (actionBarHeight * 3) / 4;
             layoutParams.width = (actionBarHeight * 3) / 4;
+
+            Picasso.with(this).cancelRequest(profileImage);
+            Picasso.with(this)
+                    .load(chat.getOtherContact().getImageUrl())
+                    .placeholder(R.drawable.profile)
+                    .into(profileImage);
 
             TextView tvName = (TextView) myToolbar.findViewById(R.id.tv_contact_name);
             String name = chat.getOtherContact().getUsername();

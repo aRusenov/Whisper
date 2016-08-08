@@ -17,7 +17,7 @@ import com.example.nasko.whisper.models.Message;
 
 import java.net.URISyntaxException;
 
-public class BackgroundSocketService extends Service{
+public class BackgroundSocketService extends Service {
 
     public class LocalBinder extends Binder {
         public BackgroundSocketService getService() {

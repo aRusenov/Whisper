@@ -20,4 +20,6 @@
     <string name="add_contact_hint">New contact name</string>
     <string name="title_activity_edit_profile">EditProfileActivity</string>
     <string name="search_contact">Search for people</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_profile">ProfileActivity</string>
 </resources>

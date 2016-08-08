@@ -1,7 +1,14 @@
 package com.example.nasko.whisper.models;
 
-/**
- * Created by nasko on 09/07/2016.
- */
 public class ProfileData {
+
+    private String profileImageStr;
+
+    public String getProfileImageStr() {
+        return profileImageStr;
+    }
+
+    public void setProfileImageStr(String profileImageStr) {
+        this.profileImageStr = profileImageStr;
+    }
 }

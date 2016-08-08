@@ -28,7 +28,7 @@ import java.util.Date;
 public class ChatsActivity extends AppCompatActivity implements DateProvider, ChatsViewNavigator {
 
     private static final String TAG = ChatsActivity.class.getName();
-    private static final int[] TAB_DRAWABLES = new int[] { R.drawable.home, R.drawable.search, R.drawable.settings };
+    private static final int[] TAB_DRAWABLES = new int[] { R.drawable.home, R.drawable.search };
     private static final String KEY_CHAT_EXTRA = "chat";
     private static final String KEY_USER_EXTRA = "user";
 
@@ -132,6 +132,9 @@ public class ChatsActivity extends AppCompatActivity implements DateProvider, Ch
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.action_settings:
+                chatsPresenter.onSettingsClicked();
+                return true;
             case R.id.action_logout:
                 chatsPresenter.onLogout();
                 return true;
@@ -163,6 +166,12 @@ public class ChatsActivity extends AppCompatActivity implements DateProvider, Ch
     public void navigateToLoginScreen() {
         Intent intent = new Intent(this, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+    }
+
+    public void navigateToProfileScreen(User user) {
+        Intent intent = new Intent(this, ProfileActivity.class);
+        intent.putExtra("user", user);
         startActivity(intent);
     }
 }

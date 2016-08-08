@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.managers.LocalUserRepository;
+import com.example.nasko.whisper.managers.UserProvider;
 import com.example.nasko.whisper.models.Chat;
 import com.example.nasko.whisper.models.Contact;
 import com.example.nasko.whisper.models.Error;
@@ -21,7 +22,7 @@ import java.util.List;
 
 public class ChatsPresenterImpl implements ChatsPresenter, OnSuccessListener<Object> {
 
-    private static final String TAG = "ChatsPresenter";
+    private static final String TAG = ChatsPresenterImpl.class.getName();
 
     private Context context;
     private ChatsView chatsView;
@@ -29,6 +30,7 @@ public class ChatsPresenterImpl implements ChatsPresenter, OnSuccessListener<Obj
     private ChatsViewNavigator chatsViewNavigator;
 
     private SocketServiceConsumer socketServiceConsumer;
+    private UserProvider userProvider;
     private LocalUserRepository localUserRepository;
 
     private boolean hasPendingContactQuery;
@@ -36,13 +38,27 @@ public class ChatsPresenterImpl implements ChatsPresenter, OnSuccessListener<Obj
     private boolean isLogged;
 
     public ChatsPresenterImpl() {
-        socketServiceConsumer = WhisperApplication.instance().getServiceReceiver();
+        this(WhisperApplication.instance().getServiceConsumer(),
+                WhisperApplication.instance().getUserProvider());
+    }
+
+    public ChatsPresenterImpl(SocketServiceConsumer serviceConsumer, UserProvider userProvider) {
+        socketServiceConsumer = serviceConsumer;
         socketServiceConsumer.setOnConnectedListener(this);
+        this.userProvider = userProvider;
         setupListeners();
     }
 
     public void setContext(Context context) {
         this.context = context;
+    }
+
+    @Override
+    public void onSettingsClicked() {
+        User currentUser = userProvider.getCurrentUser();
+        if (currentUser != null) {
+            chatsViewNavigator.navigateToProfileScreen(currentUser);
+        }
     }
 
     private void setupListeners() {
@@ -94,7 +110,6 @@ public class ChatsPresenterImpl implements ChatsPresenter, OnSuccessListener<Obj
             @Override
             public void onAuthenticated(User user) {
                 Log.d(TAG, "Authentication successful - loading chats");
-//                socketService.setCurrentUser(user);
                 socketServiceConsumer.loadContacts();
             }
 
@@ -106,44 +121,18 @@ public class ChatsPresenterImpl implements ChatsPresenter, OnSuccessListener<Obj
     }
 
     private void setOtherContact(Chat chat) {
+        User currentUser = userProvider.getCurrentUser();
         List<Contact> participants = chat.getParticipants();
         int i;
         for (i = 0; i < participants.size(); i++) {
             String participantId = participants.get(i).getId();
-            if (! participantId.equals(getCurrentUser().getUId())) {
+            if (! participantId.equals(currentUser.getUId())) {
                 break;
             }
         }
 
         chat.setOtherContact(participants.get(i));
     }
-
-//        socketServiceConsumer.setSocketStateListener(new SocketStateListener() {
-//            @Override
-//            public void onConnect() {
-//                Log.d(TAG, "Connected");
-//                chatsViewNavigator.setNetworkStatus("Whisper");
-//            }
-//
-//            @Override
-//            public void onConnectionTimeout() {
-//                Log.d(TAG, "Timeout");
-//                chatsViewNavigator.setNetworkStatus("Connecting...");
-//            }
-//
-//            @Override
-//            public void onConnectionError() {
-//                Log.d(TAG, "Error connecting");
-//                chatsViewNavigator.setNetworkStatus("Connecting...");
-//            }
-//
-//            @Override
-//            public void onDisconnect() {
-//                Log.d(TAG, "Disconnected");
-//                chatsViewNavigator.setNetworkStatus("Connecting...");
-//            }
-//        });
-//    }
 
     @Override
     public void onTakeChatsViewNavigator(ChatsViewNavigator chatsViewNavigator) {
@@ -162,7 +151,7 @@ public class ChatsPresenterImpl implements ChatsPresenter, OnSuccessListener<Obj
 
     @Override
     public void onChatClicked(Chat clickedChat) {
-        chatsViewNavigator.navigateToChatroom(clickedChat, getCurrentUser());
+        chatsViewNavigator.navigateToChatroom(clickedChat, userProvider.getCurrentUser());
     }
 
     @Override
@@ -189,7 +178,7 @@ public class ChatsPresenterImpl implements ChatsPresenter, OnSuccessListener<Obj
 
     @Override
     public void onLogout() {
-        LocalUserRepository localUserRepository = new LocalUserRepository(this.context);
+        LocalUserRepository localUserRepository = new LocalUserRepository(context);
         localUserRepository.logout();
         socketServiceConsumer.stop(true);
         chatsViewNavigator.navigateToLoginScreen();
@@ -197,14 +186,15 @@ public class ChatsPresenterImpl implements ChatsPresenter, OnSuccessListener<Obj
 
     @Override
     public void onCreate() {
-        User currentUser = getCurrentUser();
+        User currentUser = userProvider.getCurrentUser();
         if (currentUser == null) {
             localUserRepository = new LocalUserRepository(context);
             User loggedUser = localUserRepository.getLoggedUser();
             if (loggedUser.getSessionToken() == null) {
                 onLogout();
             } else {
-                setCurrentUser(loggedUser);
+                Log.d(TAG, loggedUser.getSessionToken());
+                userProvider.setCurrentUser(loggedUser);
             }
         }
     }
@@ -216,30 +206,22 @@ public class ChatsPresenterImpl implements ChatsPresenter, OnSuccessListener<Obj
 
     @Override
     public void onResume() {
+        User currentUser = userProvider.getCurrentUser();
         socketServiceConsumer.resume();
-        if (getCurrentUser() == null) {
+        if (currentUser == null) {
             return;
         }
 
         if (socketServiceConsumer.isBound()) {
             socketServiceConsumer.loadContacts();
         } else {
-            socketServiceConsumer.start(getCurrentUser().getSessionToken());
+            socketServiceConsumer.start(currentUser.getSessionToken());
         }
     }
 
     @Override
     public void onPause() {
         socketServiceConsumer.pause();
-    }
-
-    @Override
-    public User getCurrentUser() {
-        return WhisperApplication.instance().getCurrentUser();
-    }
-
-    public void setCurrentUser(User user) {
-        WhisperApplication.instance().setCurrentUser(user);
     }
 
     @Override

@@ -4,12 +4,11 @@ import android.content.Context;
 
 import com.example.nasko.whisper.models.Chat;
 import com.example.nasko.whisper.models.Contact;
-import com.example.nasko.whisper.models.User;
-import com.example.nasko.whisper.views.contracts.ContactsSearchView;
 import com.example.nasko.whisper.views.contracts.ChatsView;
 import com.example.nasko.whisper.views.contracts.ChatsViewNavigator;
+import com.example.nasko.whisper.views.contracts.ContactsSearchView;
 
-public interface ChatsPresenter extends UserProvider, Presenter {
+public interface ChatsPresenter extends Presenter {
 
     void onTakeChatsViewNavigator(ChatsViewNavigator chatsViewNavigator);
 
@@ -33,7 +32,7 @@ public interface ChatsPresenter extends UserProvider, Presenter {
 
     void onDestroy();
 
-    User getCurrentUser();
-
     void setContext(Context context);
+
+    void onSettingsClicked();
 }

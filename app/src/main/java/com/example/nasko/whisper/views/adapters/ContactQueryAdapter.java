@@ -9,7 +9,6 @@ import android.widget.TextView;
 
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.models.Contact;
-import com.example.nasko.whisper.presenters.UserProvider;
 import com.example.nasko.whisper.views.listeners.OnItemClickListener;
 import com.squareup.picasso.Picasso;
 
@@ -38,12 +37,11 @@ public class ContactQueryAdapter extends ArrayRecyclerViewAdapter<Contact, Conta
         }
     }
 
-    private UserProvider userProvider;
+    private String userId = "";
     private OnItemClickListener invitationIconClickListener;
 
-    public ContactQueryAdapter(Context context, UserProvider userProvider) {
+    public ContactQueryAdapter(Context context) {
         super(context);
-        this.userProvider = userProvider;
     }
 
     public OnItemClickListener getInvitationIconClickListener() {
@@ -52,6 +50,10 @@ public class ContactQueryAdapter extends ArrayRecyclerViewAdapter<Contact, Conta
 
     public void setInvitationIconClickListener(OnItemClickListener invitationIconClickListener) {
         this.invitationIconClickListener = invitationIconClickListener;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     @Override
@@ -63,18 +65,22 @@ public class ContactQueryAdapter extends ArrayRecyclerViewAdapter<Contact, Conta
     @Override
     public void onBindViewHolder(ContactViewHolder holder, int position) {
         Contact contact = this.getItem(position);
+        boolean isContactUser = userId.equals(contact.getId());
         String name = contact.getName();
         if (name == null) {
             name = contact.getUsername();
         }
+        if (isContactUser) {
+            name += " (You)";
+        }
 
         holder.name.setText(name);
-        Picasso.with(this.getContext())
-                .load(contact.getImageUrl())
+        Picasso picasso = Picasso.with(getContext());
+        picasso.setIndicatorsEnabled(true);
+        picasso.load(contact.getImageUrl())
                 .placeholder(R.drawable.blank_pic)
                 .into(holder.image);
 
-        boolean isContactUser = userProvider.getCurrentUser().getUId().equals(contact.getId());
         if (isContactUser) {
             holder.inviteIcon.setVisibility(View.INVISIBLE);
         } else {
@@ -90,6 +96,7 @@ public class ContactQueryAdapter extends ArrayRecyclerViewAdapter<Contact, Conta
     }
 
     public void setContactToFriend(Contact contact) {
+        // Find contact index in array
         int i;
         for (i = 0; i < this.items.size(); i++) {
             if (items.get(i).equals(contact)) {
@@ -97,6 +104,7 @@ public class ContactQueryAdapter extends ArrayRecyclerViewAdapter<Contact, Conta
             }
         }
 
+        // Update if present
         if (i != -1 && i < items.size()) {
             Contact contactRef = this.items.get(i);
             contactRef.setFriend(true);

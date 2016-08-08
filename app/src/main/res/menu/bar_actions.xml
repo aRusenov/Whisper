@@ -14,6 +14,11 @@
         <!--android:title="@string/action_edit_profile"-->
         <!--app:showAsAction="never"/>-->
 
+    <item android:id="@+id/action_settings"
+        android:icon="@drawable/settings"
+        android:title="@string/action_settings"
+        app:showAsAction="ifRoom|collapseActionView"/>
+
     <item android:id="@+id/action_logout"
         android:icon="@drawable/logout"
         android:title="@string/action_logout"

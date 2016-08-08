@@ -10,4 +10,6 @@ public interface ChatsViewNavigator {
     void navigateToChatroom(Chat chat, User user);
 
     void navigateToLoginScreen();
+
+    void navigateToProfileScreen(User user);
 }

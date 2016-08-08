@@ -43,6 +43,7 @@ public class HerokuContactsService implements ContactsService {
         }).on(EVENT_SHOW_CHATS, Chat[].class, chats -> {
             Log.d(TAG, "Loading chats");
             List<Chat> chatsList = Arrays.asList(chats);
+
             if (contactsEventListener != null) {
                 contactsEventListener.onContactsLoaded(chatsList);
             }

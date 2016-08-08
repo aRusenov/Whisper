@@ -72,8 +72,10 @@ public class ChatAdapter extends ArrayRecyclerViewAdapter<Chat, ChatAdapter.Chat
 
         holder.contactName.setText(name);
         holder.lastMessage.setText(chat.getLastMessage().getText());
-        Picasso.with(this.getContext())
-                .load(chat.getOtherContact().getImageUrl())
+
+        Picasso picasso = Picasso.with(getContext());
+        picasso.setIndicatorsEnabled(true);
+        picasso.load(chat.getOtherContact().getImageUrl())
                 .placeholder(R.drawable.blank_pic)
                 .into(holder.profileImg);
     }

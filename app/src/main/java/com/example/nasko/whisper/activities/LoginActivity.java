@@ -9,18 +9,19 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.nasko.whisper.R;
-import com.example.nasko.whisper.WhisperApplication;
-import com.example.nasko.whisper.managers.LocalUserRepository;
-import com.example.nasko.whisper.models.User;
-import com.example.nasko.whisper.network.rest.UserService;
+import com.example.nasko.whisper.presenters.LoginPresenter;
+import com.example.nasko.whisper.presenters.LoginPresenterImpl;
+import com.example.nasko.whisper.presenters.PresenterCache;
+import com.example.nasko.whisper.presenters.PresenterFactory;
+import com.example.nasko.whisper.views.contracts.LoginView;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity implements LoginView {
 
-    private UserService userService;
-    private LocalUserRepository localUserRepository;
+    private PresenterFactory<LoginPresenter> presenterFactory = LoginPresenterImpl::new;
+    private LoginPresenter loginPresenter;
 
-    private Button regButton;
-    private Button loginButton;
+    private Button btnLogin;
+    private Button btnRegister;
     private EditText editEmail;
     private EditText editPassword;
 
@@ -29,64 +30,51 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        loginPresenter = PresenterCache.instance().getPresenter("Login", presenterFactory);
+        loginPresenter.attachView(this);
+        loginPresenter.setContext(this);
+
         this.getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
-        localUserRepository = new LocalUserRepository(this);
-        userService = WhisperApplication.instance().getUserService();
+        loadViews();
 
-        initUi();
+        this.btnLogin.setOnClickListener(v -> {
+            String username = editEmail.getText().toString();
+            String password = editPassword.getText().toString();
+            loginPresenter.onLoginClicked(username, password);
+        });
+
+        this.btnRegister.setOnClickListener(v -> {
+            String username = editEmail.getText().toString();
+            String password = editPassword.getText().toString();
+            loginPresenter.onRegisterClicked(username, password);
+        });
     }
 
-    private void initUi() {
-        this.regButton = (Button) this.findViewById(R.id.btn_reg);
-        this.loginButton = (Button) this.findViewById(R.id.btn_login);
+    private void loadViews() {
+        this.btnRegister = (Button) this.findViewById(R.id.btn_reg);
+        this.btnLogin = (Button) this.findViewById(R.id.btn_login);
         this.editEmail = (EditText) this.findViewById(R.id.edit_email);
         this.editPassword = (EditText) this.findViewById(R.id.edit_password);
-
-        // Temporary set values
-//        editEmail.setText("Az");
-//        editPassword.setText("123");
-
-        this.loginButton.setOnClickListener(v -> {
-            String username = editEmail.getText().toString();
-            String password = editPassword.getText().toString();
-            login(username, password);
-        });
-
-        this.regButton.setOnClickListener(v -> {
-            String username = editEmail.getText().toString();
-            String password = editPassword.getText().toString();
-            register(username, password);
-        });
     }
 
-    private void login(final String username, String password) {
-
-        this.userService.login(username, password)
-                .onSuccess(user -> goToContacts(user))
-                .onError(error -> displayToast(error.getMessage()))
-                .execute();
+    @Override
+    public void navigateToContacts() {
+        Intent intent = new Intent(this, ChatsActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        this.startActivity(intent);
     }
 
-    private void register(final String username, String password) {
-
-        this.userService.register(username, password)
-                .onSuccess(user -> goToContacts(user))
-                .onError(error -> displayToast(error.getMessage()))
-                .execute();
-    }
-
-    private void displayToast(String message) {
+    @Override
+    public void displayError(String message) {
         Toast errorToast = Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT);
         errorToast.show();
     }
 
-    private void goToContacts(User user) {
-        localUserRepository.saveLoginData(user);
-        WhisperApplication.instance().setCurrentUser(user);
-        Intent intent = new Intent(this, ChatsActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        this.startActivity(intent);
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        loginPresenter.detachView();
     }
 }

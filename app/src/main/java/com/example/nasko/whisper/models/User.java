@@ -3,10 +3,16 @@ package com.example.nasko.whisper.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class User implements Parcelable {
     private String username;
+    @JsonProperty("uId")
     private String uId;
+    private String name;
+    @JsonProperty("token")
     private String sessionToken;
+    private Image image;
 
     public User() {}
 
@@ -20,6 +26,8 @@ public class User implements Parcelable {
         username = in.readString();
         uId = in.readString();
         sessionToken = in.readString();
+        name = in.readString();
+        image = in.readParcelable(Image.class.getClassLoader());
     }
 
     public static final Creator<User> CREATOR = new Creator<User>() {
@@ -46,6 +54,22 @@ public class User implements Parcelable {
         return sessionToken;
     }
 
+    public Image getImage() {
+        return image;
+    }
+
+    public void setImage(Image image) {
+        this.image = image;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -56,5 +80,7 @@ public class User implements Parcelable {
         dest.writeString(username);
         dest.writeString(uId);
         dest.writeString(sessionToken);
+        dest.writeString(name);
+        dest.writeParcelable(image, flags);
     }
 }

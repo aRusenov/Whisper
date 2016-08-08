@@ -179,20 +179,4 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
             }
         }
     }
-
-//    @Override
-//    public void onSaveInstanceState(Bundle outState) {
-//        super.onSaveInstanceState(outState);
-//        outState.putParcelable("chat", chat);
-//        outState.putParcelable("user", user);
-//    }
-//
-//    @Override
-//    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
-//        super.onViewStateRestored(savedInstanceState);
-//        if (savedInstanceState != null) {
-//            chat = savedInstanceState.getParcelable("chat");
-//            user = savedInstanceState.getParcelable("user");
-//        }
-//    }
 }
