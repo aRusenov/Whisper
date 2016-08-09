@@ -50,6 +50,7 @@
             android:layout_marginTop="2dp"
             android:layout_marginBottom="2dp"
             android:text="Waddup, bro?"
+            android:autoLink="web"
             android:textColor="#000"/>
 
     </LinearLayout>
