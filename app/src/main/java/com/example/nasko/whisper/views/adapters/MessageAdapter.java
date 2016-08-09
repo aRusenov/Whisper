@@ -78,36 +78,4 @@ public class MessageAdapter extends ArrayRecyclerViewAdapter<Message, MessageAda
             holder.text.setBackgroundResource(bgDrawable);
         }
     }
-
-//    @Override
-//    public void onMessageAdded(Message message) {
-//        if (! message.getChatId().equals(this.currentChatId)) {
-//            return;
-//        }
-//
-//        LinearLayoutManager layoutManager = ((LinearLayoutManager)messagesList.getLayoutManager());
-//
-//        int lastVisible = layoutManager.findLastCompletelyVisibleItemPosition();
-//        boolean scrollToBottom = lastVisible == this.getItemCount() - 1;
-//        this.add(message);
-//
-//        if (scrollToBottom) {
-//            messagesList.getLayoutManager().scrollToPosition(this.getItemCount() - 1);
-//        } else if (! currentUser.getUId().equals(message.getFrom())) {
-//            this.playNewMessageSound();
-//        }
-//    }
-//
-//    @Override
-//    public void onMessagesLoaded(List<Message> messages) {
-//        // Insert messages at top
-//        this.items.addAll(0, messages);
-//        this.notifyItemRangeInserted(0, messages.size());
-//
-//        // Maintain scroll position
-//        int index = messagesList.getFirstVisiblePosition() + messages.size();
-//        View topmostView = messagesList.getChildAt(0);
-//        int top = (topmostView == null) ? 0 : (topmostView.getTop() - messagesList.getPaddingTop());
-//        messagesList.setSelectionFromTop(index, top);
-//    }
 }

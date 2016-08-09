@@ -69,7 +69,7 @@ public abstract class ArrayRecyclerViewAdapter<E, VH extends RecyclerView.ViewHo
 
     public void addAllAt(int position, Collection<E> elements) {
         this.items.addAll(position, elements);
-        this.notifyItemRangeInserted(0, elements.size());
+        this.notifyItemRangeInserted(position   , elements.size());
     }
 
     public void clear() {

@@ -19,6 +19,7 @@ import com.example.nasko.whisper.presenters.PresenterFactory;
 import com.example.nasko.whisper.presenters.ProfilePresenter;
 import com.example.nasko.whisper.presenters.ProfilePresenterImpl;
 import com.example.nasko.whisper.views.contracts.ProfileView;
+import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -93,6 +94,7 @@ public class ProfileActivity extends AppCompatActivity implements ProfileView {
         String imgUrl = ImageUrlResolver.getFullUrl(user.getImage());
         Picasso.with(this)
                 .load(imgUrl)
+                .memoryPolicy(MemoryPolicy.NO_CACHE)
                 .placeholder(R.drawable.profile)
                 .into(profileImage);
     }

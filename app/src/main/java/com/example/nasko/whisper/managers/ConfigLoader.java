@@ -17,8 +17,9 @@ public final class ConfigLoader {
     public static String getConfigValue(Context context, String name) {
         Resources resources = context.getResources();
 
+        InputStream rawResource = null;
         try {
-            InputStream rawResource = resources.openRawResource(R.raw.app);
+            rawResource = resources.openRawResource(R.raw.app);
             Properties properties = new Properties();
             properties.load(rawResource);
 
@@ -27,6 +28,14 @@ public final class ConfigLoader {
             Log.e(TAG, "Unable to find the config file: " + e.getMessage());
         } catch (IOException e) {
             Log.e(TAG, "Failed to open config file.");
+        } finally {
+             if (rawResource != null) {
+                 try {
+                     rawResource.close();
+                 } catch (IOException e) {
+                     e.printStackTrace();
+                 }
+             }
         }
 
         return null;
