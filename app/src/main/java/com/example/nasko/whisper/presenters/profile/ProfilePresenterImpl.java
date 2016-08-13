@@ -1,26 +1,23 @@
-package com.example.nasko.whisper.presenters;
+package com.example.nasko.whisper.presenters.profile;
 
-import android.content.Context;
 import android.net.Uri;
-import android.os.Bundle;
 
 import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.managers.LocalUserRepository;
 import com.example.nasko.whisper.managers.RealPathUtil;
 import com.example.nasko.whisper.managers.UserProvider;
 import com.example.nasko.whisper.network.rest.UserService;
+import com.example.nasko.whisper.presenters.AbstractPresenter;
 import com.example.nasko.whisper.views.contracts.ProfileView;
 
 import java.io.File;
 
-public class ProfilePresenterImpl implements ProfilePresenter {
+public class ProfilePresenterImpl extends AbstractPresenter<ProfileView> implements ProfilePresenter {
 
     private static final String TAG = ProfilePresenterImpl.class.getName();
 
     private UserProvider userProvider;
     private UserService userService;
-    private Context context;
-    private ProfileView view;
 
     public ProfilePresenterImpl() {
         this(WhisperApplication.instance().getUserService(),
@@ -30,17 +27,6 @@ public class ProfilePresenterImpl implements ProfilePresenter {
     public ProfilePresenterImpl(UserService userService, UserProvider userProvider) {
         this.userService = userService;
         this.userProvider = userProvider;
-    }
-
-    @Override
-    public void setContext(Context context) {
-        this.context = context;
-    }
-
-    @Override
-    public void attachView(ProfileView view, Bundle bundle) {
-        this.view = view;
-        view.setUserData(userProvider.getCurrentUser());
     }
 
     @Override
@@ -68,10 +54,5 @@ public class ProfilePresenterImpl implements ProfilePresenter {
                     view.displayMessage("Upload error: " + error.getMessage());
                 }
             }).execute();
-    }
-
-    @Override
-    public void detachView() {
-        view = null;
     }
 }

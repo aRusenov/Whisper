@@ -1,17 +1,12 @@
 package com.example.nasko.whisper.network.notifications.service;
 
-import android.util.Log;
-
 import com.example.nasko.whisper.models.Chat;
 import com.example.nasko.whisper.models.ContactQueryResponse;
-import com.example.nasko.whisper.network.listeners.ContactsEventListener;
-import com.example.nasko.whisper.network.listeners.ContactsQueryEventListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Arrays;
-import java.util.List;
+import rx.Observable;
 
 public class HerokuContactsService implements ContactsService {
 
@@ -19,6 +14,7 @@ public class HerokuContactsService implements ContactsService {
     public static final String EVENT_SHOW_CHATS = "show chats";
     public static final String EVENT_CONTACT_UPDATE = "contact update";
     public static final String EVENT_QUERY_CONTACTS = "query contacts";
+
     public static final String EMIT_SHOW_CHATS = "show chats";
     public static final String EMIT_QUERY_CONTACTS = "query contacts";
     public static final String EMIT_ADD_CONTACT = "add contact";
@@ -26,48 +22,25 @@ public class HerokuContactsService implements ContactsService {
     private static final String TAG = HerokuContactsService.class.getName();
 
     private SocketManager socketManager;
-    private ContactsEventListener contactsEventListener;
-    private ContactsQueryEventListener contactsQueryEventListener;
 
     public HerokuContactsService(SocketManager socketManager) {
         this.socketManager = socketManager;
-        register();
     }
 
-    private void register() {
-        socketManager.on(EVENT_NEW_CONTACT, Chat.class, chat -> {
-            Log.d(TAG, "New contact");
-            if (contactsEventListener != null) {
-                contactsEventListener.onContactAdded(chat);
-            }
-        }).on(EVENT_SHOW_CHATS, Chat[].class, chats -> {
-            Log.d(TAG, "Loading chats");
-            List<Chat> chatsList = Arrays.asList(chats);
-
-            if (contactsEventListener != null) {
-                contactsEventListener.onContactsLoaded(chatsList);
-            }
-        }).on(EVENT_CONTACT_UPDATE, Chat.class, chat -> {
-            Log.d(TAG, "Contact updated");
-            if (contactsEventListener != null) {
-                contactsEventListener.onContactUpdated(chat);
-            }
-        }).on(EVENT_QUERY_CONTACTS, ContactQueryResponse.class, response -> {
-            Log.d(TAG, "Contact query returned results");
-            if (contactsQueryEventListener != null) {
-                contactsQueryEventListener.onContactsLoaded(response);
-            }
-        });
+    public Observable<Chat> onNewChat() {
+        return socketManager.on(EVENT_NEW_CONTACT, Chat.class);
     }
 
-    @Override
-    public void setContactsEventListener(ContactsEventListener listener) {
-        this.contactsEventListener = listener;
+    public Observable<Chat[]> onLoadChats() {
+        return socketManager.on(EVENT_SHOW_CHATS, Chat[].class);
     }
 
-    @Override
-    public void setContactsQueryEventListener(ContactsQueryEventListener listener) {
-        this.contactsQueryEventListener = listener;
+    public Observable<Chat> onChatUpdate() {
+        return socketManager.on(EVENT_CONTACT_UPDATE, Chat.class);
+    }
+
+    public Observable<ContactQueryResponse> onContactQueryResponse() {
+        return socketManager.on(EVENT_QUERY_CONTACTS, ContactQueryResponse.class);
     }
 
     @Override
@@ -97,11 +70,5 @@ public class HerokuContactsService implements ContactsService {
         }
 
         socketManager.emit(EMIT_ADD_CONTACT, data);
-    }
-
-    @Override
-    public void clearListeners() {
-        contactsEventListener = null;
-        contactsQueryEventListener = null;
     }
 }

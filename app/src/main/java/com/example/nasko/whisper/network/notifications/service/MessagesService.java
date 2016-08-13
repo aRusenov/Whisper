@@ -1,14 +1,17 @@
 package com.example.nasko.whisper.network.notifications.service;
 
-import com.example.nasko.whisper.network.listeners.MessagesEventListener;
+import com.example.nasko.whisper.models.Message;
+import com.example.nasko.whisper.models.MessagesQueryResponse;
+
+import rx.Observable;
 
 public interface MessagesService {
 
-    void setMessagesEventListener(MessagesEventListener listener);
+    Observable<MessagesQueryResponse> onLoadMessages();
+
+    Observable<Message> onNewMessage();
 
     void loadMessages(String chatId, int offset, int limit);
 
     void sendMessage(String chatId, String message);
-
-    void clearListeners();
 }

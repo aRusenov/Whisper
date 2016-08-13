@@ -1,15 +1,20 @@
 package com.example.nasko.whisper.network.notifications.service;
 
-import com.example.nasko.whisper.network.listeners.AuthenticationListener;
-import com.example.nasko.whisper.network.listeners.SocketStateListener;
+import com.example.nasko.whisper.models.User;
+
+import rx.Observable;
 
 public interface ConnectionService {
 
-    void setSocketStateListener(SocketStateListener socketStateListener);
+    Observable onConnect();
 
-    void setAuthenticatedListener(AuthenticationListener authenticatedListener);
+    Observable onError();
+
+    Observable<String> onDisconnect();
+
+    Observable<User> onAuthenticated();
+
+    Observable<String> onUnauthorized();
 
     void authenticate(String token);
-
-    void clearListeners();
 }

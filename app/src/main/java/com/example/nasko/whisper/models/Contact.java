@@ -15,6 +15,7 @@ public class Contact implements Parcelable {
     private Image image;
     @JsonProperty("isFriend")
     private boolean isFriend;
+    private boolean isUser;
 
     public Contact() { }
 
@@ -61,6 +62,14 @@ public class Contact implements Parcelable {
 
     public void setImage(Image image) {
         this.image = image;
+    }
+
+    public boolean isUser() {
+        return isUser;
+    }
+
+    public void setUser(boolean user) {
+        isUser = user;
     }
 
     public String getImageUrl() {

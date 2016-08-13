@@ -11,8 +11,8 @@ import android.widget.TextView;
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.models.Chat;
 import com.example.nasko.whisper.models.User;
-import com.example.nasko.whisper.presenters.ChatroomPresenter;
-import com.example.nasko.whisper.presenters.ChatroomPresenterImpl;
+import com.example.nasko.whisper.presenters.chatroom.ChatroomPresenter;
+import com.example.nasko.whisper.presenters.chatroom.ChatroomPresenterImpl;
 import com.example.nasko.whisper.presenters.PresenterCache;
 import com.example.nasko.whisper.presenters.PresenterFactory;
 import com.example.nasko.whisper.views.fragments.ChatroomFragment;
@@ -23,7 +23,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class ChatroomActivity extends AppCompatActivity {
 
     private ChatroomPresenter presenter;
-    private PresenterFactory<ChatroomPresenter> presenterFactory = () -> new ChatroomPresenterImpl();
+    private PresenterFactory<ChatroomPresenter> presenterFactory = ChatroomPresenterImpl::new;
     private Chat chat;
     private User user;
 
@@ -42,20 +42,17 @@ public class ChatroomActivity extends AppCompatActivity {
                 WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         setToolbar();
 
-        if (savedInstanceState != null) {
-            return;
+        if (savedInstanceState == null) {
+            ChatroomFragment chatroomFragment = new ChatroomFragment();
+            Bundle args = new Bundle();
+            args.putParcelable("chat", chat);
+            args.putParcelable("user", user);
+            chatroomFragment.setArguments(args);
+
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fragment_container, chatroomFragment)
+                    .commit();
         }
-
-        ChatroomFragment chatroomFragment = new ChatroomFragment();
-        Bundle args = new Bundle();
-        args.putParcelable("chat", chat);
-        args.putParcelable("user", user);
-        chatroomFragment.setArguments(args);
-        chatroomFragment.setPresenterFactory(presenterFactory);
-
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.fragment_container, chatroomFragment)
-                .commit();
     }
 
     private void setToolbar() {
@@ -90,7 +87,7 @@ public class ChatroomActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        presenter.onDestroy();
+        presenter.detachView();
     }
 
     @Override

@@ -15,63 +15,84 @@ import android.widget.TextView;
 
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.models.Contact;
-import com.example.nasko.whisper.presenters.ChatsPresenter;
-import com.example.nasko.whisper.presenters.ChatsPresenterImpl;
 import com.example.nasko.whisper.presenters.PresenterCache;
 import com.example.nasko.whisper.presenters.PresenterFactory;
+import com.example.nasko.whisper.presenters.chats.ContactsSearchPresenter;
+import com.example.nasko.whisper.presenters.chats.ContactsSearchPresenterImpl;
 import com.example.nasko.whisper.views.adapters.ContactQueryAdapter;
 import com.example.nasko.whisper.views.contracts.ContactsSearchView;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class ContactsSearchFragment extends Fragment implements ContactsSearchView {
 
-    private PresenterFactory<ChatsPresenter> presenterFactory = () -> new ChatsPresenterImpl();
-    private ChatsPresenter chatsPresenter;
-    private ContactQueryAdapter contactQueryAdapter;
+    private PresenterFactory<ContactsSearchPresenter> presenterFactory = ContactsSearchPresenterImpl::new;
+    private ContactsSearchPresenter presenter;
 
-    private EditText editSearch;
-    private RecyclerView rvContacts;
-    private TextView tvQueryMessage;
+    @BindView(R.id.edit_query) EditText editSearch;
+    @BindView(R.id.rv_new_contacts) RecyclerView rvContacts;
+    @BindView(R.id.tv_query_message) TextView tvQueryMessage;
+
+    private ContactQueryAdapter contactQueryAdapter;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        chatsPresenter = PresenterCache.instance().getPresenter("Chats", presenterFactory);
-        chatsPresenter.onTakeContactsSearchView(this);
-
         View view = inflater.inflate(R.layout.fragment_search_contacts, container, false);
-        editSearch = (EditText) view.findViewById(R.id.edit_query);
-        rvContacts = (RecyclerView) view.findViewById(R.id.rv_new_contacts);
-        tvQueryMessage = (TextView) view.findViewById(R.id.tv_query_message);
+        ButterKnife.bind(this, view);
 
         contactQueryAdapter = new ContactQueryAdapter(getContext());
         contactQueryAdapter.setInvitationIconClickListener(position -> {
-            Contact contact = contactQueryAdapter.getItem(position);
-            chatsPresenter.onContactSendRequestClick(contact);
+            if (presenter != null) {
+                Contact contact = contactQueryAdapter.getItem(position);
+                presenter.onContactSendRequestClick(contact);
+            }
         });
+
+        if (savedInstanceState != null) {
+            ArrayList<Contact> contacts = savedInstanceState.getParcelableArrayList("contacts");
+            for (Contact contact : contacts) {
+                contactQueryAdapter.add(contact);
+            }
+        }
 
         rvContacts.setAdapter(contactQueryAdapter);
         rvContacts.setLayoutManager(new LinearLayoutManager(getContext()));
+
         editSearch.addTextChangedListener(new TextWatcher() {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                String query = s.toString();
-                chatsPresenter.onQueryEntered(query);
+                if (presenter != null) {
+                    String query = s.toString();
+                    presenter.onQueryEntered(query);
+                }
             }
 
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
 
             @Override
-            public void afterTextChanged(Editable s) {
-
-            }
+            public void afterTextChanged(Editable s) { }
         });
 
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        presenter = PresenterCache.instance().getPresenter("ContactsSearch", presenterFactory);
+        presenter.attachView(this, getContext(), null);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        presenter.detachView();
     }
 
     @Override
@@ -95,5 +116,16 @@ public class ContactsSearchFragment extends Fragment implements ContactsSearchVi
     @Override
     public void displayInfoText(String text) {
 
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        ArrayList<Contact> savedContacts = new ArrayList<>();
+        for (Contact contact : contactQueryAdapter) {
+            savedContacts.add(contact);
+        }
+
+        outState.putParcelableArrayList("contacts", savedContacts);
     }
 }

@@ -16,8 +16,12 @@ import com.example.nasko.whisper.managers.NotificationController;
 import com.example.nasko.whisper.models.Message;
 
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 
-public class BackgroundSocketService extends Service {
+import rx.Subscription;
+
+public class BackgroundSocketService extends Service implements SocketService {
 
     public class LocalBinder extends Binder {
         public BackgroundSocketService getService() {
@@ -30,9 +34,12 @@ public class BackgroundSocketService extends Service {
     private final IBinder binder = new LocalBinder();
     private NotificationController notificationController;
     private NetworkStateReceiver networkStateReceiver;
+
     private ConnectionService connectionService;
     private MessagesService messagesService;
     private ContactsService contactsService;
+
+    private List<Subscription> subscriptions;
 
     private SocketManager socketManager;
     private String token;
@@ -41,6 +48,7 @@ public class BackgroundSocketService extends Service {
 
     @Override
     public void onCreate() {
+        Log.d(TAG, "Creating service");
         super.onCreate();
         String endpoint = ConfigLoader.getConfigValue(this, "api_url");
         try {
@@ -75,17 +83,31 @@ public class BackgroundSocketService extends Service {
     }
 
     private void setOwnSocketListeners() {
-        socketManager.on(HerokuConnectionService.EVENT_CONNECT, Object.class, args -> {
-            if (token != null) {
-                connectionService.authenticate(token);
-            }
-        });
+        subscriptions = new ArrayList<>();
+        Subscription connectSub = socketManager.on(HerokuConnectionService.EVENT_CONNECT, Object.class)
+                .subscribe(o -> {
+                    if (token != null) {
+                        connectionService.authenticate(token);
+                    }
+                });
 
-        socketManager.on(HerokuMessagesService.EVENT_NEW_MESSAGE, Message.class, message -> {
-            if (isPaused) {
-                notificationController.createMessageNotification(message);
-            }
-        });
+        Subscription disconnectSub = socketManager.on(HerokuConnectionService.EVENT_DISCONNECT, String.class)
+                .subscribe(o -> {
+                    if (networkStateReceiver.isConnected()) {
+                        socketManager.connect();
+                    }
+                });
+
+        Subscription newMsgSub = socketManager.on(HerokuMessagesService.EVENT_NEW_MESSAGE, Message.class)
+                .subscribe(message -> {
+                    if (isPaused) {
+                        notificationController.createMessageNotification(message);
+                    }
+                });
+
+        subscriptions.add(connectSub);
+        subscriptions.add(disconnectSub);
+        subscriptions.add(newMsgSub);
     }
 
     public void onBind() {
@@ -110,15 +132,18 @@ public class BackgroundSocketService extends Service {
         startForeground(1, notification);
     }
 
-    public ConnectionService getConnectionService() {
+    @Override
+    public ConnectionService connectionService() {
         return connectionService;
     }
 
-    public ContactsService getContactsService() {
+    @Override
+    public ContactsService contactsService() {
         return contactsService;
     }
 
-    public MessagesService getMessagesService() {
+    @Override
+    public MessagesService messageService() {
         return messagesService;
     }
 
@@ -149,14 +174,8 @@ public class BackgroundSocketService extends Service {
     }
 
     @Override
-    public boolean onUnbind(Intent intent) {
-        detachListeners();
-        return super.onUnbind(intent);
-    }
-
-    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(TAG, "Service started");
+        Log.d(TAG, "Starting service");
         isClosing = false;
         token = intent.getStringExtra("token");
 
@@ -170,17 +189,14 @@ public class BackgroundSocketService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        detachListeners();
+        for (Subscription sub : subscriptions) {
+            sub.unsubscribe();
+        }
+
         socketManager.disconnect();
         networkStateReceiver.stop();
         isClosing = true;
 
         Log.d(TAG, "Service destroyed");
-    }
-
-    public void detachListeners() {
-        connectionService.clearListeners();
-        contactsService.clearListeners();
-        messagesService.clearListeners();
     }
 }

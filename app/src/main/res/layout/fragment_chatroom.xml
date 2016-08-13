@@ -50,7 +50,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="5"
-                android:id="@+id/edit_newMessage"
+                android:id="@+id/edit_new_message"
                 android:imeOptions="actionDone"
                 android:inputType="text"
                 android:hint="Message"/>

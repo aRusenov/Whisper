@@ -5,7 +5,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,10 +12,10 @@ import android.widget.ProgressBar;
 
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.models.Chat;
-import com.example.nasko.whisper.presenters.ChatsPresenter;
-import com.example.nasko.whisper.presenters.ChatsPresenterImpl;
 import com.example.nasko.whisper.presenters.PresenterCache;
 import com.example.nasko.whisper.presenters.PresenterFactory;
+import com.example.nasko.whisper.presenters.chats.ChatsPresenter;
+import com.example.nasko.whisper.presenters.chats.ChatsPresenterImpl;
 import com.example.nasko.whisper.utils.DateProvider;
 import com.example.nasko.whisper.views.adapters.ChatAdapter;
 import com.example.nasko.whisper.views.contracts.ChatsView;
@@ -24,40 +23,51 @@ import com.example.nasko.whisper.views.contracts.ChatsView;
 import java.util.Date;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class ChatsFragment extends Fragment implements DateProvider, ChatsView {
 
-    private  static final String TAG = "ChatsFragment";
+    private  static final String TAG = ChatsFragment.class.getName();
 
-    private ChatsPresenter chatsPresenter;
-    private PresenterFactory<ChatsPresenter> presenterFactory = () -> new ChatsPresenterImpl();
+    private ChatsPresenter presenter;
+    private PresenterFactory<ChatsPresenter> presenterFactory = ChatsPresenterImpl::new;
+
+    @BindView(R.id.progress_loading) ProgressBar loadingBar;
+    @BindView(R.id.rv_chats) RecyclerView contactsView;
 
     private ChatAdapter chatsAdapter;
-    private RecyclerView contactsView;
     private LinearLayoutManager chatsLayoutManager;
-    private ProgressBar loadingBar;
     private Date now = new Date();
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        chatsPresenter = PresenterCache.instance().getPresenter("Chats", presenterFactory);
-        chatsPresenter.onTakeChatsView(this);
+    public void onStart() {
+        super.onStart();
+        presenter = PresenterCache.instance().getPresenter("Chats", presenterFactory);
+        presenter.attachView(this, getContext(), null);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        presenter.detachView();
+        presenter = null;
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_chats, container, false);
-        contactsView = (RecyclerView) view.findViewById(R.id.rv_chats);
-        loadingBar = (ProgressBar) view.findViewById(R.id.progress_loading);
+        ButterKnife.bind(this, view);
+
+        chatsLayoutManager = new LinearLayoutManager(getActivity());
         chatsAdapter = new ChatAdapter(getContext(), this);
         chatsAdapter.setItemClickListener(position -> {
             Chat selectedChat = chatsAdapter.getItem(position);
-            chatsPresenter.onChatClicked(selectedChat);
+            presenter.onChatClicked(selectedChat);
         });
 
         contactsView.setAdapter(this.chatsAdapter);
-        chatsLayoutManager = new LinearLayoutManager(getActivity());
         contactsView.setLayoutManager(chatsLayoutManager);
 
         return view;
@@ -66,8 +76,8 @@ public class ChatsFragment extends Fragment implements DateProvider, ChatsView {
     @Override
     public void onResume() {
         super.onResume();
+        presenter.onResume();
         now = new Date();
-        Log.d(TAG, "OnResume called");
         contactsView.scrollToPosition(0);
     }
 

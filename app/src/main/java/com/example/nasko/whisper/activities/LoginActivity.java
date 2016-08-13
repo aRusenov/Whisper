@@ -1,43 +1,43 @@
 package com.example.nasko.whisper.activities;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.nasko.whisper.R;
-import com.example.nasko.whisper.presenters.LoginPresenter;
-import com.example.nasko.whisper.presenters.LoginPresenterImpl;
 import com.example.nasko.whisper.presenters.PresenterCache;
 import com.example.nasko.whisper.presenters.PresenterFactory;
+import com.example.nasko.whisper.presenters.login.LoginPresenter;
+import com.example.nasko.whisper.presenters.login.LoginPresenterImpl;
 import com.example.nasko.whisper.views.contracts.LoginView;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class LoginActivity extends AppCompatActivity implements LoginView {
+
+    private static final String TAG = LoginActivity.class.getName();
 
     private PresenterFactory<LoginPresenter> presenterFactory = LoginPresenterImpl::new;
     private LoginPresenter loginPresenter;
 
-    private Button btnLogin;
-    private Button btnRegister;
-    private EditText editEmail;
-    private EditText editPassword;
+    @BindView(R.id.btn_login) Button btnLogin;
+    @BindView(R.id.btn_reg) Button btnRegister;
+    @BindView(R.id.edit_email) EditText editEmail;
+    @BindView(R.id.edit_password) EditText editPassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        loginPresenter = PresenterCache.instance().getPresenter("Login", presenterFactory);
-        loginPresenter.attachView(this);
-        loginPresenter.setContext(this);
-
+        ButterKnife.bind(this);
         this.getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
-
-        loadViews();
 
         this.btnLogin.setOnClickListener(v -> {
             String username = editEmail.getText().toString();
@@ -52,29 +52,24 @@ public class LoginActivity extends AppCompatActivity implements LoginView {
         });
     }
 
-    private void loadViews() {
-        this.btnRegister = (Button) this.findViewById(R.id.btn_reg);
-        this.btnLogin = (Button) this.findViewById(R.id.btn_login);
-        this.editEmail = (EditText) this.findViewById(R.id.edit_email);
-        this.editPassword = (EditText) this.findViewById(R.id.edit_password);
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d(TAG, "OnStart called");
+        loginPresenter = PresenterCache.instance().getPresenter("Login", presenterFactory);
+        loginPresenter.attachView(this, this, null);
     }
 
     @Override
-    public void navigateToContacts() {
-        Intent intent = new Intent(this, ChatsActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        this.startActivity(intent);
+    protected void onStop() {
+        Log.d(TAG, "OnStop called");
+        super.onStop();
+        loginPresenter.detachView();
     }
 
     @Override
     public void displayError(String message) {
-        Toast errorToast = Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT);
+        Toast errorToast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
         errorToast.show();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        loginPresenter.detachView();
     }
 }

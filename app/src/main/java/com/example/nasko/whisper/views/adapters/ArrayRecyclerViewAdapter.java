@@ -8,9 +8,10 @@ import com.example.nasko.whisper.views.listeners.OnItemClickListener;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
-public abstract class ArrayRecyclerViewAdapter<E, VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> {
+public abstract class ArrayRecyclerViewAdapter<E, VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> implements Iterable<E> {
 
     private Context context;
     private LayoutInflater inflater;
@@ -52,6 +53,10 @@ public abstract class ArrayRecyclerViewAdapter<E, VH extends RecyclerView.ViewHo
         return this.items.get(position);
     }
 
+    public int size() {
+        return items.size();
+    }
+
     public void add(E item) {
         this.items.add(item);
         this.notifyItemInserted(this.getItemCount());
@@ -75,5 +80,10 @@ public abstract class ArrayRecyclerViewAdapter<E, VH extends RecyclerView.ViewHo
     public void clear() {
         this.items.clear();
         this.notifyDataSetChanged();
+    }
+
+    @Override
+    public Iterator<E> iterator() {
+        return items.iterator();
     }
 }

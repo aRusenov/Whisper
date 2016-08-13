@@ -1,7 +1,6 @@
 package com.example.nasko.whisper.activities;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
@@ -13,89 +12,80 @@ import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
 
 import com.example.nasko.whisper.R;
-import com.example.nasko.whisper.models.Chat;
-import com.example.nasko.whisper.models.User;
-import com.example.nasko.whisper.presenters.ChatsPresenter;
-import com.example.nasko.whisper.presenters.ChatsPresenterImpl;
 import com.example.nasko.whisper.presenters.PresenterCache;
 import com.example.nasko.whisper.presenters.PresenterFactory;
-import com.example.nasko.whisper.utils.DateProvider;
+import com.example.nasko.whisper.presenters.chats.NavBarPresenter;
+import com.example.nasko.whisper.presenters.chats.NavBarPresenterImpl;
 import com.example.nasko.whisper.views.adapters.MenuFragmentPageAdapter;
-import com.example.nasko.whisper.views.contracts.ChatsViewNavigator;
+import com.example.nasko.whisper.views.contracts.ChatsNavBarView;
 
-import java.util.Date;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
-public class ChatsActivity extends AppCompatActivity implements DateProvider, ChatsViewNavigator {
+public class ChatsActivity extends AppCompatActivity implements ChatsNavBarView {
 
     private static final String TAG = ChatsActivity.class.getName();
     private static final int[] TAB_DRAWABLES = new int[] { R.drawable.home, R.drawable.search };
-    private static final String KEY_CHAT_EXTRA = "chat";
-    private static final String KEY_USER_EXTRA = "user";
 
-    private ChatsPresenter chatsPresenter;
-    private PresenterFactory<ChatsPresenter> presenterFactory = () -> new ChatsPresenterImpl();
+    private NavBarPresenter presenter;
+    private PresenterFactory<NavBarPresenter> presenterFactory = NavBarPresenterImpl::new;
 
-    private ViewPager viewPager;
+    @BindView(R.id.my_toolbar) Toolbar toolbar;
+    @BindView(R.id.pager) ViewPager viewPager;
+    @BindView(R.id.tabs) TabLayout tabLayout;
+
     private MenuFragmentPageAdapter pageAdapter;
-    private Date today = new Date();
-
-    private boolean isBeingDestroyed;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chats);
+        ButterKnife.bind(this);
 
-        Log.d(TAG, "Creating activity");
-        chatsPresenter = PresenterCache.instance().getPresenter("Chats", presenterFactory);
-        chatsPresenter.setContext(getApplicationContext());
-        chatsPresenter.onTakeChatsViewNavigator(this);
-        chatsPresenter.onCreate();
+        Log.d(TAG, "OnCreate");
+        presenter = PresenterCache.instance().getPresenter("ChatsNavBar", presenterFactory);
+        presenter.attachView(this, this, null);
 
         pageAdapter = new MenuFragmentPageAdapter(getSupportFragmentManager());
-        viewPager = (ViewPager) findViewById(R.id.pager);
         viewPager.setAdapter(pageAdapter);
         viewPager.setOffscreenPageLimit(2);
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-            }
-
-            @Override
             public void onPageSelected(int position) {
-                if (position == 0) {
+                if (position == 0 && getCurrentFocus() != null) {
                     // Hide keyboard if coming from ContactsSearchFragment
-                    if (getCurrentFocus() != null) {
-                        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                        inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
-                    }
+                    InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
                 }
             }
 
             @Override
-            public void onPageScrollStateChanged(int state) {
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) { }
 
-            }
+            @Override
+            public void onPageScrollStateChanged(int state) { }
         });
 
-        setToolbar();
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        setSupportActionBar(toolbar);
         tabLayout.setupWithViewPager(viewPager);
         for (int i = 0; i < TAB_DRAWABLES.length; i++) {
             tabLayout.getTabAt(i).setIcon(TAB_DRAWABLES[i]);
         }
+
+        presenter.onCreate();
     }
 
-    private void setToolbar() {
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
-        setSupportActionBar(myToolbar);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        presenter.onResume();
     }
 
     @Override
     protected void onPause() {
+        Log.d(TAG, "OnPause");
         super.onPause();
-        chatsPresenter.onPause();
+        presenter.onPause();
     }
 
     @Override
@@ -105,47 +95,17 @@ public class ChatsActivity extends AppCompatActivity implements DateProvider, Ch
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        Log.d(TAG, "Resuming activity");
-        this.today = new Date();
-        chatsPresenter.onResume();
-        isBeingDestroyed = false;
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        isBeingDestroyed = true;
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Log.d(TAG, "Destroying activity");
-        chatsPresenter.onDestroy();
-        if (isBeingDestroyed) {
-            PresenterCache.instance().removePresenter("Chats");
-        }
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_settings:
-                chatsPresenter.onSettingsClicked();
+                presenter.onSettingsClicked();
                 return true;
             case R.id.action_logout:
-                chatsPresenter.onLogout();
+                presenter.onLogoutClicked();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    @Override
-    public Date getDate() {
-        return this.today;
     }
 
     @Override
@@ -154,24 +114,9 @@ public class ChatsActivity extends AppCompatActivity implements DateProvider, Ch
     }
 
     @Override
-    public void navigateToChatroom(Chat chat, User user) {
-        Intent intent = new Intent(ChatsActivity.this, ChatroomActivity.class);
-        intent.putExtra(KEY_CHAT_EXTRA, chat);
-        intent.putExtra(KEY_USER_EXTRA, user);
-
-        startActivity(intent);
-    }
-
-    @Override
-    public void navigateToLoginScreen() {
-        Intent intent = new Intent(this, LoginActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-    }
-
-    public void navigateToProfileScreen(User user) {
-        Intent intent = new Intent(this, ProfileActivity.class);
-        intent.putExtra("user", user);
-        startActivity(intent);
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "OnPause");
+        presenter.detachView();
     }
 }

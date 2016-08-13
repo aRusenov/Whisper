@@ -16,12 +16,14 @@ import com.example.nasko.whisper.managers.ImageUrlResolver;
 import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.presenters.PresenterCache;
 import com.example.nasko.whisper.presenters.PresenterFactory;
-import com.example.nasko.whisper.presenters.ProfilePresenter;
-import com.example.nasko.whisper.presenters.ProfilePresenterImpl;
+import com.example.nasko.whisper.presenters.profile.ProfilePresenter;
+import com.example.nasko.whisper.presenters.profile.ProfilePresenterImpl;
 import com.example.nasko.whisper.views.contracts.ProfileView;
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ProfileActivity extends AppCompatActivity implements ProfileView {
@@ -29,22 +31,22 @@ public class ProfileActivity extends AppCompatActivity implements ProfileView {
     private static final String TAG = ProfileActivity.class.getName();
     private static final int GALLERY_PICK_IMAGE = 2;
 
-    private PresenterFactory<ProfilePresenter> presenterFactory = () -> new ProfilePresenterImpl();
+    private PresenterFactory<ProfilePresenter> presenterFactory = ProfilePresenterImpl::new;
     private ProfilePresenter presenter;
 
-    private CircleImageView profileImage;
-    private TextView tvUsername;
-    private TextView tvName;
-    private CoordinatorLayout coordinatorLayout;
-    private FloatingActionButton galleryFab;
-    private Toolbar toolbar;
+    @BindView(R.id.profile_image) CircleImageView profileImage;
+    @BindView(R.id.tv_username) TextView tvUsername;
+    @BindView(R.id.tv_name) TextView tvName;
+    @BindView(R.id.coordinator_layout) CoordinatorLayout coordinatorLayout;
+    @BindView(R.id.fab_pick_image) FloatingActionButton galleryFab;
+    @BindView(R.id.toolbar) Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
-        loadViews();
+        ButterKnife.bind(this);
 
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
@@ -59,18 +61,8 @@ public class ProfileActivity extends AppCompatActivity implements ProfileView {
         });
 
         presenter = PresenterCache.instance().getPresenter("Profile", presenterFactory);
-        presenter.setContext(this);
         Bundle extras = getIntent().getExtras();
-        presenter.attachView(this, extras);
-    }
-
-    private void loadViews() {
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        tvUsername = (TextView) findViewById(R.id.tv_username);
-        tvName = (TextView) findViewById(R.id.tv_name);
-        coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_layout);
-        profileImage = (CircleImageView) findViewById(R.id.profile_image);
-        galleryFab = (FloatingActionButton) findViewById(R.id.fab_pick_image);
+        presenter.attachView(this, this, extras);
     }
 
     @Override
@@ -107,5 +99,11 @@ public class ProfileActivity extends AppCompatActivity implements ProfileView {
         });
 
         snackbar.show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        presenter.detachView();
     }
 }

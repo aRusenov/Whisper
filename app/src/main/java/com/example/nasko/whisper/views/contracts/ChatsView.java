@@ -4,7 +4,7 @@ import com.example.nasko.whisper.models.Chat;
 
 import java.util.List;
 
-public interface ChatsView {
+public interface ChatsView extends View {
 
     void loadChats(List<Chat> chats);
 

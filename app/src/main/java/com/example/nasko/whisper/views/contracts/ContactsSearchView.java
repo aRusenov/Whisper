@@ -4,7 +4,7 @@ import com.example.nasko.whisper.models.Contact;
 
 import java.util.List;
 
-public interface ContactsSearchView {
+public interface ContactsSearchView extends View {
 
     void loadQueryResults(List<Contact> contacts);
 

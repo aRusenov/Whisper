@@ -8,7 +8,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,15 +15,15 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.models.Chat;
 import com.example.nasko.whisper.models.Message;
 import com.example.nasko.whisper.models.User;
-import com.example.nasko.whisper.presenters.ChatroomPresenter;
 import com.example.nasko.whisper.presenters.PresenterCache;
 import com.example.nasko.whisper.presenters.PresenterFactory;
+import com.example.nasko.whisper.presenters.chatroom.ChatroomPresenter;
+import com.example.nasko.whisper.presenters.chatroom.ChatroomPresenterImpl;
 import com.example.nasko.whisper.utils.DateFormatter;
 import com.example.nasko.whisper.utils.MessageSeparatorDateFormatter;
 import com.example.nasko.whisper.views.adapters.MessageAdapter;
@@ -34,31 +33,34 @@ import com.example.nasko.whisper.views.listeners.EndlessUpScrollListener;
 import java.util.Date;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class ChatroomFragment extends Fragment implements ChatroomView {
 
     private ChatroomPresenter presenter;
-    private PresenterFactory<ChatroomPresenter> presenterFactory;
+    private PresenterFactory<ChatroomPresenter> presenterFactory = ChatroomPresenterImpl::new;
     private DateFormatter dateFormatter;
     private User user;
     private Chat chat;
 
-    private EditText messageEdit;
+    @BindView(R.id.message_list) RecyclerView messageList;
+    @BindView(R.id.progress_loading_bar) ProgressBar loadingBar;
+    @BindView(R.id.edit_new_message) EditText messageEdit;
+    @BindView(R.id.btn_send_message) ImageButton sendButton;
+
     private LinearLayoutManager layoutManager;
-    private RecyclerView messageList;
     private EndlessUpScrollListener endlessScrollListener;
     private MessageAdapter adapter;
-    private ProgressBar loadingBar;
 
     private Date today = new Date();
-
-    public void setPresenterFactory(PresenterFactory<ChatroomPresenter> presenterFactory) {
-        this.presenterFactory = presenterFactory;
-    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         presenter = PresenterCache.instance().getPresenter("Chatroom", presenterFactory);
+        presenter.attachView(this, getContext(), getArguments());
+
         dateFormatter = new MessageSeparatorDateFormatter();
 
         chat = getArguments().getParcelable("chat");
@@ -69,15 +71,15 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_chatroom, container, false);
+        ButterKnife.bind(this, view);
 
         adapter = new MessageAdapter(getContext(), user, chat.getId());
         layoutManager = new LinearLayoutManager(getContext());
         layoutManager.setStackFromEnd(true);
-        messageList = (RecyclerView) view.findViewById(R.id.message_list);
+
         messageList.setAdapter(adapter);
         messageList.setLayoutManager(layoutManager);
 
-        loadingBar = (ProgressBar) view.findViewById(R.id.progress_loading_bar);
         loadingBar.setVisibility(View.VISIBLE);
 
         endlessScrollListener = new EndlessUpScrollListener(layoutManager) {
@@ -88,33 +90,17 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
         };
 
         messageList.addOnScrollListener(endlessScrollListener);
-
-        this.messageEdit = (EditText) view.findViewById(R.id.edit_newMessage);
-        ImageButton sendButton = (ImageButton) view.findViewById(R.id.btn_send_message);
         sendButton.setOnClickListener(v -> sendMessage());
-
-        this.messageEdit.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    sendMessage();
-                    return true;
-                }
-
-                return false;
+        this.messageEdit.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                sendMessage();
+                return true;
             }
+
+            return false;
         });
 
-        presenter.onTakeChatroomView(this, chat);
         return view;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public void setChat(Chat chat) {
-        this.chat = chat;
     }
 
     @Override
