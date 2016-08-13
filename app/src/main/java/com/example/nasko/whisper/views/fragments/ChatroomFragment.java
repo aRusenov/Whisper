@@ -20,8 +20,6 @@ import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.models.Chat;
 import com.example.nasko.whisper.models.Message;
 import com.example.nasko.whisper.models.User;
-import com.example.nasko.whisper.presenters.PresenterCache;
-import com.example.nasko.whisper.presenters.PresenterFactory;
 import com.example.nasko.whisper.presenters.chatroom.ChatroomPresenter;
 import com.example.nasko.whisper.presenters.chatroom.ChatroomPresenterImpl;
 import com.example.nasko.whisper.utils.DateFormatter;
@@ -39,15 +37,9 @@ import butterknife.ButterKnife;
 public class ChatroomFragment extends Fragment implements ChatroomView {
 
     private ChatroomPresenter presenter;
-    private PresenterFactory<ChatroomPresenter> presenterFactory = ChatroomPresenterImpl::new;
     private DateFormatter dateFormatter;
     private User user;
     private Chat chat;
-
-    @BindView(R.id.message_list) RecyclerView messageList;
-    @BindView(R.id.progress_loading_bar) ProgressBar loadingBar;
-    @BindView(R.id.edit_new_message) EditText messageEdit;
-    @BindView(R.id.btn_send_message) ImageButton sendButton;
 
     private LinearLayoutManager layoutManager;
     private EndlessUpScrollListener endlessScrollListener;
@@ -55,12 +47,14 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
 
     private Date today = new Date();
 
+    @BindView(R.id.message_list) RecyclerView messageList;
+    @BindView(R.id.progress_loading_bar) ProgressBar loadingBar;
+    @BindView(R.id.edit_new_message) EditText messageEdit;
+    @BindView(R.id.btn_send_message) ImageButton sendButton;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        presenter = PresenterCache.instance().getPresenter("Chatroom", presenterFactory);
-        presenter.attachView(this, getContext(), getArguments());
-
         dateFormatter = new MessageSeparatorDateFormatter();
 
         chat = getArguments().getParcelable("chat");
@@ -101,6 +95,32 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
         });
 
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        presenter = new ChatroomPresenterImpl();
+        presenter.attachView(this, getContext(), getArguments());
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        presenter.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        presenter.onPause();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        presenter.detachView();
+        presenter = null;
     }
 
     @Override

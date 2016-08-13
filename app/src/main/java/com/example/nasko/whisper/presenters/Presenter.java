@@ -9,10 +9,6 @@ public interface Presenter<V extends View> {
 
     void attachView(V view, Context context, Bundle extras);
 
-    void onCreate();
-
-    void onDestroy();
-
     void onPause();
 
     void onResume();

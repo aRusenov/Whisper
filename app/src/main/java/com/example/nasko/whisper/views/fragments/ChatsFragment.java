@@ -12,8 +12,6 @@ import android.widget.ProgressBar;
 
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.models.Chat;
-import com.example.nasko.whisper.presenters.PresenterCache;
-import com.example.nasko.whisper.presenters.PresenterFactory;
 import com.example.nasko.whisper.presenters.chats.ChatsPresenter;
 import com.example.nasko.whisper.presenters.chats.ChatsPresenterImpl;
 import com.example.nasko.whisper.utils.DateProvider;
@@ -31,19 +29,18 @@ public class ChatsFragment extends Fragment implements DateProvider, ChatsView {
     private  static final String TAG = ChatsFragment.class.getName();
 
     private ChatsPresenter presenter;
-    private PresenterFactory<ChatsPresenter> presenterFactory = ChatsPresenterImpl::new;
-
-    @BindView(R.id.progress_loading) ProgressBar loadingBar;
-    @BindView(R.id.rv_chats) RecyclerView contactsView;
 
     private ChatAdapter chatsAdapter;
     private LinearLayoutManager chatsLayoutManager;
     private Date now = new Date();
 
+    @BindView(R.id.progress_loading) ProgressBar loadingBar;
+    @BindView(R.id.rv_chats) RecyclerView contactsView;
+
     @Override
     public void onStart() {
         super.onStart();
-        presenter = PresenterCache.instance().getPresenter("Chats", presenterFactory);
+        presenter = new ChatsPresenterImpl();
         presenter.attachView(this, getContext(), null);
     }
 

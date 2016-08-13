@@ -2,15 +2,12 @@ package com.example.nasko.whisper.activities;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.nasko.whisper.R;
-import com.example.nasko.whisper.presenters.PresenterCache;
-import com.example.nasko.whisper.presenters.PresenterFactory;
 import com.example.nasko.whisper.presenters.login.LoginPresenter;
 import com.example.nasko.whisper.presenters.login.LoginPresenterImpl;
 import com.example.nasko.whisper.views.contracts.LoginView;
@@ -22,8 +19,7 @@ public class LoginActivity extends AppCompatActivity implements LoginView {
 
     private static final String TAG = LoginActivity.class.getName();
 
-    private PresenterFactory<LoginPresenter> presenterFactory = LoginPresenterImpl::new;
-    private LoginPresenter loginPresenter;
+    private LoginPresenter presenter;
 
     @BindView(R.id.btn_login) Button btnLogin;
     @BindView(R.id.btn_reg) Button btnRegister;
@@ -42,29 +38,28 @@ public class LoginActivity extends AppCompatActivity implements LoginView {
         this.btnLogin.setOnClickListener(v -> {
             String username = editEmail.getText().toString();
             String password = editPassword.getText().toString();
-            loginPresenter.onLoginClicked(username, password);
+            presenter.onLoginClicked(username, password);
         });
 
         this.btnRegister.setOnClickListener(v -> {
             String username = editEmail.getText().toString();
             String password = editPassword.getText().toString();
-            loginPresenter.onRegisterClicked(username, password);
+            presenter.onRegisterClicked(username, password);
         });
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        Log.d(TAG, "OnStart called");
-        loginPresenter = PresenterCache.instance().getPresenter("Login", presenterFactory);
-        loginPresenter.attachView(this, this, null);
+        presenter = new LoginPresenterImpl();
+        presenter.attachView(this, this, null);
     }
 
     @Override
     protected void onStop() {
-        Log.d(TAG, "OnStop called");
         super.onStop();
-        loginPresenter.detachView();
+        presenter.detachView();
+        presenter = null;
     }
 
     @Override

@@ -14,8 +14,6 @@ import android.widget.TextView;
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.managers.ImageUrlResolver;
 import com.example.nasko.whisper.models.User;
-import com.example.nasko.whisper.presenters.PresenterCache;
-import com.example.nasko.whisper.presenters.PresenterFactory;
 import com.example.nasko.whisper.presenters.profile.ProfilePresenter;
 import com.example.nasko.whisper.presenters.profile.ProfilePresenterImpl;
 import com.example.nasko.whisper.views.contracts.ProfileView;
@@ -31,7 +29,6 @@ public class ProfileActivity extends AppCompatActivity implements ProfileView {
     private static final String TAG = ProfileActivity.class.getName();
     private static final int GALLERY_PICK_IMAGE = 2;
 
-    private PresenterFactory<ProfilePresenter> presenterFactory = ProfilePresenterImpl::new;
     private ProfilePresenter presenter;
 
     @BindView(R.id.profile_image) CircleImageView profileImage;
@@ -59,10 +56,21 @@ public class ProfileActivity extends AppCompatActivity implements ProfileView {
             startActivityForResult(Intent.createChooser(intent,
                     "Select Picture"), GALLERY_PICK_IMAGE);
         });
+    }
 
-        presenter = PresenterCache.instance().getPresenter("Profile", presenterFactory);
+    @Override
+    protected void onStart() {
+        super.onStart();
+        presenter = new ProfilePresenterImpl();
         Bundle extras = getIntent().getExtras();
         presenter.attachView(this, this, extras);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        presenter.detachView();
+        presenter = null;
     }
 
     @Override
@@ -99,11 +107,5 @@ public class ProfileActivity extends AppCompatActivity implements ProfileView {
         });
 
         snackbar.show();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        presenter.detachView();
     }
 }

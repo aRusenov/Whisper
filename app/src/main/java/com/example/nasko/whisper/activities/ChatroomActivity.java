@@ -11,10 +11,6 @@ import android.widget.TextView;
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.models.Chat;
 import com.example.nasko.whisper.models.User;
-import com.example.nasko.whisper.presenters.chatroom.ChatroomPresenter;
-import com.example.nasko.whisper.presenters.chatroom.ChatroomPresenterImpl;
-import com.example.nasko.whisper.presenters.PresenterCache;
-import com.example.nasko.whisper.presenters.PresenterFactory;
 import com.example.nasko.whisper.views.fragments.ChatroomFragment;
 import com.squareup.picasso.Picasso;
 
@@ -22,8 +18,6 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ChatroomActivity extends AppCompatActivity {
 
-    private ChatroomPresenter presenter;
-    private PresenterFactory<ChatroomPresenter> presenterFactory = ChatroomPresenterImpl::new;
     private Chat chat;
     private User user;
 
@@ -35,8 +29,6 @@ public class ChatroomActivity extends AppCompatActivity {
         Intent intent = this.getIntent();
         chat = intent.getParcelableExtra("chat");
         user = intent.getParcelableExtra("user");
-
-        presenter = PresenterCache.instance().getPresenter("Chatroom", presenterFactory);
 
         this.getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
@@ -82,35 +74,5 @@ public class ChatroomActivity extends AppCompatActivity {
             TextView tvStatus = (TextView) myToolbar.findViewById(R.id.tv_status);
             tvStatus.setTextSize(TypedValue.COMPLEX_UNIT_PX, actionBarHeight / 4);
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        presenter.detachView();
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        presenter.onSaveInstanceState(outState);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        presenter.onRestoreInstanceState(savedInstanceState);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        presenter.onPause();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        presenter.onResume();
     }
 }

@@ -15,8 +15,6 @@ import android.widget.TextView;
 
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.models.Contact;
-import com.example.nasko.whisper.presenters.PresenterCache;
-import com.example.nasko.whisper.presenters.PresenterFactory;
 import com.example.nasko.whisper.presenters.chats.ContactsSearchPresenter;
 import com.example.nasko.whisper.presenters.chats.ContactsSearchPresenterImpl;
 import com.example.nasko.whisper.views.adapters.ContactQueryAdapter;
@@ -30,14 +28,13 @@ import butterknife.ButterKnife;
 
 public class ContactsSearchFragment extends Fragment implements ContactsSearchView {
 
-    private PresenterFactory<ContactsSearchPresenter> presenterFactory = ContactsSearchPresenterImpl::new;
     private ContactsSearchPresenter presenter;
+
+    private ContactQueryAdapter contactQueryAdapter;
 
     @BindView(R.id.edit_query) EditText editSearch;
     @BindView(R.id.rv_new_contacts) RecyclerView rvContacts;
     @BindView(R.id.tv_query_message) TextView tvQueryMessage;
-
-    private ContactQueryAdapter contactQueryAdapter;
 
     @Nullable
     @Override
@@ -85,7 +82,7 @@ public class ContactsSearchFragment extends Fragment implements ContactsSearchVi
     @Override
     public void onStart() {
         super.onStart();
-        presenter = PresenterCache.instance().getPresenter("ContactsSearch", presenterFactory);
+        presenter = new ContactsSearchPresenterImpl();
         presenter.attachView(this, getContext(), null);
     }
 
@@ -93,6 +90,7 @@ public class ContactsSearchFragment extends Fragment implements ContactsSearchVi
     public void onStop() {
         super.onStop();
         presenter.detachView();
+        presenter = null;
     }
 
     @Override

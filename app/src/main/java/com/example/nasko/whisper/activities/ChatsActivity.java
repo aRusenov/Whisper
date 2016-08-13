@@ -12,8 +12,6 @@ import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
 
 import com.example.nasko.whisper.R;
-import com.example.nasko.whisper.presenters.PresenterCache;
-import com.example.nasko.whisper.presenters.PresenterFactory;
 import com.example.nasko.whisper.presenters.chats.NavBarPresenter;
 import com.example.nasko.whisper.presenters.chats.NavBarPresenterImpl;
 import com.example.nasko.whisper.views.adapters.MenuFragmentPageAdapter;
@@ -28,23 +26,18 @@ public class ChatsActivity extends AppCompatActivity implements ChatsNavBarView 
     private static final int[] TAB_DRAWABLES = new int[] { R.drawable.home, R.drawable.search };
 
     private NavBarPresenter presenter;
-    private PresenterFactory<NavBarPresenter> presenterFactory = NavBarPresenterImpl::new;
+
+    private MenuFragmentPageAdapter pageAdapter;
 
     @BindView(R.id.my_toolbar) Toolbar toolbar;
     @BindView(R.id.pager) ViewPager viewPager;
     @BindView(R.id.tabs) TabLayout tabLayout;
-
-    private MenuFragmentPageAdapter pageAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chats);
         ButterKnife.bind(this);
-
-        Log.d(TAG, "OnCreate");
-        presenter = PresenterCache.instance().getPresenter("ChatsNavBar", presenterFactory);
-        presenter.attachView(this, this, null);
 
         pageAdapter = new MenuFragmentPageAdapter(getSupportFragmentManager());
         viewPager.setAdapter(pageAdapter);
@@ -71,8 +64,13 @@ public class ChatsActivity extends AppCompatActivity implements ChatsNavBarView 
         for (int i = 0; i < TAB_DRAWABLES.length; i++) {
             tabLayout.getTabAt(i).setIcon(TAB_DRAWABLES[i]);
         }
+    }
 
-        presenter.onCreate();
+    @Override
+    protected void onStart() {
+        super.onStart();
+        presenter = new NavBarPresenterImpl();
+        presenter.attachView(this, this, null);
     }
 
     @Override
@@ -86,6 +84,13 @@ public class ChatsActivity extends AppCompatActivity implements ChatsNavBarView 
         Log.d(TAG, "OnPause");
         super.onPause();
         presenter.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        presenter.detachView();
+        presenter = null;
     }
 
     @Override
@@ -111,12 +116,5 @@ public class ChatsActivity extends AppCompatActivity implements ChatsNavBarView 
     @Override
     public void setNetworkStatus(String message) {
         getSupportActionBar().setTitle(message);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Log.d(TAG, "OnPause");
-        presenter.detachView();
     }
 }

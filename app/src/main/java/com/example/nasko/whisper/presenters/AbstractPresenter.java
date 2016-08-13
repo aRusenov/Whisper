@@ -25,19 +25,11 @@ public abstract class AbstractPresenter<V extends View> implements Presenter<V> 
         this.context = context;
     }
 
-    public void onCreate() {
-        // Empty
-    }
-
     public void onPause() {
         // Empty
     }
 
     public void onResume() {
-        // Empty
-    }
-
-    public void onDestroy() {
         // Empty
     }
 
