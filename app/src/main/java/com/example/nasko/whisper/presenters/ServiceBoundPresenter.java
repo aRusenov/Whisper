@@ -8,12 +8,12 @@ import com.example.nasko.whisper.network.notifications.consumer.SocketServiceBin
 import com.example.nasko.whisper.network.notifications.service.SocketService;
 import com.example.nasko.whisper.views.contracts.View;
 
-public abstract class SocketServicePresenter<V extends View> extends AbstractPresenter<V> implements OnServiceBoundListener {
+public abstract class ServiceBoundPresenter<V extends View> extends AbstractPresenter<V> implements OnServiceBoundListener {
 
     protected SocketServiceBinder serviceBinder;
     protected SocketService service;
 
-    protected SocketServicePresenter(SocketServiceBinder binder) {
+    protected ServiceBoundPresenter(SocketServiceBinder binder) {
         serviceBinder = binder;
     }
 

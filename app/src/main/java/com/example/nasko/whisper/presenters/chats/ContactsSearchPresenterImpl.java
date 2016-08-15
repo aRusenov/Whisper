@@ -9,7 +9,7 @@ import com.example.nasko.whisper.models.Contact;
 import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.network.notifications.consumer.SocketServiceBinder;
 import com.example.nasko.whisper.network.notifications.service.SocketService;
-import com.example.nasko.whisper.presenters.SocketServicePresenter;
+import com.example.nasko.whisper.presenters.ServiceBoundPresenter;
 import com.example.nasko.whisper.views.contracts.ContactsSearchView;
 
 import java.util.List;
@@ -17,13 +17,11 @@ import java.util.List;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 
-public class ContactsSearchPresenterImpl extends SocketServicePresenter<ContactsSearchView> implements ContactsSearchPresenter {
+public class ContactsSearchPresenterImpl extends ServiceBoundPresenter<ContactsSearchView> implements ContactsSearchPresenter {
 
     private static final String TAG = ContactsSearchPresenterImpl.class.getName();
 
     private UserProvider userProvider;
-    private Subscription contactsQuerySub;
-    private Subscription newChatSub;
 
     private boolean hasPendingQuery;
     private String contactQuery;
@@ -42,7 +40,7 @@ public class ContactsSearchPresenterImpl extends SocketServicePresenter<Contacts
     @Override
     public void onServiceBind(SocketService service) {
         super.onServiceBind(service);
-        contactsQuerySub = service.contactsService()
+        Subscription contactsQuerySub = service.contactsService()
                 .onContactQueryResponse()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(response -> {
@@ -63,13 +61,16 @@ public class ContactsSearchPresenterImpl extends SocketServicePresenter<Contacts
                     }
                 });
 
-        newChatSub = service.contactsService()
+        Subscription newChatSub = service.contactsService()
                 .onNewChat()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(chat -> {
                     setOtherContact(chat);
                     view.markContactAsFriend(chat.getOtherContact());
                 });
+
+        subscriptions.add(contactsQuerySub);
+        subscriptions.add(newChatSub);
     }
 
     private void setOtherContact(Chat chat) {
@@ -84,14 +85,6 @@ public class ContactsSearchPresenterImpl extends SocketServicePresenter<Contacts
         }
 
         chat.setOtherContact(participants.get(i));
-    }
-
-    @Override
-    public void detachView() {
-        super.detachView();
-
-        contactsQuerySub.unsubscribe();
-        newChatSub.unsubscribe();
     }
 
     @Override
@@ -114,5 +107,11 @@ public class ContactsSearchPresenterImpl extends SocketServicePresenter<Contacts
         if (!contact.isFriend() && !contact.isUser()) {
             service.contactsService().addContact(contact.getId());
         }
+    }
+
+    @Override
+    public void detachView() {
+        super.detachView();
+        Log.d(TAG, "Presenter detached");
     }
 }

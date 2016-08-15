@@ -6,11 +6,9 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.nasko.whisper.managers.ConfigLoader;
-import com.example.nasko.whisper.models.Error;
 import com.example.nasko.whisper.models.Image;
 import com.example.nasko.whisper.models.User;
-import com.example.nasko.whisper.network.misc.JsonDeserializer;
-import com.example.nasko.whisper.network.misc.Task;
+import com.example.nasko.whisper.network.JsonDeserializer;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,6 +24,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import rx.Observable;
 
 public class HerokuUserService implements UserService {
 
@@ -51,115 +50,107 @@ public class HerokuUserService implements UserService {
     }
 
     @Override
-    public Task<User> login(String username, String password) {
-        return new Task<User>(true) {
-            @Override
-            public void execute() {
-                JSONObject loginData = new JSONObject();
-                try {
-                    loginData.put(KEY_USERNAME, username);
-                    loginData.put(KEY_PASSWORD, password);
-                } catch (JSONException e) {
-                    getErrorListener().onError(new Error(e.getMessage()));
-                }
-
-                JsonObjectRequest request = new JsonObjectRequest(loginEndpoint, loginData, response -> {
-                    try {
-                        User user = new User(
-                                response.getString("username"),
-                                response.getString("uId"),
-                                response.getString("token"));
-
-                        String imageUrl = response.getJSONObject("image").getString("url");
-                        user.setImage(new Image(imageUrl));
-
-                        getSuccessListener().onSuccess(user);
-                    } catch (JSONException e) {
-                        getErrorListener().onError(new Error(e.getMessage()));
-                    }
-                }, error -> getErrorListener().onError(new Error(error.getMessage())));
-
-                requestQueue.add(request);
+    public Observable<User> login(String username, String password) {
+        return Observable.create(subscriber -> {
+            JSONObject loginData = new JSONObject();
+            try {
+                loginData.put(KEY_USERNAME, username);
+                loginData.put(KEY_PASSWORD, password);
+            } catch (JSONException e) {
+                subscriber.onError(e);
             }
-        };
+
+            JsonObjectRequest request = new JsonObjectRequest(loginEndpoint, loginData, response -> {
+                try {
+                    User user = new User(
+                            response.getString("username"),
+                            response.getString("uId"),
+                            response.getString("token"));
+
+                    String imageUrl = response.getJSONObject("image").getString("url");
+                    user.setImage(new Image(imageUrl));
+
+                    subscriber.onNext(user);
+                    subscriber.onCompleted();
+                } catch (JSONException e) {
+                    subscriber.onError(e);
+                }
+            }, error -> subscriber.onError(error.getCause()));
+
+            requestQueue.add(request);
+        });
     }
 
     @Override
-    public Task<User> register(String username, String password) {
-        return new Task<User>(true) {
-            @Override
-            public void execute() {
-                JSONObject loginData = new JSONObject();
-                try {
-                    loginData.put("username", username);
-                    loginData.put("password", password);
-                } catch (JSONException e) {
-                    getErrorListener().onError(new Error(e.getMessage()));
-                    return;
-                }
-
-                JsonObjectRequest request = new JsonObjectRequest(registerEndpoint, loginData, response -> {
-                    try {
-                        User user = new User(
-                                response.getString("username"),
-                                response.getString("uId"),
-                                response.getString("token"));
-
-                        String imageUrl = response.getJSONObject("image").getString("url");
-                        user.setImage(new Image(imageUrl));
-
-                        getSuccessListener().onSuccess(user);
-                    } catch (JSONException e) {
-                        getErrorListener().onError(new Error(e.getMessage()));
-                    }
-                }, error -> getErrorListener().onError(new Error(error.getMessage())));
-
-                requestQueue.add(request);
+    public Observable<User> register(String username, String password) {
+        return Observable.create(subscriber -> {
+            JSONObject loginData = new JSONObject();
+            try {
+                loginData.put("username", username);
+                loginData.put("password", password);
+            } catch (JSONException e) {
+                subscriber.onError(e);
+                return;
             }
-        };
+
+            JsonObjectRequest request = new JsonObjectRequest(registerEndpoint, loginData, response -> {
+                try {
+                    User user = new User(
+                            response.getString("username"),
+                            response.getString("uId"),
+                            response.getString("token"));
+
+                    String imageUrl = response.getJSONObject("image").getString("url");
+                    user.setImage(new Image(imageUrl));
+
+                    subscriber.onNext(user);
+                    subscriber.onCompleted();
+                } catch (JSONException e) {
+                    subscriber.onError(e);
+                }
+            }, error -> subscriber.onError(error.getCause()));
+
+            requestQueue.add(request);
+        });
     }
 
     @Override
-    public Task<User> editProfile(String token, String fileName, File sourceFile) {
-        return new Task<User>(true) {
-            @Override
-            public void execute() {
-                MediaType MEDIA_TYPE_PNG = MediaType.parse("image/png");
+    public Observable<User> editProfile(String token, String fileName, File sourceFile) {
+        return Observable.create(subscriber -> {
+            MediaType MEDIA_TYPE_PNG = MediaType.parse("image/png");
 
-                RequestBody requestBody = new MultipartBody.Builder()
-                        .setType(MultipartBody.FORM)
-                        .addFormDataPart("token", token)
-                        .addFormDataPart("image", fileName, RequestBody.create(MEDIA_TYPE_PNG, sourceFile))
-                        .build();
+            RequestBody requestBody = new MultipartBody.Builder()
+                    .setType(MultipartBody.FORM)
+                    .addFormDataPart("token", token)
+                    .addFormDataPart("image", fileName, RequestBody.create(MEDIA_TYPE_PNG, sourceFile))
+                    .build();
 
-                Request request = new Request.Builder()
-                        .url(editProfileEndpoint)
-                        .post(requestBody)
-                        .build();
+            Request request = new Request.Builder()
+                    .url(editProfileEndpoint)
+                    .post(requestBody)
+                    .build();
 
-                client.newCall(request).enqueue(new Callback() {
-                    @Override
-                    public void onFailure(Call call, IOException e) {
-                        getErrorListener().onError(
-                                new Error(e.getMessage()));
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    subscriber.onError(e);
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    if (response.code() != 200) {
+                        // TODO
+                        subscriber.onError(null);
+                    } else {
+                        User user = deserializer.deserialize(response.body().string(), User.class);
+                        String relativeUrl = user.getImage().getUrl();
+                        user.getImage().setUrl(relativeUrl);
+
+                        subscriber.onNext(user);
+                        subscriber.onCompleted();
                     }
-
-                    @Override
-                    public void onResponse(Call call, Response response) throws IOException {
-                        if (response.code() != 200) {
-                            getErrorListener().onError(new Error(
-                                    response.body().string()
-                            ));
-                        } else {
-                            User user = deserializer.deserialize(response.body().string(), User.class);
-                            String relativeUrl = user.getImage().getUrl();
-                            user.getImage().setUrl(relativeUrl);
-
-                            getSuccessListener().onSuccess(user);
-                        }
-                    }
-                });
-            }
-        };
+                }
+            });
+        });
     }
 }

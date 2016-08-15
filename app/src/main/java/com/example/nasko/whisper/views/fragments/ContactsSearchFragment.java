@@ -15,8 +15,8 @@ import android.widget.TextView;
 
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.models.Contact;
-import com.example.nasko.whisper.presenters.chats.ContactsSearchPresenter;
 import com.example.nasko.whisper.presenters.chats.ContactsSearchPresenterImpl;
+import com.example.nasko.whisper.presenters.chats.ContactsSearchPresenter;
 import com.example.nasko.whisper.views.adapters.ContactQueryAdapter;
 import com.example.nasko.whisper.views.contracts.ContactsSearchView;
 
@@ -35,6 +35,13 @@ public class ContactsSearchFragment extends Fragment implements ContactsSearchVi
     @BindView(R.id.edit_query) EditText editSearch;
     @BindView(R.id.rv_new_contacts) RecyclerView rvContacts;
     @BindView(R.id.tv_query_message) TextView tvQueryMessage;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        presenter = new ContactsSearchPresenterImpl();
+        presenter.attachView(this, getContext(), null);
+    }
 
     @Nullable
     @Override
@@ -80,15 +87,8 @@ public class ContactsSearchFragment extends Fragment implements ContactsSearchVi
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        presenter = new ContactsSearchPresenterImpl();
-        presenter.attachView(this, getContext(), null);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
+    public void onDestroy() {
+        super.onDestroy();
         presenter.detachView();
         presenter = null;
     }

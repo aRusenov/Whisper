@@ -38,17 +38,10 @@ public class ChatsFragment extends Fragment implements DateProvider, ChatsView {
     @BindView(R.id.rv_chats) RecyclerView contactsView;
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         presenter = new ChatsPresenterImpl();
         presenter.attachView(this, getContext(), null);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        presenter.detachView();
-        presenter = null;
     }
 
     @Nullable
@@ -76,6 +69,13 @@ public class ChatsFragment extends Fragment implements DateProvider, ChatsView {
         presenter.onResume();
         now = new Date();
         contactsView.scrollToPosition(0);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        presenter.detachView();
+        presenter = null;
     }
 
     @Override

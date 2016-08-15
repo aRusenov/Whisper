@@ -10,7 +10,7 @@ import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.network.notifications.consumer.SocketServiceBinder;
 import com.example.nasko.whisper.network.notifications.service.SocketService;
 import com.example.nasko.whisper.presenters.Navigator;
-import com.example.nasko.whisper.presenters.SocketServicePresenter;
+import com.example.nasko.whisper.presenters.ServiceBoundPresenter;
 import com.example.nasko.whisper.views.contracts.ChatsView;
 
 import java.util.Arrays;
@@ -19,17 +19,12 @@ import java.util.List;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 
-public class ChatsPresenterImpl extends SocketServicePresenter<ChatsView> implements ChatsPresenter {
+public class ChatsPresenterImpl extends ServiceBoundPresenter<ChatsView> implements ChatsPresenter {
 
     private static final String TAG = ChatsPresenterImpl.class.getName();
 
     private UserProvider userProvider;
     private Navigator navigator;
-
-    private Subscription authSub;
-    private Subscription loadChatsSub;
-    private Subscription newChatSub;
-    private Subscription updateChatSub;
 
     public ChatsPresenterImpl() {
         this(WhisperApplication.instance().getServiceConsumer(),
@@ -50,14 +45,14 @@ public class ChatsPresenterImpl extends SocketServicePresenter<ChatsView> implem
         super.onServiceBind(service);
         service.contactsService().loadContacts();
 
-        authSub = service.connectionService()
+        Subscription authSub = service.connectionService()
                 .onAuthenticated()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(user -> {
                     service.contactsService().loadContacts();
                 });
 
-        loadChatsSub = service.contactsService()
+        Subscription loadChatsSub = service.contactsService()
                 .onLoadChats()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(chatsArr -> {
@@ -73,7 +68,7 @@ public class ChatsPresenterImpl extends SocketServicePresenter<ChatsView> implem
                     }
                 });
 
-        updateChatSub = service.contactsService()
+        Subscription updateChatSub = service.contactsService()
                 .onChatUpdate()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(chat -> {
@@ -82,25 +77,20 @@ public class ChatsPresenterImpl extends SocketServicePresenter<ChatsView> implem
                     }
                 });
 
-        newChatSub = service.contactsService()
+        Subscription newChatSub = service.contactsService()
                 .onNewChat()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(chat -> {
+                    setOtherContact(chat);
                     if (view != null) {
-                        setOtherContact(chat);
                         view.addChat(chat);
                     }
                 });
-    }
 
-    @Override
-    public void detachView() {
-        super.detachView();
-
-        authSub.unsubscribe();
-        loadChatsSub.unsubscribe();
-        newChatSub.unsubscribe();
-        updateChatSub.unsubscribe();
+        subscriptions.add(authSub);
+        subscriptions.add(loadChatsSub);
+        subscriptions.add(updateChatSub);
+        subscriptions.add(newChatSub);
     }
 
     @Override
@@ -109,14 +99,6 @@ public class ChatsPresenterImpl extends SocketServicePresenter<ChatsView> implem
                 context,
                 userProvider.getCurrentUser(),
                 clickedChat);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (service != null) {
-            service.contactsService().loadContacts();
-        }
     }
 
     private void setOtherContact(Chat chat) {
@@ -131,5 +113,11 @@ public class ChatsPresenterImpl extends SocketServicePresenter<ChatsView> implem
         }
 
         chat.setOtherContact(participants.get(i));
+    }
+
+    @Override
+    public void detachView() {
+        super.detachView();
+        Log.d(TAG, "Presenter detached");
     }
 }

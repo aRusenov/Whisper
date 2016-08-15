@@ -60,7 +60,6 @@ public class ChatroomActivity extends AppCompatActivity {
             layoutParams.height = (actionBarHeight * 3) / 4;
             layoutParams.width = (actionBarHeight * 3) / 4;
 
-            Picasso.with(this).cancelRequest(profileImage);
             Picasso.with(this)
                     .load(chat.getOtherContact().getImageUrl())
                     .placeholder(R.drawable.profile)

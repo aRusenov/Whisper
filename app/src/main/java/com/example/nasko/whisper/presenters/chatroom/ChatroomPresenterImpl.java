@@ -2,13 +2,14 @@ package com.example.nasko.whisper.presenters.chatroom;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.models.Chat;
 import com.example.nasko.whisper.models.Message;
 import com.example.nasko.whisper.network.notifications.consumer.SocketServiceBinder;
 import com.example.nasko.whisper.network.notifications.service.SocketService;
-import com.example.nasko.whisper.presenters.SocketServicePresenter;
+import com.example.nasko.whisper.presenters.ServiceBoundPresenter;
 import com.example.nasko.whisper.views.contracts.ChatroomView;
 
 import java.util.List;
@@ -16,15 +17,12 @@ import java.util.List;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 
-public class ChatroomPresenterImpl extends SocketServicePresenter<ChatroomView> implements ChatroomPresenter {
+public class ChatroomPresenterImpl extends ServiceBoundPresenter<ChatroomView> implements ChatroomPresenter {
 
+    private static final String TAG = ChatroomPresenter.class.getName();
     private static final int PAGE_SIZE = 10;
     private static final int DEFAULT_MESSAGE_SEQ = -1;
-    public static final String LAST_MESSAGE_SEQ = "lastMessageSeq";
-
-    private Subscription authSub;
-    private Subscription newMsgSub;
-    private Subscription loadMessagesSub;
+    private static final String LAST_MESSAGE_SEQ = "lastMessageSeq";
 
     private Chat chat;
     private int lastLoadedMessageSeq = DEFAULT_MESSAGE_SEQ;
@@ -51,7 +49,7 @@ public class ChatroomPresenterImpl extends SocketServicePresenter<ChatroomView> 
             loadMesages();
         }
 
-        authSub = service.connectionService()
+        Subscription authSub = service.connectionService()
                 .onAuthenticated()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(user -> {
@@ -60,7 +58,7 @@ public class ChatroomPresenterImpl extends SocketServicePresenter<ChatroomView> 
                     }
                 });
 
-        loadMessagesSub = service.messageService()
+        Subscription loadMessagesSub = service.messageService()
                 .onLoadMessages()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(response -> {
@@ -80,7 +78,7 @@ public class ChatroomPresenterImpl extends SocketServicePresenter<ChatroomView> 
                     }
                 });
 
-        newMsgSub = service.messageService()
+        Subscription newMsgSub = service.messageService()
                 .onNewMessage()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(message -> {
@@ -90,16 +88,17 @@ public class ChatroomPresenterImpl extends SocketServicePresenter<ChatroomView> 
                         }
                     }
                 });
+
+        subscriptions.add(authSub);
+        subscriptions.add(loadMessagesSub);
+        subscriptions.add(newMsgSub);
     }
 
     @Override
     public void detachView() {
         super.detachView();
+        Log.d(TAG, "Detaching presenter");
         lastLoadedMessageSeq = DEFAULT_MESSAGE_SEQ;
-
-        authSub.unsubscribe();
-        loadMessagesSub.unsubscribe();
-        newMsgSub.unsubscribe();
     }
 
     @Override

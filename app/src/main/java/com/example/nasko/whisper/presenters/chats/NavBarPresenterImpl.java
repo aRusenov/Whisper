@@ -11,23 +11,19 @@ import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.network.notifications.consumer.SocketServiceBinder;
 import com.example.nasko.whisper.network.notifications.service.SocketService;
 import com.example.nasko.whisper.presenters.Navigator;
-import com.example.nasko.whisper.presenters.SocketServicePresenter;
+import com.example.nasko.whisper.presenters.ServiceBoundPresenter;
 import com.example.nasko.whisper.views.contracts.ChatsNavBarView;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 
-public class NavBarPresenterImpl extends SocketServicePresenter<ChatsNavBarView> implements NavBarPresenter {
+public class NavBarPresenterImpl extends ServiceBoundPresenter<ChatsNavBarView> implements NavBarPresenter {
 
     private static final String TAG = NavBarPresenterImpl.class.getName();
 
     private LocalUserRepository localUserRepository;
     private UserProvider userProvider;
     private Navigator navigator;
-
-    private Subscription connectSubscription;
-    private Subscription disconnectSubscription;
-    private Subscription authenticatedSubscription;
 
     public NavBarPresenterImpl() {
         this(WhisperApplication.instance().getLocalUserRepository(),
@@ -65,7 +61,7 @@ public class NavBarPresenterImpl extends SocketServicePresenter<ChatsNavBarView>
     public void onServiceBind(SocketService service) {
         super.onServiceBind(service);
 
-        connectSubscription = service.connectionService()
+        Subscription connectSub = service.connectionService()
                 .onConnect()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(res -> {
@@ -73,7 +69,7 @@ public class NavBarPresenterImpl extends SocketServicePresenter<ChatsNavBarView>
                     view.setNetworkStatus("Authenticating...");
                 });
 
-        authenticatedSubscription = service.connectionService()
+        Subscription authSub = service.connectionService()
                 .onAuthenticated()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(res -> {
@@ -81,22 +77,17 @@ public class NavBarPresenterImpl extends SocketServicePresenter<ChatsNavBarView>
                     view.setNetworkStatus("Whisper");
                 });
 
-        disconnectSubscription = service.connectionService()
+        Subscription disconnectSub = service.connectionService()
                 .onDisconnect()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(res -> {
                     Log.d(TAG, "Disconnect");
                     view.setNetworkStatus("Connecting..");
                 });
-    }
 
-    @Override
-    public void detachView() {
-        super.detachView();
-
-        connectSubscription.unsubscribe();
-        authenticatedSubscription.unsubscribe();
-        disconnectSubscription.unsubscribe();
+        subscriptions.add(connectSub);
+        subscriptions.add(authSub);
+        subscriptions.add(disconnectSub);
     }
 
     @Override
@@ -135,5 +126,11 @@ public class NavBarPresenterImpl extends SocketServicePresenter<ChatsNavBarView>
         localUserRepository.logout();
         serviceBinder.stop(true);
         navigator.navigateToLoginScreen(context);
+    }
+
+    @Override
+    public void detachView() {
+        super.detachView();
+        Log.d(TAG, "Presenter detached");
     }
 }

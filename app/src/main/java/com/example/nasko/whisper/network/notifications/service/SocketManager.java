@@ -3,7 +3,7 @@ package com.example.nasko.whisper.network.notifications.service;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.example.nasko.whisper.network.misc.JsonDeserializer;
+import com.example.nasko.whisper.network.JsonDeserializer;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

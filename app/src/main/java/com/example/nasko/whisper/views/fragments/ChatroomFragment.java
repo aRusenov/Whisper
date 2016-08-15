@@ -28,6 +28,7 @@ import com.example.nasko.whisper.views.adapters.MessageAdapter;
 import com.example.nasko.whisper.views.contracts.ChatroomView;
 import com.example.nasko.whisper.views.listeners.EndlessUpScrollListener;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -59,6 +60,13 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
 
         chat = getArguments().getParcelable("chat");
         user = getArguments().getParcelable("user");
+
+        presenter = new ChatroomPresenterImpl();
+        if (savedInstanceState != null) {
+            presenter.onRestoreInstanceState(savedInstanceState);
+        }
+
+        presenter.attachView(this, getContext(), getArguments());
     }
 
     @Nullable
@@ -67,14 +75,19 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
         View view = inflater.inflate(R.layout.fragment_chatroom, container, false);
         ButterKnife.bind(this, view);
 
+        loadingBar.setVisibility(View.VISIBLE);
         adapter = new MessageAdapter(getContext(), user, chat.getId());
+        if (savedInstanceState != null) {
+            ArrayList<Message> messages = savedInstanceState.getParcelableArrayList("messages");
+            adapter.addAll(messages);
+            loadingBar.setVisibility(View.INVISIBLE);
+        }
+
         layoutManager = new LinearLayoutManager(getContext());
         layoutManager.setStackFromEnd(true);
 
         messageList.setAdapter(adapter);
         messageList.setLayoutManager(layoutManager);
-
-        loadingBar.setVisibility(View.VISIBLE);
 
         endlessScrollListener = new EndlessUpScrollListener(layoutManager) {
             @Override
@@ -98,13 +111,6 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        presenter = new ChatroomPresenterImpl();
-        presenter.attachView(this, getContext(), getArguments());
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
         presenter.onResume();
@@ -117,8 +123,20 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        presenter.onSaveInstanceState(outState);
+        ArrayList<Message> savedMessages = new ArrayList<>();
+        for (Message msg : adapter) {
+            savedMessages.add(msg);
+        }
+
+        outState.putParcelableArrayList("messages", savedMessages);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
         presenter.detachView();
         presenter = null;
     }

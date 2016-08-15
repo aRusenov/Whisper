@@ -5,10 +5,17 @@ import android.os.Bundle;
 
 import com.example.nasko.whisper.views.contracts.View;
 
+import rx.subscriptions.CompositeSubscription;
+
 public abstract class AbstractPresenter<V extends View> implements Presenter<V> {
 
     protected V view;
     protected Context context;
+    protected CompositeSubscription subscriptions;
+
+    public AbstractPresenter() {
+        subscriptions = new CompositeSubscription();
+    }
 
     @Override
     public void attachView(V view, Context context, Bundle extras) {
@@ -46,5 +53,6 @@ public abstract class AbstractPresenter<V extends View> implements Presenter<V> 
     public void detachView() {
         view = null;
         context = null;
+        subscriptions.unsubscribe();
     }
 }

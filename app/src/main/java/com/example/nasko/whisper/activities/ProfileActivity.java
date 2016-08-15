@@ -30,6 +30,7 @@ public class ProfileActivity extends AppCompatActivity implements ProfileView {
     private static final int GALLERY_PICK_IMAGE = 2;
 
     private ProfilePresenter presenter;
+    private Uri galleryPickedImageUri;
 
     @BindView(R.id.profile_image) CircleImageView profileImage;
     @BindView(R.id.tv_username) TextView tvUsername;
@@ -56,30 +57,34 @@ public class ProfileActivity extends AppCompatActivity implements ProfileView {
             startActivityForResult(Intent.createChooser(intent,
                     "Select Picture"), GALLERY_PICK_IMAGE);
         });
-    }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
         presenter = new ProfilePresenterImpl();
         Bundle extras = getIntent().getExtras();
         presenter.attachView(this, this, extras);
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-        presenter.detachView();
-        presenter = null;
-    }
-
-    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == GALLERY_PICK_IMAGE && resultCode == RESULT_OK) {
-            Uri imageUri = data.getData();
-            presenter.onImagePickedFromGallery(imageUri);
+            galleryPickedImageUri = data.getData();
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (galleryPickedImageUri != null) {
+            presenter.onImagePickedFromGallery(galleryPickedImageUri);
+            galleryPickedImageUri = null;
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        presenter.detachView();
+        presenter = null;
     }
 
     @Override

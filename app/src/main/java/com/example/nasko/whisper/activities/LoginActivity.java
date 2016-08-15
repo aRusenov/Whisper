@@ -46,18 +46,14 @@ public class LoginActivity extends AppCompatActivity implements LoginView {
             String password = editPassword.getText().toString();
             presenter.onRegisterClicked(username, password);
         });
-    }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
         presenter = new LoginPresenterImpl();
         presenter.attachView(this, this, null);
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onDestroy() {
+        super.onDestroy();
         presenter.detachView();
         presenter = null;
     }
