@@ -2,7 +2,6 @@ package com.example.nasko.whisper.views.listeners;
 
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 
 public abstract class EndlessUpScrollListener extends RecyclerView.OnScrollListener {
 
@@ -40,9 +39,8 @@ public abstract class EndlessUpScrollListener extends RecyclerView.OnScrollListe
         }
 
         // If it's no longer loading and the threshold is reached -> load more data
-        if (!loading && itemsAboveFirstVisibleItem - loadThreshold <= 0) {
+        if (!loading && itemsAboveFirstVisibleItem <= loadThreshold) {
             loading = true;
-            Log.v("LOADING", "Loading fresh messages");
             onLoadMore();
         }
     }
