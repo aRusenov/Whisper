@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.example.nasko.whisper.WhisperApplication;
+import com.example.nasko.whisper.managers.MessageNotificationController;
 import com.example.nasko.whisper.models.Chat;
 import com.example.nasko.whisper.models.Message;
 import com.example.nasko.whisper.network.notifications.consumer.SocketServiceBinder;
@@ -28,17 +29,22 @@ public class ChatroomPresenterImpl extends ServiceBoundPresenter<ChatroomView> i
     private int lastLoadedMessageSeq = DEFAULT_MESSAGE_SEQ;
     private boolean loadingMessages;
 
-    public ChatroomPresenterImpl(SocketServiceBinder serviceBinder) {
+    private MessageNotificationController notificationController;
+
+    public ChatroomPresenterImpl(SocketServiceBinder serviceBinder, MessageNotificationController notificationController) {
         super(serviceBinder);
+        this.notificationController = notificationController;
     }
 
     public ChatroomPresenterImpl() {
-        this(WhisperApplication.instance().getServiceConsumer());
+        this(WhisperApplication.instance().getServiceConsumer(),
+                WhisperApplication.instance().getNotificationController());
     }
 
     @Override
     public void attachView(ChatroomView view, Context context, Bundle extras) {
         chat = extras.getParcelable("chat");
+        notificationController.removeNotification(chat.getOtherContact().getId());
         super.attachView(view, context, extras);
     }
 

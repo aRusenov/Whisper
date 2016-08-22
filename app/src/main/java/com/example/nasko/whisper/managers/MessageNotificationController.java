@@ -1,5 +1,6 @@
 package com.example.nasko.whisper.managers;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -15,10 +16,10 @@ import com.example.nasko.whisper.activities.ChatroomActivity;
 import com.example.nasko.whisper.models.Chat;
 import com.example.nasko.whisper.models.Message;
 
-public class MessageNotificationController {
+public class MessageNotificationController implements NotificationDismissedListener {
 
+    private NotificationDismissedReceiver notificationDismissedReceiver;
     private UserProvider userProvider;
-
     private Context context;
     private NotificationManager notificationManager;
     private Uri alarmSound;
@@ -32,6 +33,9 @@ public class MessageNotificationController {
         notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         contactsNotificationIds = new SimpleArrayMap<>();
+
+        notificationDismissedReceiver = new NotificationDismissedReceiver(context, this);
+        notificationDismissedReceiver.start();
     }
 
     public void createMessageNotification(Message message) {
@@ -42,19 +46,17 @@ public class MessageNotificationController {
             contactsNotificationIds.put(contactId, notificationId);
         }
 
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(context)
-                        .setSmallIcon(R.drawable.profile)
-                        .setContentTitle(message.getAuthor().getUsername())
-                        .setContentText(message.getText());
-
-        mBuilder.setSound(alarmSound);
-
         Chat chat = new Chat();
         chat.setId(message.getChatId());
         chat.setOtherContact(message.getAuthor());
 
-        // Creates an explicit intent for an Activity in your app
+        Notification notification = buildNotification(message, chat, notificationId);
+
+        notificationManager.notify(notificationId, notification);
+    }
+
+    private Notification buildNotification(Message message, Chat chat, int notificationId) {
+        // Add intent extras
         Intent chatroomLaunchIntent = new Intent(context, ChatroomActivity.class);
         chatroomLaunchIntent.putExtra("chat", chat);
         chatroomLaunchIntent.putExtra("user", userProvider.getCurrentUser());
@@ -69,8 +71,38 @@ public class MessageNotificationController {
                         PendingIntent.FLAG_UPDATE_CURRENT
                 );
 
-        mBuilder.setContentIntent(resultPendingIntent);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
+                .setSmallIcon(R.drawable.profile)
+                .setContentTitle(message.getAuthor().getUsername())
+                .setContentText(message.getText())
+                .setSound(alarmSound)
+                .setAutoCancel(true)
+                .setContentIntent(resultPendingIntent)
+                .setDeleteIntent(createOnDismissedIntent(chat.getOtherContact().getId(), notificationId));
 
-        notificationManager.notify(notificationId, mBuilder.build());
+        return builder.build();
+    }
+
+    private PendingIntent createOnDismissedIntent(String contactId, int notificationId) {
+        Intent intent = new Intent(NotificationDismissedReceiver.ACTION_DISMISSED);
+        intent.putExtra(NotificationDismissedReceiver.EXTRA_CONTACT_ID, contactId);
+
+        return PendingIntent.getBroadcast(
+                context.getApplicationContext(),
+                notificationId,
+                intent,
+                0);
+    }
+
+    @Override
+    public void onNotificationDismissed(String contactId) {
+        removeNotification(contactId);
+    }
+
+    public void removeNotification(String contactId) {
+        Integer notificationId = contactsNotificationIds.remove(contactId);
+        if (notificationId != null) {
+            notificationManager.cancel(notificationId);
+        }
     }
 }
