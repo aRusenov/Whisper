@@ -11,8 +11,9 @@ import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
 import com.example.nasko.whisper.R;
+import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.managers.ConfigLoader;
-import com.example.nasko.whisper.managers.NotificationController;
+import com.example.nasko.whisper.managers.MessageNotificationController;
 import com.example.nasko.whisper.models.Message;
 
 import java.net.URISyntaxException;
@@ -32,7 +33,7 @@ public class BackgroundSocketService extends Service implements SocketService {
     private static final String TAG = BackgroundSocketService.class.getName();
 
     private final IBinder binder = new LocalBinder();
-    private NotificationController notificationController;
+    private MessageNotificationController notificationController;
     private NetworkStateReceiver networkStateReceiver;
 
     private ConnectionService connectionService;
@@ -63,7 +64,7 @@ public class BackgroundSocketService extends Service implements SocketService {
         messagesService = new HerokuMessagesService(socketManager);
         setOwnSocketListeners();
 
-        notificationController = new NotificationController(this);
+        notificationController = WhisperApplication.instance().getNotificationController();
         networkStateReceiver = new NetworkStateReceiver(this) {
             @Override
             public void onNetworkConnected() {
@@ -86,6 +87,7 @@ public class BackgroundSocketService extends Service implements SocketService {
         subscriptions = new ArrayList<>();
         Subscription connectSub = socketManager.on(HerokuConnectionService.EVENT_CONNECT, Object.class)
                 .subscribe(o -> {
+                    Log.d(TAG, "Connected");
                     if (token != null) {
                         connectionService.authenticate(token);
                     }

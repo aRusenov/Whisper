@@ -6,6 +6,7 @@ import com.example.nasko.whisper.managers.AppUserProvider;
 import com.example.nasko.whisper.managers.ConfigLoader;
 import com.example.nasko.whisper.managers.ImageUrlResolver;
 import com.example.nasko.whisper.managers.LocalUserRepository;
+import com.example.nasko.whisper.managers.MessageNotificationController;
 import com.example.nasko.whisper.managers.UserProvider;
 import com.example.nasko.whisper.network.notifications.consumer.SocketServiceBinder;
 import com.example.nasko.whisper.network.rest.HerokuUserService;
@@ -19,6 +20,7 @@ public class WhisperApplication extends Application {
     private SocketServiceBinder serviceConsumer;
     private Navigator navigator;
     private LocalUserRepository localUserRepository;
+    private MessageNotificationController notificationController;
 
     private static WhisperApplication instance;
 
@@ -36,6 +38,7 @@ public class WhisperApplication extends Application {
         userService = new HerokuUserService(getApplicationContext());
         serviceConsumer = new SocketServiceBinder(getApplicationContext());
         userProvider = new AppUserProvider();
+        notificationController = new MessageNotificationController(userProvider, getApplicationContext());
         ImageUrlResolver.setEndpoint(
                 ConfigLoader.getConfigValue(this, "api_images")
         );
@@ -59,5 +62,9 @@ public class WhisperApplication extends Application {
 
     public SocketServiceBinder getServiceConsumer() {
         return serviceConsumer;
+    }
+
+    public MessageNotificationController getNotificationController() {
+        return notificationController;
     }
 }

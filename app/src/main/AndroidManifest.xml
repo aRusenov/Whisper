@@ -22,7 +22,13 @@
             </intent-filter>
         </activity>
         <activity android:name=".activities.LoginActivity" />
-        <activity android:name=".activities.ChatroomActivity" />
+        <activity
+            android:name=".activities.ChatroomActivity"
+            android:parentActivityName=".activities.ChatsActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activities.ChatsActivity"/>
+        </activity>
 
         <service
             android:name=".network.notifications.service.BackgroundSocketService"
