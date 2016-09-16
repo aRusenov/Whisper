@@ -8,8 +8,8 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.example.nasko.whisper.models.Message;
 import com.example.nasko.whisper.R;
+import com.example.nasko.whisper.models.Message;
 import com.example.nasko.whisper.models.User;
 
 import java.util.Date;

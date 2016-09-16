@@ -1,11 +1,13 @@
 package com.example.nasko.whisper.activities;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
@@ -33,8 +35,22 @@ public class ChatsActivity extends AppCompatActivity implements ChatsNavBarView 
     @BindView(R.id.tabs) TabLayout tabLayout;
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        Log.d(TAG, "New intent");
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Intent intent = getIntent();
+        if (intent.hasExtra("open_chatroom")) {
+            Intent launchIntent = new Intent(this, ChatroomActivity.class);
+            launchIntent.putExtras(intent.getExtras());
+            startActivity(launchIntent);
+            finish();
+        }
+
         setContentView(R.layout.activity_chats);
         ButterKnife.bind(this);
 
@@ -63,13 +79,15 @@ public class ChatsActivity extends AppCompatActivity implements ChatsNavBarView 
         for (int i = 0; i < TAB_DRAWABLES.length; i++) {
             tabLayout.getTabAt(i).setIcon(TAB_DRAWABLES[i]);
         }
+
+        presenter = new NavBarPresenterImpl();
+        presenter.attachView(this, this, getIntent().getExtras());
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        presenter = new NavBarPresenterImpl();
-        presenter.attachView(this, this, null);
+
     }
 
     @Override
@@ -87,6 +105,12 @@ public class ChatsActivity extends AppCompatActivity implements ChatsNavBarView 
     @Override
     protected void onStop() {
         super.onStop();
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
         presenter.detachView();
         presenter = null;
     }

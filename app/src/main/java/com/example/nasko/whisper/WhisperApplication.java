@@ -17,7 +17,7 @@ public class WhisperApplication extends Application {
 
     private UserProvider userProvider;
     private UserService userService;
-    private SocketServiceBinder serviceConsumer;
+    private SocketServiceBinder serviceBinder;
     private Navigator navigator;
     private LocalUserRepository localUserRepository;
     private MessageNotificationController notificationController;
@@ -36,7 +36,7 @@ public class WhisperApplication extends Application {
         navigator = new Navigator();
         localUserRepository = new LocalUserRepository(getApplicationContext());
         userService = new HerokuUserService(getApplicationContext());
-        serviceConsumer = new SocketServiceBinder(getApplicationContext());
+        serviceBinder = new SocketServiceBinder(getApplicationContext());
         userProvider = new AppUserProvider();
         notificationController = new MessageNotificationController(userProvider, getApplicationContext());
         ImageUrlResolver.setEndpoint(
@@ -60,8 +60,8 @@ public class WhisperApplication extends Application {
         return userService;
     }
 
-    public SocketServiceBinder getServiceConsumer() {
-        return serviceConsumer;
+    public SocketServiceBinder getServiceBinder() {
+        return serviceBinder;
     }
 
     public MessageNotificationController getNotificationController() {

@@ -13,7 +13,7 @@ import com.example.nasko.whisper.network.notifications.service.SocketService;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SocketServiceBinder {
+public class SocketServiceBinder implements AppStateChecker.AppBackgroundListener {
 
     private static final String TAG = SocketServiceBinder.class.getName();
 
@@ -21,6 +21,8 @@ public class SocketServiceBinder {
     private boolean isBound;
     private BackgroundSocketService service;
     private List<OnServiceBoundListener> serviceBoundListeners;
+    private AppStateChecker appStateChecker;
+    private String token;
 
     private ServiceConnection connection = new ServiceConnection() {
         @Override
@@ -43,7 +45,11 @@ public class SocketServiceBinder {
 
     public SocketServiceBinder(Context context) {
         this.context = context;
-        this.serviceBoundListeners = new ArrayList<>();
+        serviceBoundListeners = new ArrayList<>();
+
+        appStateChecker = new AppStateChecker();
+        appStateChecker.setAppInBackgroundListener(this);
+        appStateChecker.start();
     }
 
     public boolean isBound() {
@@ -65,6 +71,7 @@ public class SocketServiceBinder {
     public void start(String token) {
         if (!isBound) {
             Intent intent = new Intent("START_SERVICE");
+            this.token = token;
             intent.putExtra("token", token);
             intent.setPackage(context.getPackageName());
             context.bindService(intent, connection, context.BIND_AUTO_CREATE);
@@ -92,13 +99,19 @@ public class SocketServiceBinder {
     }
 
     public void resume() {
-        if (service != null) {
+        if (service == null) {
+            if (token != null) {
+                start(token);
+            }
+        } else {
             service.resume();
+            appStateChecker.onResume();
         }
     }
 
     public void pause() {
         if (service != null) {
+            appStateChecker.onPause();
             service.pause();
         }
     }
@@ -113,5 +126,11 @@ public class SocketServiceBinder {
         for (OnServiceBoundListener listener : serviceBoundListeners) {
             listener.onServiceUnbind();
         }
+    }
+
+    @Override
+    public void onAppInBackground() {
+        Log.d(TAG, "App is in background -> stopping socket service");
+        stop(true);
     }
 }

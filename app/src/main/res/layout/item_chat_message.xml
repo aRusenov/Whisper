@@ -8,15 +8,17 @@
         android:id="@+id/label_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone">
+        android:visibility="gone"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp">
 
         <TextView
             android:id="@+id/tv_label"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Yesterday"
-            android:textSize="20sp"
-            android:textColor="#000"
+            android:textSize="15sp"
+            android:textColor="#616161"
             android:gravity="center_horizontal"/>
 
     </RelativeLayout>

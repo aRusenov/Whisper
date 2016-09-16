@@ -37,7 +37,7 @@ public class ChatroomPresenterImpl extends ServiceBoundPresenter<ChatroomView> i
     }
 
     public ChatroomPresenterImpl() {
-        this(WhisperApplication.instance().getServiceConsumer(),
+        this(WhisperApplication.instance().getServiceBinder(),
                 WhisperApplication.instance().getNotificationController());
     }
 

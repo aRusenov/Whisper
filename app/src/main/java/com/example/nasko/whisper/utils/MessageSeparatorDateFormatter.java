@@ -9,7 +9,7 @@ public class MessageSeparatorDateFormatter implements DateFormatter {
 
     private static final String YESTERDAY_FORMAT = "Yesterday";
     private static final DateFormat WEEKDAY_FORMAT = new SimpleDateFormat("E d-M", Locale.US);
-    private static final DateFormat MONTHLY_FORMAT = new SimpleDateFormat("d M", Locale.US);
+    private static final DateFormat MONTHLY_FORMAT = new SimpleDateFormat("d MMMM", Locale.US);
     private static final int TO_DAYS_DENOMINATOR = 24 * 60 * 60 * 1000;
 
     public String getStringFormat(Date now, Date other) {

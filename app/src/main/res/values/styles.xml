@@ -12,4 +12,8 @@
 
     <style name="PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="ToolbarStyle">
+        <item name="android:textColorSecondary">#fff</item>
+    </style>
+
 </resources>

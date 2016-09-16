@@ -12,6 +12,7 @@ import com.example.nasko.whisper.network.notifications.service.SocketService;
 import com.example.nasko.whisper.presenters.Navigator;
 import com.example.nasko.whisper.presenters.ServiceBoundPresenter;
 import com.example.nasko.whisper.views.contracts.ChatsView;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.Arrays;
 import java.util.List;
@@ -27,7 +28,7 @@ public class ChatsPresenterImpl extends ServiceBoundPresenter<ChatsView> impleme
     private Navigator navigator;
 
     public ChatsPresenterImpl() {
-        this(WhisperApplication.instance().getServiceConsumer(),
+        this(WhisperApplication.instance().getServiceBinder(),
                 WhisperApplication.instance().getUserProvider(),
                 WhisperApplication.instance().getNavigator());
     }
@@ -38,6 +39,7 @@ public class ChatsPresenterImpl extends ServiceBoundPresenter<ChatsView> impleme
         super(serviceBinder);
         this.userProvider = userProvider;
         this.navigator = navigator;
+        FirebaseMessaging.getInstance().subscribeToTopic("chats");
     }
 
     @Override

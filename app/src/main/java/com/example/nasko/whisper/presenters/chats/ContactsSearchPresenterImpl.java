@@ -27,7 +27,7 @@ public class ContactsSearchPresenterImpl extends ServiceBoundPresenter<ContactsS
     private String contactQuery;
 
     public ContactsSearchPresenterImpl() {
-        this(WhisperApplication.instance().getServiceConsumer(),
+        this(WhisperApplication.instance().getServiceBinder(),
                 WhisperApplication.instance().getUserProvider());
     }
 

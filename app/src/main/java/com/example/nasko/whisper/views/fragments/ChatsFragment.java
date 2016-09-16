@@ -17,6 +17,7 @@ import com.example.nasko.whisper.presenters.chats.ChatsPresenterImpl;
 import com.example.nasko.whisper.utils.DateProvider;
 import com.example.nasko.whisper.views.adapters.ChatAdapter;
 import com.example.nasko.whisper.views.contracts.ChatsView;
+import com.example.nasko.whisper.views.misc.DividerItemDecoration;
 
 import java.util.Date;
 import java.util.List;
@@ -59,6 +60,7 @@ public class ChatsFragment extends Fragment implements DateProvider, ChatsView {
 
         contactsView.setAdapter(this.chatsAdapter);
         contactsView.setLayoutManager(chatsLayoutManager);
+        contactsView.addItemDecoration(new DividerItemDecoration(getContext()));
 
         return view;
     }

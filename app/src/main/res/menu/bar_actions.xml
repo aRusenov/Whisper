@@ -17,11 +17,11 @@
     <item android:id="@+id/action_settings"
         android:icon="@drawable/settings"
         android:title="@string/action_settings"
-        app:showAsAction="ifRoom|collapseActionView"/>
+        app:showAsAction="never"/>
 
     <item android:id="@+id/action_logout"
         android:icon="@drawable/logout"
         android:title="@string/action_logout"
-        app:showAsAction="ifRoom|collapseActionView"/>
+        app:showAsAction="never"/>
 
 </menu>

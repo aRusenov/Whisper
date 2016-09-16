@@ -14,13 +14,11 @@ import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.managers.ConfigLoader;
 import com.example.nasko.whisper.managers.MessageNotificationController;
-import com.example.nasko.whisper.models.Message;
 
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
 
 import rx.Subscription;
+import rx.subscriptions.CompositeSubscription;
 
 public class BackgroundSocketService extends Service implements SocketService {
 
@@ -40,7 +38,7 @@ public class BackgroundSocketService extends Service implements SocketService {
     private MessagesService messagesService;
     private ContactsService contactsService;
 
-    private List<Subscription> subscriptions;
+    private CompositeSubscription subscriptions;
 
     private SocketManager socketManager;
     private String token;
@@ -80,11 +78,10 @@ public class BackgroundSocketService extends Service implements SocketService {
         };
 
         networkStateReceiver.start();
-        startServiceInForeground();
     }
 
     private void setOwnSocketListeners() {
-        subscriptions = new ArrayList<>();
+        subscriptions = new CompositeSubscription();
         Subscription connectSub = socketManager.on(HerokuConnectionService.EVENT_CONNECT, Object.class)
                 .subscribe(o -> {
                     Log.d(TAG, "Connected");
@@ -100,16 +97,15 @@ public class BackgroundSocketService extends Service implements SocketService {
                     }
                 });
 
-        Subscription newMsgSub = socketManager.on(HerokuMessagesService.EVENT_NEW_MESSAGE, Message.class)
-                .subscribe(message -> {
-                    if (isPaused) {
-                        notificationController.createMessageNotification(message);
-                    }
-                });
+//        Subscription newMsgSub = socketManager.on(HerokuMessagesService.EVENT_NEW_MESSAGE, Message.class)
+//                .subscribe(message -> {
+//                    if (isPaused) {
+//                        notificationController.createMessageNotification(message);
+//                    }
+//                });
 
         subscriptions.add(connectSub);
         subscriptions.add(disconnectSub);
-        subscriptions.add(newMsgSub);
     }
 
     public void onBind() {
@@ -157,9 +153,6 @@ public class BackgroundSocketService extends Service implements SocketService {
 
     public void pause() {
         isPaused = true;
-        if (networkStateReceiver.isConnected() && !socketManager.connected()) {
-            reconnect();
-        }
     }
 
     public void resume() {
@@ -185,20 +178,18 @@ public class BackgroundSocketService extends Service implements SocketService {
             reconnect();
         }
 
-        return START_REDELIVER_INTENT;
+        return START_NOT_STICKY;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        for (Subscription sub : subscriptions) {
-            sub.unsubscribe();
-        }
+        subscriptions.unsubscribe();
 
         socketManager.disconnect();
         networkStateReceiver.stop();
-        isClosing = true;
 
+        isClosing = true;
         Log.d(TAG, "Service destroyed");
     }
 }
