@@ -7,5 +7,5 @@ public interface ChatroomPresenter extends Presenter<ChatroomView> {
 
     void onMessageSend(String text);
 
-    void onScrollToTop();
+    boolean onScrollToTop();
 }

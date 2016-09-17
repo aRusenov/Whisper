@@ -77,6 +77,11 @@ public abstract class ArrayRecyclerViewAdapter<E, VH extends RecyclerView.ViewHo
         this.notifyItemRangeInserted(position   , elements.size());
     }
 
+    public void removeAt(int position) {
+        this.items.remove(position);
+        this.notifyItemRemoved(0);
+    }
+
     public void clear() {
         this.items.clear();
         this.notifyDataSetChanged();

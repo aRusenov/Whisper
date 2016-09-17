@@ -114,14 +114,17 @@ public class ChatroomPresenterImpl extends ServiceBoundPresenter<ChatroomView> i
     }
 
     @Override
-    public void onScrollToTop() {
+    public boolean onScrollToTop() {
         if (lastLoadedMessageSeq == 0) {
-            return;
+            return false;
         }
 
         if (!loadingMessages) {
             loadMesages();
+            return true;
         }
+
+        return false;
     }
 
     @Override

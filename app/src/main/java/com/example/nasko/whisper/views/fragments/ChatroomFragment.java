@@ -18,7 +18,9 @@ import android.widget.ProgressBar;
 
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.models.Chat;
+import com.example.nasko.whisper.models.LoadingData;
 import com.example.nasko.whisper.models.Message;
+import com.example.nasko.whisper.models.MessageSeparator;
 import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.presenters.chatroom.ChatroomPresenter;
 import com.example.nasko.whisper.presenters.chatroom.ChatroomPresenterImpl;
@@ -29,7 +31,6 @@ import com.example.nasko.whisper.views.contracts.ChatroomView;
 import com.example.nasko.whisper.views.listeners.EndlessUpScrollListener;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
@@ -45,8 +46,6 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
     private LinearLayoutManager layoutManager;
     private EndlessUpScrollListener endlessScrollListener;
     private MessageAdapter adapter;
-
-    private Date today = new Date();
 
     @BindView(R.id.message_list) RecyclerView messageList;
     @BindView(R.id.progress_loading_bar) ProgressBar loadingBar;
@@ -79,7 +78,9 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
         adapter = new MessageAdapter(getContext(), user, chat.getId());
         if (savedInstanceState != null) {
             ArrayList<Message> messages = savedInstanceState.getParcelableArrayList("messages");
-            adapter.addAll(messages);
+            for (Object msg : messages) {
+                adapter.add(msg);
+            }
             loadingBar.setVisibility(View.INVISIBLE);
         }
 
@@ -92,7 +93,10 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
         endlessScrollListener = new EndlessUpScrollListener(layoutManager) {
             @Override
             public void onLoadMore() {
-                presenter.onScrollToTop();
+                boolean loading = presenter.onScrollToTop();
+                if (loading) {
+                    adapter.add(0, new LoadingData());
+                }
             }
         };
 
@@ -127,8 +131,10 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
         super.onSaveInstanceState(outState);
         presenter.onSaveInstanceState(outState);
         ArrayList<Message> savedMessages = new ArrayList<>();
-        for (Message msg : adapter) {
-            savedMessages.add(msg);
+        for (Object msg : adapter) {
+            if (msg instanceof Message) {
+                savedMessages.add((Message) msg);
+            }
         }
 
         outState.putParcelableArrayList("messages", savedMessages);
@@ -144,14 +150,27 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
     @Override
     public void loadMessages(List<Message> messages) {
         loadingBar.setVisibility(View.INVISIBLE);
+        if (adapter.size() > 0 && adapter.getItem(0) instanceof LoadingData) {
+            adapter.removeAt(0);
+        }
 
         if (messages.isEmpty()) {
             return;
         }
 
-        addTimeLabels(messages);
         // Insert messages at top
-        adapter.addAllAt(0, messages);
+        adapter.add(0, messages.get(messages.size() - 1));
+        for (int i = messages.size() - 2; i >= 0; i--) {
+            Message prev = messages.get(i + 1);
+            Message current = messages.get(i);
+            // If message is posted on different date than previous -> add a dummy message as separator
+            if (prev.getCreatedAt().getDay() != current.getCreatedAt().getDay()) {
+                String dateString = dateFormatter.getStringFormat(getContext(), current.getCreatedAt());
+                adapter.add(0, new MessageSeparator(dateString));
+            }
+
+            adapter.add(0, current);
+        }
 
         // Maintain scroll position
         int index = layoutManager.findFirstVisibleItemPosition() + messages.size();
@@ -191,16 +210,16 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
         }
     }
 
-    private void addTimeLabels(List<Message> messages) {
-        for (int i = messages.size() - 2; i >= 0; i--) {
-            Message prev = messages.get(i + 1);
-            Message current = messages.get(i);
-            // If message is posted on different date than previous -> add a dummy message as separator
-            if (prev.getCreatedAt().getDay() != current.getCreatedAt().getDay()) {
-                String dateString = dateFormatter.getStringFormat(getContext(), current.getCreatedAt());
-                Message label = Message.createDummy(dateString);
-                messages.add(i + 1, label);
-            }
-        }
-    }
+//    private void addTimeLabels(List<Object> messages) {
+//        for (int i = messages.size() - 2; i >= 0; i--) {
+//            Message prev = messages.get(i + 1);
+//            Message current = messages.get(i);
+//            // If message is posted on different date than previous -> add a dummy message as separator
+//            if (prev.getCreatedAt().getDay() != current.getCreatedAt().getDay()) {
+//                String dateString = dateFormatter.getStringFormat(getContext(), current.getCreatedAt());
+//                Message label = Message.createDummy(dateString);
+//                messages.add(i + 1, label);
+//            }
+//        }
+//    }
 }
