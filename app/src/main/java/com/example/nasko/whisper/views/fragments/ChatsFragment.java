@@ -14,10 +14,9 @@ import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.models.Chat;
 import com.example.nasko.whisper.presenters.chats.ChatsPresenter;
 import com.example.nasko.whisper.presenters.chats.ChatsPresenterImpl;
-import com.example.nasko.whisper.utils.DateProvider;
+import com.example.nasko.whisper.utils.LastMessageDateFormatter;
 import com.example.nasko.whisper.views.adapters.ChatAdapter;
 import com.example.nasko.whisper.views.contracts.ChatsView;
-import com.example.nasko.whisper.views.misc.DividerItemDecoration;
 
 import java.util.Date;
 import java.util.List;
@@ -25,7 +24,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class ChatsFragment extends Fragment implements DateProvider, ChatsView {
+public class ChatsFragment extends Fragment implements ChatsView {
 
     private  static final String TAG = ChatsFragment.class.getName();
 
@@ -52,7 +51,7 @@ public class ChatsFragment extends Fragment implements DateProvider, ChatsView {
         ButterKnife.bind(this, view);
 
         chatsLayoutManager = new LinearLayoutManager(getActivity());
-        chatsAdapter = new ChatAdapter(getContext(), this);
+        chatsAdapter = new ChatAdapter(getContext(), new LastMessageDateFormatter());
         chatsAdapter.setItemClickListener(position -> {
             Chat selectedChat = chatsAdapter.getItem(position);
             presenter.onChatClicked(selectedChat);
@@ -60,7 +59,7 @@ public class ChatsFragment extends Fragment implements DateProvider, ChatsView {
 
         contactsView.setAdapter(this.chatsAdapter);
         contactsView.setLayoutManager(chatsLayoutManager);
-        contactsView.addItemDecoration(new DividerItemDecoration(getContext()));
+//        contactsView.addItemDecoration(new DividerItemDecoration(getContext()));
 
         return view;
     }
@@ -78,11 +77,6 @@ public class ChatsFragment extends Fragment implements DateProvider, ChatsView {
         super.onDestroy();
         presenter.detachView();
         presenter = null;
-    }
-
-    @Override
-    public Date getDate() {
-        return this.now;
     }
 
     @Override
@@ -107,5 +101,17 @@ public class ChatsFragment extends Fragment implements DateProvider, ChatsView {
     @Override
     public void clearChats() {
         chatsAdapter.clear();
+    }
+
+    @Override
+    public void setChatStatus(String chatId, boolean online) {
+        for (int i = 0; i < chatsAdapter.size(); i++) {
+            Chat chat = chatsAdapter.getItem(i);
+            if (chat.getId().equals(chatId)) {
+                chat.getOtherContact().setOnline(online);
+                chatsAdapter.update(chat);
+                break;
+            }
+        }
     }
 }

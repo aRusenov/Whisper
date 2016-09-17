@@ -16,6 +16,8 @@ public class Contact implements Parcelable {
     @JsonProperty("isFriend")
     private boolean isFriend;
     private boolean isUser;
+    @JsonProperty("online")
+    private boolean isOnline;
 
     public Contact() { }
 
@@ -56,6 +58,14 @@ public class Contact implements Parcelable {
         this.id = id;
     }
 
+    public boolean isOnline() {
+        return isOnline;
+    }
+
+    public void setOnline(boolean online) {
+        isOnline = online;
+    }
+
     public Image getImage() {
         return image;
     }
@@ -94,6 +104,7 @@ public class Contact implements Parcelable {
         id = in.readString();
         image = in.readParcelable(Image.class.getClassLoader());
         isFriend = in.readByte() != 0;
+        isOnline = in.readByte() != 0;
     }
 
     public static final Creator<Contact> CREATOR = new Creator<Contact>() {
@@ -120,5 +131,6 @@ public class Contact implements Parcelable {
         dest.writeString(id);
         dest.writeParcelable(image, flags);
         dest.writeByte((byte) (isFriend ? 1 : 0));
+        dest.writeByte((byte) (isOnline? 1 : 0));
     }
 }

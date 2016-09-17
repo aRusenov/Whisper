@@ -13,4 +13,6 @@ public interface ChatsView extends View {
     void updateChat(Chat chat);
 
     void clearChats();
+
+    void setChatStatus(String chatId, boolean online);
 }

@@ -20,6 +20,7 @@ public class FcmListenerService extends FirebaseMessagingService {
     public void onCreate() {
         super.onCreate();
         notificationController = WhisperApplication.instance().getNotificationController();
+        userProvider = WhisperApplication.instance().getUserProvider();
         deserializer = new JsonDeserializer();
     }
 

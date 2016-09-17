@@ -4,17 +4,14 @@ import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.models.Chat;
-import com.example.nasko.whisper.utils.DateProvider;
+import com.example.nasko.whisper.utils.DateFormatter;
 import com.example.nasko.whisper.views.listeners.OnItemClickListener;
 import com.squareup.picasso.Picasso;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -26,6 +23,7 @@ public class ChatAdapter extends ArrayRecyclerViewAdapter<Chat, ChatAdapter.Chat
         TextView msgDate;
         TextView lastMessage;
         CircleImageView profileImg;
+        ImageView statusImg;
 
         ChatViewHolder(View itemView) {
             super(itemView);
@@ -33,6 +31,7 @@ public class ChatAdapter extends ArrayRecyclerViewAdapter<Chat, ChatAdapter.Chat
             this.contactName = (TextView) itemView.findViewById(R.id.tv_contact_name);
             this.lastMessage = (TextView) itemView.findViewById(R.id.last_message);
             this.profileImg = (CircleImageView) itemView.findViewById(R.id.profile_image);
+            this.statusImg = (ImageView) itemView.findViewById(R.id.status_image);
 
             itemView.setOnClickListener(v -> {
                 OnItemClickListener listener1 = getItemClickListener();
@@ -43,14 +42,11 @@ public class ChatAdapter extends ArrayRecyclerViewAdapter<Chat, ChatAdapter.Chat
         }
     }
 
-    private static final DateFormat WEEKDAY_FORMAT = new SimpleDateFormat("E");
-    private static final DateFormat MONTHLY_FORMAT = new SimpleDateFormat("W d");
+    private DateFormatter dateFormatter;
 
-    private DateProvider dateProvider;
-
-    public ChatAdapter(Context context, DateProvider dateProvider) {
+    public ChatAdapter(Context context, DateFormatter dateFormatter) {
         super(context);
-        this.dateProvider = dateProvider;
+        this.dateFormatter = dateFormatter;
     }
 
     @Override
@@ -63,7 +59,7 @@ public class ChatAdapter extends ArrayRecyclerViewAdapter<Chat, ChatAdapter.Chat
     public void onBindViewHolder(ChatViewHolder holder, int position) {
         Chat chat = this.items.get(position);
 
-        String dateText = getDisplayDate(chat.getLastMessage().getCreatedAt());
+        String dateText = dateFormatter.getStringFormat(getContext(), chat.getLastMessage().getCreatedAt());
         holder.msgDate.setText(dateText);
         String name = chat.getOtherContact().getName();
         if (name == null) {
@@ -73,22 +69,14 @@ public class ChatAdapter extends ArrayRecyclerViewAdapter<Chat, ChatAdapter.Chat
         holder.contactName.setText(name);
         holder.lastMessage.setText(chat.getLastMessage().getText());
 
+        int statusRes = chat.getOtherContact().isOnline() ? R.drawable.circle_green : R.drawable.circle_gray;
+        holder.statusImg.setImageResource(statusRes);
+
         Picasso picasso = Picasso.with(getContext());
         picasso.setIndicatorsEnabled(true);
         picasso.load(chat.getOtherContact().getImageUrl())
                 .placeholder(R.drawable.blank_pic)
                 .into(holder.profileImg);
-    }
-
-    private String getDisplayDate(Date date) {
-        Date today = this.dateProvider.getDate();
-        if (today.getDay() == date.getDay()) {
-            return String.format("%02d:%02d", date.getHours(), date.getMinutes());
-        } else if (today.getDay() - date.getDay() <= 6) {
-            return WEEKDAY_FORMAT.format(date);
-        } else {
-            return MONTHLY_FORMAT.format(date);
-        }
     }
 
     public void update(Chat chat) {

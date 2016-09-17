@@ -197,7 +197,7 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
             Message current = messages.get(i);
             // If message is posted on different date than previous -> add a dummy message as separator
             if (prev.getCreatedAt().getDay() != current.getCreatedAt().getDay()) {
-                String dateString = dateFormatter.getStringFormat(today, current.getCreatedAt());
+                String dateString = dateFormatter.getStringFormat(getContext(), current.getCreatedAt());
                 Message label = Message.createDummy(dateString);
                 messages.add(i + 1, label);
             }

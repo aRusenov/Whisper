@@ -2,6 +2,7 @@ package com.example.nasko.whisper.network.notifications.service;
 
 import com.example.nasko.whisper.models.Chat;
 import com.example.nasko.whisper.models.ContactQueryResponse;
+import com.example.nasko.whisper.models.ContactStateChange;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,6 +38,14 @@ public class HerokuContactsService implements ContactsService {
 
     public Observable<Chat> onChatUpdate() {
         return socketManager.on(EVENT_CONTACT_UPDATE, Chat.class);
+    }
+
+    public Observable<ContactStateChange> onUserOnline() {
+        return socketManager.on("online", ContactStateChange.class);
+    }
+
+    public Observable<ContactStateChange> onUserOffline() {
+        return socketManager.on("offline", ContactStateChange.class);
     }
 
     public Observable<ContactQueryResponse> onContactQueryResponse() {

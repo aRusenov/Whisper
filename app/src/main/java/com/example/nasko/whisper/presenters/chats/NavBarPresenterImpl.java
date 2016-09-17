@@ -7,8 +7,6 @@ import android.util.Log;
 import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.managers.LocalUserRepository;
 import com.example.nasko.whisper.managers.UserProvider;
-import com.example.nasko.whisper.models.Chat;
-import com.example.nasko.whisper.models.Message;
 import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.network.JsonDeserializer;
 import com.example.nasko.whisper.network.notifications.consumer.SocketServiceBinder;
@@ -16,8 +14,6 @@ import com.example.nasko.whisper.network.notifications.service.SocketService;
 import com.example.nasko.whisper.presenters.Navigator;
 import com.example.nasko.whisper.presenters.ServiceBoundPresenter;
 import com.example.nasko.whisper.views.contracts.ChatsNavBarView;
-
-import java.io.IOException;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -60,19 +56,6 @@ public class NavBarPresenterImpl extends ServiceBoundPresenter<ChatsNavBarView> 
             }
 
             userProvider.setCurrentUser(loggedUser);
-        }
-
-        if (extras != null && extras.getString("action") != null) {
-            try {
-                Message message = deserializer.deserialize(extras.getString("payload"), Message.class);
-                Chat chat = new Chat();
-                chat.setId(message.getChatId());
-                chat.setOtherContact(message.getAuthor());
-                Log.d(TAG, "Came here from notification click -> navigating to chatroom " + chat.getId());
-                navigator.navigateToChatroom(context, userProvider.getCurrentUser(), chat);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
     }
 

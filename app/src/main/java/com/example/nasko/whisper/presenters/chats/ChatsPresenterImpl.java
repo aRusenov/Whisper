@@ -89,10 +89,31 @@ public class ChatsPresenterImpl extends ServiceBoundPresenter<ChatsView> impleme
                     }
                 });
 
+        Subscription userOnlineSub = service.contactsService()
+                .onUserOnline()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(stateChange -> {
+                    if (view != null) {
+                        view.setChatStatus(stateChange.getChatId(), true);
+                    }
+                });
+
+        Subscription userOfflineSub = service.contactsService()
+                .onUserOffline()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(stateChange -> {
+//                    Log.d(TAG, stateChange.getUsername() + " went offline..");
+                    if (view != null) {
+                        view.setChatStatus(stateChange.getChatId(), false);
+                    }
+                });
+
         subscriptions.add(authSub);
         subscriptions.add(loadChatsSub);
         subscriptions.add(updateChatSub);
         subscriptions.add(newChatSub);
+        subscriptions.add(userOnlineSub);
+        subscriptions.add(userOfflineSub);
     }
 
     @Override

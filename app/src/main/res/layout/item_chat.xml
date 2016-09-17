@@ -3,29 +3,45 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="5dp">
+    android:layout_marginBottom="10dp">
 
-    <de.hdodenhof.circleimageview.CircleImageView
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/profile_image"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:src="@drawable/profile"
-        app:civ_border_width="1dp"
-        app:civ_border_color="#DFDFDF"
-        android:layout_margin="5dp"/>
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/profile_image"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/profile"
+            app:civ_border_width="1dp"
+            app:civ_border_color="#DFDFDF"
+            android:layout_margin="5dp"/>
+
+        <ImageView
+            android:id="@+id/status_image"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:src="@drawable/circle_green"
+            android:layout_gravity="bottom|right"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="10dp"/>
+
+    </FrameLayout>
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_weight="4">
+        android:layout_weight="4"
+        android:layout_gravity="center_vertical">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Gosho"
-            android:textSize="25sp"
+            android:textSize="22sp"
             android:textColor="#000"
             android:maxLines="1"
             android:ellipsize="end"
@@ -35,7 +51,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/last_message"
-            android:textSize="20sp"
+            android:textSize="17sp"
             android:maxLines="1"
             android:ellipsize="end"
             android:scrollHorizontally="false"
@@ -43,15 +59,22 @@
 
     </LinearLayout>
 
-    <TextView
-        android:layout_width="0dp"
+    <LinearLayout
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/message_date"
-        android:textSize="20sp"
-        android:text="Jun 22"
-        android:gravity="right"
-        android:layout_marginEnd="5dp"
-        android:layout_marginRight="5dp"
-        android:layout_weight="2" />
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:id="@+id/message_date"
+            android:textSize="15sp"
+            android:text="Jun 22"
+            android:gravity="right"
+            android:layout_marginEnd="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_weight="2" />
+
+    </LinearLayout>
 
 </LinearLayout>

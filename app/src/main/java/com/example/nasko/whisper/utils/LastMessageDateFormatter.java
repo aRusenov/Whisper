@@ -5,14 +5,15 @@ import android.text.format.DateUtils;
 
 import java.util.Date;
 
-public class MessageSeparatorDateFormatter implements DateFormatter {
+public class LastMessageDateFormatter implements DateFormatter {
 
+    private long nowMillis = new Date().getTime();
+
+    @Override
     public String getStringFormat(Context context, Date date) {
-        return (String) DateUtils.getRelativeDateTimeString(
-                context,
+        return (String) DateUtils.getRelativeTimeSpanString(
                 date.getTime(),
-                DateUtils.MINUTE_IN_MILLIS,
-                DateUtils.WEEK_IN_MILLIS,
+                new Date().getTime(),
                 0);
     }
 }

@@ -1,13 +1,11 @@
 package com.example.nasko.whisper.activities;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
@@ -35,22 +33,8 @@ public class ChatsActivity extends AppCompatActivity implements ChatsNavBarView 
     @BindView(R.id.tabs) TabLayout tabLayout;
 
     @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        Log.d(TAG, "New intent");
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Intent intent = getIntent();
-        if (intent.hasExtra("open_chatroom")) {
-            Intent launchIntent = new Intent(this, ChatroomActivity.class);
-            launchIntent.putExtras(intent.getExtras());
-            startActivity(launchIntent);
-            finish();
-        }
-
         setContentView(R.layout.activity_chats);
         ButterKnife.bind(this);
 
@@ -85,12 +69,6 @@ public class ChatsActivity extends AppCompatActivity implements ChatsNavBarView 
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
         presenter.onResume();
@@ -100,12 +78,6 @@ public class ChatsActivity extends AppCompatActivity implements ChatsNavBarView 
     protected void onPause() {
         super.onPause();
         presenter.onPause();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-
     }
 
     @Override
