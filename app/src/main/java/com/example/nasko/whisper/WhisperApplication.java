@@ -1,7 +1,9 @@
 package com.example.nasko.whisper;
 
 import android.app.Application;
+import android.util.Log;
 
+import com.example.nasko.whisper.managers.AppState;
 import com.example.nasko.whisper.managers.AppUserProvider;
 import com.example.nasko.whisper.managers.ConfigLoader;
 import com.example.nasko.whisper.managers.ImageUrlResolver;
@@ -15,6 +17,7 @@ import com.example.nasko.whisper.presenters.Navigator;
 
 public class WhisperApplication extends Application {
 
+    private AppState appState;
     private UserProvider userProvider;
     private UserService userService;
     private SocketServiceBinder serviceBinder;
@@ -31,8 +34,10 @@ public class WhisperApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.d("WhisperApp", "OnCreate");
         instance = this;
 
+        appState = new AppState();
         navigator = new Navigator();
         localUserRepository = new LocalUserRepository(getApplicationContext());
         userService = new HerokuUserService(getApplicationContext());
@@ -66,5 +71,9 @@ public class WhisperApplication extends Application {
 
     public MessageNotificationController getNotificationController() {
         return notificationController;
+    }
+
+    public AppState getAppState() {
+        return appState;
     }
 }

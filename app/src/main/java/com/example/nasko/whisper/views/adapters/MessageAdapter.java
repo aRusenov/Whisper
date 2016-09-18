@@ -10,6 +10,7 @@ import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.models.LoadingData;
 import com.example.nasko.whisper.models.Message;
 import com.example.nasko.whisper.models.MessageSeparator;
+import com.example.nasko.whisper.models.TypingEvent;
 import com.example.nasko.whisper.models.User;
 
 import java.util.Date;
@@ -50,11 +51,11 @@ public class MessageAdapter extends ArrayRecyclerViewAdapter<Object, RecyclerVie
 
     class TypingViewHolder extends RecyclerView.ViewHolder {
 
-        @BindView(R.id.tv_timestamp) TextView tvTimestamp;
+        @BindView(R.id.tv_label) TextView tvLabel;
 
         public TypingViewHolder(View itemView) {
             super(itemView);
-            ButterKnife.bind(itemView);
+            ButterKnife.bind(this, itemView);
         }
     }
 
@@ -76,6 +77,8 @@ public class MessageAdapter extends ArrayRecyclerViewAdapter<Object, RecyclerVie
             return 1;
         } else if (item instanceof LoadingData) {
             return 2;
+        } else if (item instanceof TypingEvent) {
+            return 3;
         } else {
             throw new IllegalArgumentException("MessageAdapter does not support type " + item.getClass().getName());
         }
@@ -95,6 +98,10 @@ public class MessageAdapter extends ArrayRecyclerViewAdapter<Object, RecyclerVie
             case 2: {
                 View view = this.getInflater().inflate(R.layout.item_message_loading, parent, false);
                 return new LoadingViewHolder(view);
+            }
+            case 3: {
+                View view = this.getInflater().inflate(R.layout.item_message_typing, parent, false);
+                return new TypingViewHolder(view);
             }
             default:
                 throw new UnsupportedOperationException("View type " + viewType + " not supported");
@@ -129,6 +136,13 @@ public class MessageAdapter extends ArrayRecyclerViewAdapter<Object, RecyclerVie
             }
             case 2: {
                 // Nothing
+                break;
+            }
+            case 3: {
+                TypingEvent typingEvent = (TypingEvent) getItem(position);
+                TypingViewHolder holder = (TypingViewHolder) absHolder;
+
+                holder.tvLabel.setText(typingEvent.getUsername() + " is typing...");
                 break;
             }
             default:

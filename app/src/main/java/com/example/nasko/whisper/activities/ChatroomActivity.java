@@ -2,7 +2,6 @@ package com.example.nasko.whisper.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
 import android.view.WindowManager;
@@ -20,7 +19,7 @@ import com.example.nasko.whisper.views.fragments.ChatroomFragment;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class ChatroomActivity extends AppCompatActivity implements ChatroomNavBarView {
+public class ChatroomActivity extends BaseActivity implements ChatroomNavBarView {
 
     private Chat chat;
     private User user;

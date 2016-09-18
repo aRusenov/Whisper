@@ -39,6 +39,18 @@ public abstract class ServiceBoundPresenter<V extends View> extends AbstractPres
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        serviceBinder.resume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        serviceBinder.pause();
+    }
+
+    @Override
     public void detachView() {
         super.detachView();
         service = null;

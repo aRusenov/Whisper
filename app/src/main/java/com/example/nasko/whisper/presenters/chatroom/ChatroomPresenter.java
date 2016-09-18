@@ -8,4 +8,8 @@ public interface ChatroomPresenter extends Presenter<ChatroomView> {
     void onMessageSend(String text);
 
     boolean onScrollToTop();
+
+    void onStartTyping();
+
+    void onStopTyping();
 }

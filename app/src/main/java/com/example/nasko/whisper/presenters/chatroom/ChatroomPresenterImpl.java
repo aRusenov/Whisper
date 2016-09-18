@@ -6,8 +6,10 @@ import android.util.Log;
 
 import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.managers.MessageNotificationController;
+import com.example.nasko.whisper.managers.UserProvider;
 import com.example.nasko.whisper.models.Chat;
 import com.example.nasko.whisper.models.Message;
+import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.network.notifications.consumer.SocketServiceBinder;
 import com.example.nasko.whisper.network.notifications.service.SocketService;
 import com.example.nasko.whisper.presenters.ServiceBoundPresenter;
@@ -30,15 +32,18 @@ public class ChatroomPresenterImpl extends ServiceBoundPresenter<ChatroomView> i
     private boolean loadingMessages;
 
     private MessageNotificationController notificationController;
+    private UserProvider userProvider;
 
-    public ChatroomPresenterImpl(SocketServiceBinder serviceBinder, MessageNotificationController notificationController) {
+    public ChatroomPresenterImpl(SocketServiceBinder serviceBinder, MessageNotificationController notificationController, UserProvider userProvider) {
         super(serviceBinder);
         this.notificationController = notificationController;
+        this.userProvider = userProvider;
     }
 
     public ChatroomPresenterImpl() {
         this(WhisperApplication.instance().getServiceBinder(),
-                WhisperApplication.instance().getNotificationController());
+                WhisperApplication.instance().getNotificationController(),
+                WhisperApplication.instance().getUserProvider());
     }
 
     @Override
@@ -95,9 +100,29 @@ public class ChatroomPresenterImpl extends ServiceBoundPresenter<ChatroomView> i
                     }
                 });
 
+        Subscription startTypingSub = service.messageService()
+                .onStartTyping()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(typingEvent -> {
+                    if (typingEvent.getChatId().equals(chat.getId()) && view != null) {
+                        view.displayTypingStarted(typingEvent);
+                    }
+                });
+
+        Subscription stopTypingSub = service.messageService()
+                .onStopTyping()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(typingEvent -> {
+                    if (typingEvent.getChatId().equals(chat.getId()) && view != null) {
+                        view.displayTypingStopped(typingEvent);
+                    }
+                });
+
         subscriptions.add(authSub);
         subscriptions.add(loadMessagesSub);
         subscriptions.add(newMsgSub);
+        subscriptions.add(startTypingSub);
+        subscriptions.add(stopTypingSub);
     }
 
     @Override
@@ -128,6 +153,20 @@ public class ChatroomPresenterImpl extends ServiceBoundPresenter<ChatroomView> i
     }
 
     @Override
+    public void onStartTyping() {
+        if (service != null) {
+            service.messageService().startTyping(chat.getId(), userProvider.getCurrentUser().getUsername());
+        }
+    }
+
+    @Override
+    public void onStopTyping() {
+        if (service != null) {
+            service.messageService().stopTyping(chat.getId(), userProvider.getCurrentUser().getUsername());
+        }
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outBundle) {
         outBundle.putInt(LAST_MESSAGE_SEQ, lastLoadedMessageSeq);
     }
@@ -140,15 +179,16 @@ public class ChatroomPresenterImpl extends ServiceBoundPresenter<ChatroomView> i
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        serviceBinder.pause();
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
-        serviceBinder.resume();
+
+        User currentUser = userProvider.getCurrentUser();
+        if (currentUser == null) {
+            return;
+        }
+        if (service == null) {
+            serviceBinder.start(currentUser.getSessionToken());
+        }
     }
 
     private void loadMesages() {

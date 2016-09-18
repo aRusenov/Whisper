@@ -2,6 +2,7 @@ package com.example.nasko.whisper.network.notifications.service;
 
 import com.example.nasko.whisper.models.Message;
 import com.example.nasko.whisper.models.MessagesQueryResponse;
+import com.example.nasko.whisper.models.TypingEvent;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,6 +33,35 @@ public class HerokuMessagesService implements MessagesService {
     @Override
     public Observable<Message> onNewMessage() {
         return socketManager.on(EVENT_NEW_MESSAGE, Message.class);
+    }
+
+    // TODO: Extract constants
+    // TODO: possibly refactor entire module lol
+    public Observable<TypingEvent> onStartTyping() {
+        return socketManager.on("start typing", TypingEvent.class);
+    }
+
+    public Observable<TypingEvent> onStopTyping() {
+        return socketManager.on("stop typing", TypingEvent.class);
+    }
+
+    public void startTyping(String chatId, String username) {
+        emitTyping(chatId, username, "start typing");
+    }
+
+    public void stopTyping(String chatId, String username) {
+        emitTyping(chatId, username, "stop typing");
+    }
+
+    private void emitTyping(String chatId, String username, String event) {
+        JSONObject data = new JSONObject();
+        try {
+            data.put("chatId", chatId);
+            data.put("username", username);
+            socketManager.emit(event, data);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

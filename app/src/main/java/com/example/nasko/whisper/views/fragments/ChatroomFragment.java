@@ -8,6 +8,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +23,7 @@ import com.example.nasko.whisper.models.Chat;
 import com.example.nasko.whisper.models.LoadingData;
 import com.example.nasko.whisper.models.Message;
 import com.example.nasko.whisper.models.MessageSeparator;
+import com.example.nasko.whisper.models.TypingEvent;
 import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.presenters.chatroom.ChatroomPresenter;
 import com.example.nasko.whisper.presenters.chatroom.ChatroomPresenterImpl;
@@ -46,6 +49,8 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
     private LinearLayoutManager layoutManager;
     private EndlessUpScrollListener endlessScrollListener;
     private MessageAdapter adapter;
+
+    private boolean isTyping;
 
     @BindView(R.id.message_list) RecyclerView messageList;
     @BindView(R.id.progress_loading_bar) ProgressBar loadingBar;
@@ -102,13 +107,36 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
 
         messageList.addOnScrollListener(endlessScrollListener);
         sendButton.setOnClickListener(v -> sendMessage());
-        this.messageEdit.setOnEditorActionListener((v, actionId, event) -> {
+        messageEdit.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 sendMessage();
                 return true;
             }
 
             return false;
+        });
+
+        messageEdit.setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus && isTyping) {
+                stopTyping();
+            }
+        });
+
+        messageEdit.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.length() > 0 && !isTyping) {
+                    startTyping();
+                } else if (s.length() == 0 && isTyping) {
+                    stopTyping();
+                }
+            }
         });
 
         return view;
@@ -149,6 +177,7 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
 
     @Override
     public void loadMessages(List<Message> messages) {
+        // TODO: Remove and use empty view
         loadingBar.setVisibility(View.INVISIBLE);
         if (adapter.size() > 0 && adapter.getItem(0) instanceof LoadingData) {
             adapter.removeAt(0);
@@ -158,29 +187,47 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
             return;
         }
 
-        // Insert messages at top
-        adapter.add(0, messages.get(messages.size() - 1));
-        for (int i = messages.size() - 2; i >= 0; i--) {
-            Message prev = messages.get(i + 1);
+        // Add timestamps if necessary
+        List<Object> newItems = new ArrayList<>(messages.size() + 5);
+        newItems.add(messages.get(0));
+        for (int i = 1; i < messages.size(); i++) {
+            Message prev = messages.get(i - 1);
             Message current = messages.get(i);
-            // If message is posted on different date than previous -> add a dummy message as separator
+            // If message is posted on different date than previous -> add a timestamp
             if (prev.getCreatedAt().getDay() != current.getCreatedAt().getDay()) {
                 String dateString = dateFormatter.getStringFormat(getContext(), current.getCreatedAt());
-                adapter.add(0, new MessageSeparator(dateString));
+                newItems.add(new MessageSeparator(dateString));
             }
 
-            adapter.add(0, current);
+            newItems.add(current);
         }
 
+        // Insert items at top
+        adapter.addAllAt(0, newItems);
+
         // Maintain scroll position
-        int index = layoutManager.findFirstVisibleItemPosition() + messages.size();
+        int index = layoutManager.findFirstVisibleItemPosition() + newItems.size();
         messageList.scrollToPosition(index);
     }
 
-    private void playNewMessageSound() {
-        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        Ringtone r = RingtoneManager.getRingtone(getContext(), notification);
-        r.play();
+    @Override
+    public void displayTypingStarted(TypingEvent typingEvent) {
+        boolean scrollToBottom = isLastItemVisible();
+        adapter.add(typingEvent);
+        if (scrollToBottom) {
+            scrollToPosition(adapter.getItemCount() - 1);
+        }
+    }
+
+    @Override
+    public void displayTypingStopped(TypingEvent typingEvent) {
+        if (adapter.last() instanceof TypingEvent) {
+            boolean scrollToBottom = isLastItemVisible();
+            adapter.removeAt(adapter.size() - 1);
+            if (scrollToBottom) {
+                scrollToPosition(adapter.getItemCount() - 1);
+            }
+        }
     }
 
     private void sendMessage() {
@@ -199,27 +246,42 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
             return;
         }
 
-        int lastVisible = layoutManager.findLastCompletelyVisibleItemPosition();
-        boolean scrollToBottom = lastVisible == adapter.getItemCount() - 1;
-        adapter.add(message);
+        int insertPosition = adapter.size();
+        if (adapter.last() instanceof TypingEvent) {
+            insertPosition--;
+        }
 
-        if (scrollToBottom) {
-            messageList.getLayoutManager().scrollToPosition(adapter.getItemCount() - 1);
-        } else if (! user.getUId().equals(message.getAuthor().getId())) {
+        boolean scroll = isLastItemVisible();
+        adapter.add(insertPosition, message);
+        if (scroll) {
+            scrollToPosition(adapter.getItemCount() - 1);
+        } else if (!user.getUId().equals(message.getAuthor().getId())) {
             playNewMessageSound();
         }
     }
 
-//    private void addTimeLabels(List<Object> messages) {
-//        for (int i = messages.size() - 2; i >= 0; i--) {
-//            Message prev = messages.get(i + 1);
-//            Message current = messages.get(i);
-//            // If message is posted on different date than previous -> add a dummy message as separator
-//            if (prev.getCreatedAt().getDay() != current.getCreatedAt().getDay()) {
-//                String dateString = dateFormatter.getStringFormat(getContext(), current.getCreatedAt());
-//                Message label = Message.createDummy(dateString);
-//                messages.add(i + 1, label);
-//            }
-//        }
-//    }
+    private void stopTyping() {
+        isTyping = false;
+        presenter.onStopTyping();
+    }
+
+    private void startTyping() {
+        isTyping = true;
+        presenter.onStartTyping();
+    }
+
+    private boolean isLastItemVisible() {
+        int lastVisible = layoutManager.findLastCompletelyVisibleItemPosition();
+        return lastVisible == adapter.getItemCount() - 1;
+    }
+
+    private void scrollToPosition(int position) {
+        messageList.getLayoutManager().scrollToPosition(position);
+    }
+
+    private void playNewMessageSound() {
+        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        Ringtone r = RingtoneManager.getRingtone(getContext(), notification);
+        r.play();
+    }
 }

@@ -94,8 +94,8 @@ public class NavBarPresenterImpl extends ServiceBoundPresenter<ChatsNavBarView> 
 
     @Override
     public void onResume() {
+        super.onResume();
         User currentUser = userProvider.getCurrentUser();
-        serviceBinder.resume();
         if (currentUser == null) {
             return;
         }
@@ -103,11 +103,6 @@ public class NavBarPresenterImpl extends ServiceBoundPresenter<ChatsNavBarView> 
         if (service == null) {
             serviceBinder.start(currentUser.getSessionToken());
         }
-    }
-
-    @Override
-    public void onPause() {
-        serviceBinder.pause();
     }
 
     @Override

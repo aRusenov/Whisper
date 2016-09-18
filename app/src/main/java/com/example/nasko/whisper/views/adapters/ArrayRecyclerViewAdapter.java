@@ -79,12 +79,16 @@ public abstract class ArrayRecyclerViewAdapter<E, VH extends RecyclerView.ViewHo
 
     public void removeAt(int position) {
         this.items.remove(position);
-        this.notifyItemRemoved(0);
+        this.notifyItemRemoved(position);
     }
 
     public void clear() {
         this.items.clear();
         this.notifyDataSetChanged();
+    }
+
+    public E last() {
+        return items.get(items.size() - 1);
     }
 
     @Override

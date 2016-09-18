@@ -1,7 +1,6 @@
 package com.example.nasko.whisper.activities;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,7 +14,7 @@ import com.example.nasko.whisper.views.contracts.LoginView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class LoginActivity extends AppCompatActivity implements LoginView {
+public class LoginActivity extends BaseActivity implements LoginView {
 
     private static final String TAG = LoginActivity.class.getName();
 
