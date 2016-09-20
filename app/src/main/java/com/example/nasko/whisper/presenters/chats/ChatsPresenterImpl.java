@@ -4,17 +4,17 @@ import android.util.Log;
 
 import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.managers.UserProvider;
-import com.example.nasko.whisper.models.Chat;
-import com.example.nasko.whisper.models.Contact;
+import com.example.nasko.whisper.models.dto.Contact;
 import com.example.nasko.whisper.models.User;
+import com.example.nasko.whisper.models.view.ChatViewModel;
 import com.example.nasko.whisper.network.notifications.consumer.SocketServiceBinder;
 import com.example.nasko.whisper.network.notifications.service.SocketService;
 import com.example.nasko.whisper.presenters.Navigator;
 import com.example.nasko.whisper.presenters.ServiceBoundPresenter;
+import com.example.nasko.whisper.utils.Mapper;
 import com.example.nasko.whisper.views.contracts.ChatsView;
 import com.google.firebase.messaging.FirebaseMessaging;
 
-import java.util.Arrays;
 import java.util.List;
 
 import rx.Subscription;
@@ -60,32 +60,37 @@ public class ChatsPresenterImpl extends ServiceBoundPresenter<ChatsView> impleme
                 .subscribe(chatsArr -> {
                     Log.d(TAG, "Loading fresh chats");
                     if (view != null) {
-                        List<Chat> chats = Arrays.asList(chatsArr);
-                        for (int i = 0; i < chats.size(); i++) {
-                            setOtherContact(chats.get(i));
+                        List<ChatViewModel> chatViewModels = Mapper.toChatViewModelList(chatsArr);
+                        for (int i = 0; i < chatViewModels.size(); i++) {
+                            ChatViewModel chatViewModel = chatViewModels.get(i);
+                            List<Contact> chatParticipants = chatsArr[i].getParticipants();
+                            setDisplayContact(chatViewModel, chatParticipants);
                         }
 
                         view.clearChats();
-                        view.loadChats(chats);
+                        view.loadChats(chatViewModels);
                     }
                 });
 
-        Subscription updateChatSub = service.contactsService()
-                .onChatUpdate()
+        Subscription newMsgSub = service.messageService()
+                .onNewMessage()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(chat -> {
+                .subscribe(message -> {
                     if (view != null) {
-                        view.updateChat(chat);
+                        view.updateChatLastMessage(
+                                message.getChatId(),
+                                Mapper.toMessageViewModel(message));
                     }
                 });
 
-        Subscription newChatSub = service.contactsService()
-                .onNewChat()
+        Subscription messageSentSub = service.messageService()
+                .onMessageSent()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(chat -> {
-                    setOtherContact(chat);
+                .subscribe(messageSentAck -> {
                     if (view != null) {
-                        view.addChat(chat);
+                        view.updateChatLastMessage(
+                                messageSentAck.getChatId(),
+                                Mapper.toMessageViewModel(messageSentAck.getMessage()));
                     }
                 });
 
@@ -102,31 +107,42 @@ public class ChatsPresenterImpl extends ServiceBoundPresenter<ChatsView> impleme
                 .onUserOffline()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(stateChange -> {
-//                    Log.d(TAG, stateChange.getUsername() + " went offline..");
                     if (view != null) {
                         view.setChatStatus(stateChange.getChatId(), false);
                     }
                 });
 
+        Subscription newChatSub = service.contactsService()
+                .onNewChat()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(chat -> {
+                     if (view != null) {
+                         ChatViewModel chatViewModel = Mapper.toChatViewModel(chat);
+                         setDisplayContact(chatViewModel, chat.getParticipants());
+
+                         view.addChat(chatViewModel);
+                     }
+                });
+
         subscriptions.add(authSub);
-        subscriptions.add(loadChatsSub);
-        subscriptions.add(updateChatSub);
+        subscriptions.add(newMsgSub);
+        subscriptions.add(messageSentSub);
         subscriptions.add(newChatSub);
+        subscriptions.add(loadChatsSub);
         subscriptions.add(userOnlineSub);
         subscriptions.add(userOfflineSub);
     }
 
     @Override
-    public void onChatClicked(Chat clickedChat) {
+    public void onChatClicked(ChatViewModel clickedChat) {
         navigator.navigateToChatroom(
                 context,
                 userProvider.getCurrentUser(),
                 clickedChat);
     }
 
-    private void setOtherContact(Chat chat) {
+    private void setDisplayContact(ChatViewModel chat, List<Contact> participants) {
         User currentUser = userProvider.getCurrentUser();
-        List<Contact> participants = chat.getParticipants();
         int i;
         for (i = 0; i < participants.size(); i++) {
             String participantId = participants.get(i).getId();
@@ -135,7 +151,7 @@ public class ChatsPresenterImpl extends ServiceBoundPresenter<ChatsView> impleme
             }
         }
 
-        chat.setOtherContact(participants.get(i));
+        chat.setDisplayContact(Mapper.toContactViewModel(participants.get(i)));
     }
 
     @Override

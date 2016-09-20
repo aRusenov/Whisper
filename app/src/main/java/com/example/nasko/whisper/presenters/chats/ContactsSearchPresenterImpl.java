@@ -4,8 +4,8 @@ import android.util.Log;
 
 import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.managers.UserProvider;
-import com.example.nasko.whisper.models.Chat;
-import com.example.nasko.whisper.models.Contact;
+import com.example.nasko.whisper.models.dto.Chat;
+import com.example.nasko.whisper.models.dto.Contact;
 import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.network.notifications.consumer.SocketServiceBinder;
 import com.example.nasko.whisper.network.notifications.service.SocketService;

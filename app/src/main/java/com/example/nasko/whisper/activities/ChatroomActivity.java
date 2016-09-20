@@ -9,9 +9,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.nasko.whisper.R;
-import com.example.nasko.whisper.models.Chat;
-import com.example.nasko.whisper.models.Contact;
 import com.example.nasko.whisper.models.User;
+import com.example.nasko.whisper.models.view.ChatViewModel;
+import com.example.nasko.whisper.models.view.ContactViewModel;
 import com.example.nasko.whisper.presenters.chatroom.ChatroomNavBarPresenter;
 import com.example.nasko.whisper.views.contracts.ChatroomNavBarView;
 import com.example.nasko.whisper.views.fragments.ChatroomFragment;
@@ -21,7 +21,7 @@ import butterknife.ButterKnife;
 
 public class ChatroomActivity extends BaseActivity implements ChatroomNavBarView {
 
-    private Chat chat;
+    private ChatViewModel chat;
     private User user;
 
     private ChatroomNavBarPresenter presenter;
@@ -67,7 +67,8 @@ public class ChatroomActivity extends BaseActivity implements ChatroomNavBarView
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        if (chat.getOtherContact() == null) {
+        ContactViewModel displayContact = chat.getDisplayContact();
+        if (displayContact == null) {
             return;
         }
 
@@ -75,16 +76,15 @@ public class ChatroomActivity extends BaseActivity implements ChatroomNavBarView
         if (getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true))
         {
             int actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data,getResources().getDisplayMetrics());
-            Contact contact = chat.getOtherContact();
-            tvName.setText(contact.getUsername());
+            tvName.setText(displayContact.getUsername());
             tvName.setTextSize(TypedValue.COMPLEX_UNIT_PX, actionBarHeight / 3);
             tvStatus.setTextSize(TypedValue.COMPLEX_UNIT_PX, actionBarHeight / 4);
-            setContactStatus(contact.getUsername(), contact.isOnline());
+            setContactStatus(displayContact.isOnline());
         }
     }
 
     @Override
-    public void setContactStatus(String username, boolean online) {
+    public void setContactStatus(boolean online) {
         int statusRes = online ? R.drawable.circle_green : R.drawable.circle_gray;
         statusImg.setImageResource(statusRes);
         tvStatus.setText(online ? "Online" : "Offline");

@@ -5,7 +5,7 @@ import com.example.nasko.whisper.managers.AppState;
 import com.example.nasko.whisper.managers.LocalUserRepository;
 import com.example.nasko.whisper.managers.MessageNotificationController;
 import com.example.nasko.whisper.managers.UserProvider;
-import com.example.nasko.whisper.models.Message;
+import com.example.nasko.whisper.models.dto.Message;
 import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.network.JsonDeserializer;
 import com.google.firebase.messaging.FirebaseMessagingService;

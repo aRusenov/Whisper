@@ -7,12 +7,15 @@ import android.util.Log;
 import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.managers.MessageNotificationController;
 import com.example.nasko.whisper.managers.UserProvider;
-import com.example.nasko.whisper.models.Chat;
-import com.example.nasko.whisper.models.Message;
+import com.example.nasko.whisper.models.dto.Message;
+import com.example.nasko.whisper.models.MessageStatus;
 import com.example.nasko.whisper.models.User;
+import com.example.nasko.whisper.models.view.ChatViewModel;
+import com.example.nasko.whisper.models.view.MessageViewModel;
 import com.example.nasko.whisper.network.notifications.consumer.SocketServiceBinder;
 import com.example.nasko.whisper.network.notifications.service.SocketService;
 import com.example.nasko.whisper.presenters.ServiceBoundPresenter;
+import com.example.nasko.whisper.utils.Mapper;
 import com.example.nasko.whisper.views.contracts.ChatroomView;
 
 import java.util.List;
@@ -27,7 +30,7 @@ public class ChatroomPresenterImpl extends ServiceBoundPresenter<ChatroomView> i
     private static final int DEFAULT_MESSAGE_SEQ = -1;
     private static final String LAST_MESSAGE_SEQ = "lastMessageSeq";
 
-    private Chat chat;
+    private ChatViewModel chat;
     private int lastLoadedMessageSeq = DEFAULT_MESSAGE_SEQ;
     private boolean loadingMessages;
 
@@ -49,7 +52,10 @@ public class ChatroomPresenterImpl extends ServiceBoundPresenter<ChatroomView> i
     @Override
     public void attachView(ChatroomView view, Context context, Bundle extras) {
         chat = extras.getParcelable("chat");
-        notificationController.removeNotification(chat.getOtherContact().getId());
+        if (chat != null) {
+            notificationController.removeNotification(chat.getDisplayContact().getId());
+        }
+
         super.attachView(view, context, extras);
     }
 
@@ -71,20 +77,18 @@ public class ChatroomPresenterImpl extends ServiceBoundPresenter<ChatroomView> i
 
         Subscription loadMessagesSub = service.messageService()
                 .onLoadMessages()
+                .filter(response -> response.getChatId().equals(chat.getId()))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(response -> {
                     loadingMessages = false;
-                    if (!response.getChatId().equals(chat.getId())) {
-                        // For another chat room
-                        return;
-                    }
 
                     List<Message> messages = response.getMessages();
                     if (messages.size() > 0) {
                         int messageSeq = messages.get(0).getSeq();
                         lastLoadedMessageSeq = messageSeq;
                         if (view != null) {
-                            view.loadMessages(messages);
+                            List<MessageViewModel> viewModelList = Mapper.toMessageViewModelList(messages);
+                            view.loadMessages(viewModelList);
                         }
                     }
                 });
@@ -95,8 +99,18 @@ public class ChatroomPresenterImpl extends ServiceBoundPresenter<ChatroomView> i
                 .subscribe(message -> {
                     if (message.getChatId().equals(chat.getId())) {
                         if (view != null) {
-                            view.addMessage(message);
+                            MessageViewModel msg = Mapper.toMessageViewModel(message);
+                            view.addMessage(msg);
                         }
+                    }
+                });
+
+        Subscription messageSentSub = service.messageService()
+                .onMessageSent()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(messageSentAck -> {
+                    if (view != null) {
+                        view.updateMessageStatus(messageSentAck.getMessageIdentifier(), MessageStatus.SENT);
                     }
                 });
 
@@ -121,6 +135,7 @@ public class ChatroomPresenterImpl extends ServiceBoundPresenter<ChatroomView> i
         subscriptions.add(authSub);
         subscriptions.add(loadMessagesSub);
         subscriptions.add(newMsgSub);
+        subscriptions.add(messageSentSub);
         subscriptions.add(startTypingSub);
         subscriptions.add(stopTypingSub);
     }
@@ -133,9 +148,9 @@ public class ChatroomPresenterImpl extends ServiceBoundPresenter<ChatroomView> i
     }
 
     @Override
-    public void onMessageSend(String text) {
+    public void onMessageSend(String text, long msgIdentifier) {
         service.messageService()
-                .sendMessage(chat.getId(), text);
+                .sendMessage(chat.getId(), text.trim(), msgIdentifier);
     }
 
     @Override

@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 
+import io.socket.client.Ack;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
@@ -38,7 +39,7 @@ public class SocketManager {
 
     @NonNull
     private <R> Observable<?> createObservable(final String event, final Class<R> responseType) {
-        Observable<?> eventObservable = Observable.create(subscriber ->  {
+        return Observable.create(subscriber ->  {
             socket.on(event, new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
@@ -62,11 +63,14 @@ public class SocketManager {
                 }
             });
         });
-        return eventObservable;
     }
 
     public void emit(String event, Object... args) {
         socket.emit(event, args);
+    }
+
+    public void emit(String event, Object[] args, Ack ack) {
+        socket.emit(event, args, ack);
     }
 
     public boolean connected() {

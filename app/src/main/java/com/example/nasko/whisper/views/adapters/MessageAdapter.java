@@ -2,16 +2,20 @@ package com.example.nasko.whisper.views.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.models.LoadingData;
-import com.example.nasko.whisper.models.Message;
 import com.example.nasko.whisper.models.MessageSeparator;
 import com.example.nasko.whisper.models.TypingEvent;
 import com.example.nasko.whisper.models.User;
+import com.example.nasko.whisper.models.view.MessageViewModel;
 
 import java.util.Date;
 
@@ -22,9 +26,10 @@ public class MessageAdapter extends ArrayRecyclerViewAdapter<Object, RecyclerVie
 
     class MessageViewHolder extends RecyclerView.ViewHolder {
 
+        @BindView(R.id.container) FrameLayout container;
         @BindView(R.id.tv_text) TextView tvText;
         @BindView(R.id.tv_time) TextView tvTime;
-        @BindView(R.id.offSet_view) View offsetView;
+        @BindView(R.id.message_status_img) ImageView messageStatusImg;
 
         MessageViewHolder(View itemView) {
             super(itemView);
@@ -61,17 +66,19 @@ public class MessageAdapter extends ArrayRecyclerViewAdapter<Object, RecyclerVie
 
     private User currentUser;
     private String currentChatId;
+    private int messageMaxWidth;
 
-    public MessageAdapter(Context context, User currentUser, String currentChatId) {
+    public MessageAdapter(Context context, User currentUser, String currentChatId, int messageMaxWidth) {
         super(context);
         this.currentUser = currentUser;
         this.currentChatId = currentChatId;
+        this.messageMaxWidth = messageMaxWidth;
     }
 
     @Override
     public int getItemViewType(int position) {
         Object item = getItem(position);
-        if (item instanceof Message) {
+        if (item instanceof MessageViewModel) {
             return 0;
         } else if (item instanceof MessageSeparator) {
             return 1;
@@ -88,8 +95,10 @@ public class MessageAdapter extends ArrayRecyclerViewAdapter<Object, RecyclerVie
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         switch (viewType) {
             case 0: {
-                View view = this.getInflater().inflate(R.layout.item_chat_message, parent, false);
-                return new MessageViewHolder(view);
+                View view = this.getInflater().inflate(R.layout.item_chat_message_new, parent, false);
+                MessageViewHolder holder = new MessageViewHolder(view);
+                holder.tvText.setMaxWidth((messageMaxWidth * 4) / 5);
+                return holder;
             }
             case 1: {
                 View view = this.getInflater().inflate(R.layout.item_message_separator, parent, false);
@@ -112,19 +121,45 @@ public class MessageAdapter extends ArrayRecyclerViewAdapter<Object, RecyclerVie
     public void onBindViewHolder(RecyclerView.ViewHolder absHolder, int position) {
         switch (absHolder.getItemViewType()) {
             case 0: {
-                Message message = (Message) getItem(position);
+                MessageViewModel message = (MessageViewModel) getItem(position);
                 MessageViewHolder holder = (MessageViewHolder) absHolder;
 
-                holder.tvText.setText(message.getText() + "        ");
+                holder.tvText.setText(message.getText());
+
                 Date date = message.getCreatedAt();
                 String dateString = String.format("%02d:%02d", date.getHours(), date.getMinutes());
                 holder.tvTime.setText(dateString);
 
                 boolean isMyMessage = message.getAuthor().getId().equals(currentUser.getUId());
-                int visibility = isMyMessage ? View.VISIBLE : View.GONE;
-                int bgDrawable = isMyMessage ? R.drawable.blue_bg : R.drawable.white_bg;
-                holder.offsetView.setVisibility(visibility);
-                holder.tvText.setBackgroundResource(bgDrawable);
+                int drawableId = isMyMessage ? R.drawable.bubble_final_right : R.drawable.bubble_final_left;
+                int gravity = isMyMessage ? Gravity.RIGHT : Gravity.NO_GRAVITY;
+                holder.container.setBackgroundResource(drawableId);
+
+                LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) holder.container.getLayoutParams();
+                params.gravity = gravity;
+                holder.container.setLayoutParams(params);
+                if (isMyMessage) {
+                    holder.tvText.append(getContext().getString(R.string.m_spaces));
+                    holder.messageStatusImg.setVisibility(View.VISIBLE);
+
+                    int resId;
+                    switch (message.getStatus()) {
+                        case PENDING:
+                            resId = R.drawable.clock_sending;
+                            break;
+                        case SENT:
+                            resId = R.drawable.tick_sent;
+                            break;
+                        default:
+                            return;
+                    }
+
+                    holder.messageStatusImg.setImageResource(resId);
+                } else {
+                    holder.tvText.append(getContext().getString(R.string.s_spaces));
+                    holder.messageStatusImg.setVisibility(View.GONE);
+                }
+
                 break;
             }
             case 1: {

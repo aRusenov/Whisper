@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginBottom="7dp">
+
+    <FrameLayout
+        android:id="@+id/container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:background="@drawable/bubble_final_right">
+
+        <TextView
+            android:id="@+id/tv_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#000"
+            android:text="Well thats awkward my man                   "
+            android:textSize="18sp"
+            android:autoLink="web|phone"
+            android:layout_gravity="center"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|right"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tv_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
+                android:text="22:13"
+                android:textColor="#5d8482"/>
+
+            <ImageView
+                android:id="@+id/message_status_img"
+                android:layout_width="wrap_content"
+                android:layout_height="13sp"
+                android:adjustViewBounds="true"
+                android:src="@drawable/tick_sent"
+                android:layout_marginLeft="5dp"/>
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+</LinearLayout>

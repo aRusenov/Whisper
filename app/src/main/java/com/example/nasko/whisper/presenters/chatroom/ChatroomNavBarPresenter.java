@@ -28,7 +28,7 @@ public class ChatroomNavBarPresenter extends ServiceBoundPresenter<ChatroomNavBa
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(stateChange -> {
                     if (view != null) {
-                        view.setContactStatus(stateChange.getChatId(), true);
+                        view.setContactStatus(true);
                     }
                 });
 
@@ -37,7 +37,7 @@ public class ChatroomNavBarPresenter extends ServiceBoundPresenter<ChatroomNavBa
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(stateChange -> {
                     if (view != null) {
-                        view.setContactStatus(stateChange.getChatId(), false);
+                        view.setContactStatus(false);
                     }
                 });
 

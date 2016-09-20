@@ -10,6 +10,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,12 +20,14 @@ import android.widget.ImageButton;
 import android.widget.ProgressBar;
 
 import com.example.nasko.whisper.R;
-import com.example.nasko.whisper.models.Chat;
 import com.example.nasko.whisper.models.LoadingData;
-import com.example.nasko.whisper.models.Message;
 import com.example.nasko.whisper.models.MessageSeparator;
+import com.example.nasko.whisper.models.MessageStatus;
 import com.example.nasko.whisper.models.TypingEvent;
 import com.example.nasko.whisper.models.User;
+import com.example.nasko.whisper.models.view.ChatViewModel;
+import com.example.nasko.whisper.models.view.ContactViewModel;
+import com.example.nasko.whisper.models.view.MessageViewModel;
 import com.example.nasko.whisper.presenters.chatroom.ChatroomPresenter;
 import com.example.nasko.whisper.presenters.chatroom.ChatroomPresenterImpl;
 import com.example.nasko.whisper.utils.DateFormatter;
@@ -34,6 +37,7 @@ import com.example.nasko.whisper.views.contracts.ChatroomView;
 import com.example.nasko.whisper.views.listeners.EndlessUpScrollListener;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
@@ -44,13 +48,14 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
     private ChatroomPresenter presenter;
     private DateFormatter dateFormatter;
     private User user;
-    private Chat chat;
+    private ChatViewModel chat;
 
     private LinearLayoutManager layoutManager;
     private EndlessUpScrollListener endlessScrollListener;
     private MessageAdapter adapter;
 
     private boolean isTyping;
+    private ContactViewModel userContact;
 
     @BindView(R.id.message_list) RecyclerView messageList;
     @BindView(R.id.progress_loading_bar) ProgressBar loadingBar;
@@ -64,6 +69,7 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
 
         chat = getArguments().getParcelable("chat");
         user = getArguments().getParcelable("user");
+        userContact = new ContactViewModel(user.getUId(), user.getUsername(), user.getName(), user.getImage(), false);
 
         presenter = new ChatroomPresenterImpl();
         if (savedInstanceState != null) {
@@ -80,9 +86,13 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
         ButterKnife.bind(this, view);
 
         loadingBar.setVisibility(View.VISIBLE);
-        adapter = new MessageAdapter(getContext(), user, chat.getId());
+        DisplayMetrics metrics = new DisplayMetrics();
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
+        int width = metrics.widthPixels;
+        adapter = new MessageAdapter(getContext(), user, chat.getId(), width);
         if (savedInstanceState != null) {
-            ArrayList<Message> messages = savedInstanceState.getParcelableArrayList("messages");
+            ArrayList<MessageViewModel> messages = savedInstanceState.getParcelableArrayList("messages");
             for (Object msg : messages) {
                 adapter.add(msg);
             }
@@ -158,10 +168,10 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         presenter.onSaveInstanceState(outState);
-        ArrayList<Message> savedMessages = new ArrayList<>();
+        ArrayList<MessageViewModel> savedMessages = new ArrayList<>();
         for (Object msg : adapter) {
-            if (msg instanceof Message) {
-                savedMessages.add((Message) msg);
+            if (msg instanceof MessageViewModel) {
+                savedMessages.add((MessageViewModel) msg);
             }
         }
 
@@ -176,7 +186,7 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
     }
 
     @Override
-    public void loadMessages(List<Message> messages) {
+    public void loadMessages(List<MessageViewModel> messages) {
         // TODO: Remove and use empty view
         loadingBar.setVisibility(View.INVISIBLE);
         if (adapter.size() > 0 && adapter.getItem(0) instanceof LoadingData) {
@@ -191,8 +201,8 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
         List<Object> newItems = new ArrayList<>(messages.size() + 5);
         newItems.add(messages.get(0));
         for (int i = 1; i < messages.size(); i++) {
-            Message prev = messages.get(i - 1);
-            Message current = messages.get(i);
+            MessageViewModel prev = messages.get(i - 1);
+            MessageViewModel current = messages.get(i);
             // If message is posted on different date than previous -> add a timestamp
             if (prev.getCreatedAt().getDay() != current.getCreatedAt().getDay()) {
                 String dateString = dateFormatter.getStringFormat(getContext(), current.getCreatedAt());
@@ -236,16 +246,17 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
             return;
         }
 
-        presenter.onMessageSend(text);
+        MessageViewModel msg = new MessageViewModel(text, new Date(), userContact);
+        msg.setStatus(MessageStatus.PENDING);
+        msg.setUId(System.nanoTime());
+        addMessage(msg);
+
+        presenter.onMessageSend(text, msg.getUId());
         messageEdit.setText("");
     }
 
     @Override
-    public void addMessage(Message message) {
-        if (! message.getChatId().equals(chat.getId())) {
-            return;
-        }
-
+    public void addMessage(MessageViewModel message) {
         int insertPosition = adapter.size();
         if (adapter.last() instanceof TypingEvent) {
             insertPosition--;
@@ -257,6 +268,22 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
             scrollToPosition(adapter.getItemCount() - 1);
         } else if (!user.getUId().equals(message.getAuthor().getId())) {
             playNewMessageSound();
+        }
+    }
+
+    @Override
+    public void updateMessageStatus(long identifier, MessageStatus status) {
+        // TODO: Extract in adapter
+        for (int i = 0; i < adapter.size(); i++) {
+            Object item = adapter.getItem(i);
+            if (item instanceof MessageViewModel) {
+                MessageViewModel msg = (MessageViewModel)item;
+                if (msg.getUId() == identifier) {
+                    msg.setStatus(status);
+                    adapter.notifyItemChanged(i);
+                    break;
+                }
+            }
         }
     }
 

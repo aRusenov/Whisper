@@ -13,8 +13,8 @@ import android.support.v4.util.SimpleArrayMap;
 
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.activities.ChatroomActivity;
-import com.example.nasko.whisper.models.Chat;
-import com.example.nasko.whisper.models.Message;
+import com.example.nasko.whisper.models.dto.Chat;
+import com.example.nasko.whisper.models.dto.Message;
 
 public class MessageNotificationController implements NotificationDismissedListener {
 

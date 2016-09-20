@@ -1,4 +1,6 @@
-package com.example.nasko.whisper.models;
+package com.example.nasko.whisper.models.dto;
+
+import com.example.nasko.whisper.models.dto.Message;
 
 import java.util.List;
 

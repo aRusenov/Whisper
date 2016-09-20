@@ -1,7 +1,8 @@
 package com.example.nasko.whisper.network.notifications.service;
 
-import com.example.nasko.whisper.models.Message;
-import com.example.nasko.whisper.models.MessagesQueryResponse;
+import com.example.nasko.whisper.models.dto.Message;
+import com.example.nasko.whisper.models.dto.MessageSentAck;
+import com.example.nasko.whisper.models.dto.MessagesQueryResponse;
 import com.example.nasko.whisper.models.TypingEvent;
 
 import rx.Observable;
@@ -12,9 +13,11 @@ public interface MessagesService {
 
     Observable<Message> onNewMessage();
 
+    Observable<MessageSentAck> onMessageSent();
+
     void loadMessages(String chatId, int offset, int limit);
 
-    void sendMessage(String chatId, String message);
+    void sendMessage(String chatId, String message, long msgIdentifier);
 
     Observable<TypingEvent> onStartTyping();
 

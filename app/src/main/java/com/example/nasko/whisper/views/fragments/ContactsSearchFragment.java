@@ -14,7 +14,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.nasko.whisper.R;
-import com.example.nasko.whisper.models.Contact;
+import com.example.nasko.whisper.models.dto.Contact;
 import com.example.nasko.whisper.presenters.chats.ContactsSearchPresenterImpl;
 import com.example.nasko.whisper.presenters.chats.ContactsSearchPresenter;
 import com.example.nasko.whisper.views.adapters.ContactQueryAdapter;

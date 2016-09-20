@@ -1,6 +1,6 @@
 package com.example.nasko.whisper.managers;
 
-import com.example.nasko.whisper.models.Image;
+import com.example.nasko.whisper.models.dto.Image;
 
 public class ImageUrlResolver {
 

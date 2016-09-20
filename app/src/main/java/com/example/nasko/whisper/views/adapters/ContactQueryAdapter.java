@@ -8,25 +8,25 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.nasko.whisper.R;
-import com.example.nasko.whisper.models.Contact;
+import com.example.nasko.whisper.models.dto.Contact;
 import com.example.nasko.whisper.views.listeners.OnItemClickListener;
 import com.squareup.picasso.Picasso;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ContactQueryAdapter extends ArrayRecyclerViewAdapter<Contact, ContactQueryAdapter.ContactViewHolder> {
 
     class ContactViewHolder extends RecyclerView.ViewHolder {
 
-        CircleImageView image;
-        TextView name;
-        ImageView inviteIcon;
+        @BindView(R.id.profile_image) CircleImageView image;
+        @BindView(R.id.tv_contact_name) TextView name;
+        @BindView(R.id.invite_icon) ImageView inviteIcon;
 
         ContactViewHolder(View itemView) {
             super(itemView);
-            this.image = (CircleImageView) itemView.findViewById(R.id.profile_image);
-            this.name = (TextView) itemView.findViewById(R.id.tv_contact_name);
-            this.inviteIcon = (ImageView) itemView.findViewById(R.id.invite_icon);
+            ButterKnife.bind(this, itemView);
 
             inviteIcon.setOnClickListener(v -> {
                 OnItemClickListener listener = getInvitationIconClickListener();

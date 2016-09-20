@@ -7,8 +7,8 @@ import com.example.nasko.whisper.activities.ChatroomActivity;
 import com.example.nasko.whisper.activities.ChatsActivity;
 import com.example.nasko.whisper.activities.LoginActivity;
 import com.example.nasko.whisper.activities.ProfileActivity;
-import com.example.nasko.whisper.models.Chat;
 import com.example.nasko.whisper.models.User;
+import com.example.nasko.whisper.models.view.ChatViewModel;
 
 public class Navigator {
 
@@ -34,7 +34,7 @@ public class Navigator {
         context.startActivity(launchIntent);
     }
 
-    public void navigateToChatroom(Context context, User user, Chat chat) {
+    public void navigateToChatroom(Context context, User user, ChatViewModel chat) {
         Intent intent = new Intent(context, ChatroomActivity.class);
         intent.putExtra(KEY_CHAT_EXTRA, chat);
         intent.putExtra(KEY_USER_EXTRA, user);

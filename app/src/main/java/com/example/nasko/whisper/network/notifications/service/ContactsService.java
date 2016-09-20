@@ -1,9 +1,8 @@
 package com.example.nasko.whisper.network.notifications.service;
 
-import com.example.nasko.whisper.models.Chat;
-import com.example.nasko.whisper.models.Contact;
-import com.example.nasko.whisper.models.ContactQueryResponse;
-import com.example.nasko.whisper.models.ContactStateChange;
+import com.example.nasko.whisper.models.dto.Chat;
+import com.example.nasko.whisper.models.dto.ContactQueryResponse;
+import com.example.nasko.whisper.models.dto.ContactStateChange;
 
 import rx.Observable;
 

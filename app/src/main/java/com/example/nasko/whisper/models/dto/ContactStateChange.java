@@ -1,4 +1,4 @@
-package com.example.nasko.whisper.models;
+package com.example.nasko.whisper.models.dto;
 
 public class ContactStateChange {
 

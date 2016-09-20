@@ -6,7 +6,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.nasko.whisper.managers.ConfigLoader;
-import com.example.nasko.whisper.models.Image;
+import com.example.nasko.whisper.models.dto.Image;
 import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.network.JsonDeserializer;
 

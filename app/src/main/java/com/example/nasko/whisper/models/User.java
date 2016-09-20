@@ -3,6 +3,7 @@ package com.example.nasko.whisper.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.example.nasko.whisper.models.dto.Image;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class User implements Parcelable {

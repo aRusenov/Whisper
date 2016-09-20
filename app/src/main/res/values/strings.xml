@@ -22,4 +22,7 @@
     <string name="search_contact">Search for people</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_profile">ProfileActivity</string>
+    <string name="s_spaces">"    &#x200b;    &#x200b;    &#x200b;"</string>
+    <string name="m_spaces">"    &#x200b;    &#x200b;    &#x200b;    &#x200b;"</string>
+    <string name="message_you_prefix">"You: "</string>
 </resources>

@@ -8,45 +8,54 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.nasko.whisper.R;
-import com.example.nasko.whisper.models.Chat;
+import com.example.nasko.whisper.WhisperApplication;
+import com.example.nasko.whisper.managers.UserProvider;
+import com.example.nasko.whisper.models.view.ChatViewModel;
+import com.example.nasko.whisper.models.view.ContactViewModel;
+import com.example.nasko.whisper.models.view.MessageViewModel;
 import com.example.nasko.whisper.utils.DateFormatter;
 import com.example.nasko.whisper.views.listeners.OnItemClickListener;
 import com.squareup.picasso.Picasso;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class ChatAdapter extends ArrayRecyclerViewAdapter<Chat, ChatAdapter.ChatViewHolder> {
+public class ChatAdapter extends ArrayRecyclerViewAdapter<ChatViewModel, ChatAdapter.ChatViewHolder> {
 
     class ChatViewHolder extends RecyclerView.ViewHolder {
 
-        TextView contactName;
-        TextView msgDate;
-        TextView lastMessage;
-        CircleImageView profileImg;
-        ImageView statusImg;
+        @BindView(R.id.tv_contact_name) TextView contactName;
+        @BindView(R.id.message_date) TextView msgDate;
+        @BindView(R.id.last_message) TextView lastMessage;
+        @BindView(R.id.profile_image) CircleImageView profileImg;
+        @BindView(R.id.status_image) ImageView statusImg;
+        @BindView(R.id.tv_msg_prefix) TextView tvMsgPrefix;
 
         ChatViewHolder(View itemView) {
             super(itemView);
-            this.msgDate = (TextView) itemView.findViewById(R.id.message_date);
-            this.contactName = (TextView) itemView.findViewById(R.id.tv_contact_name);
-            this.lastMessage = (TextView) itemView.findViewById(R.id.last_message);
-            this.profileImg = (CircleImageView) itemView.findViewById(R.id.profile_image);
-            this.statusImg = (ImageView) itemView.findViewById(R.id.status_image);
+            ButterKnife.bind(this, itemView);
 
             itemView.setOnClickListener(v -> {
-                OnItemClickListener listener1 = getItemClickListener();
-                if (listener1 != null) {
-                    listener1.onItemClick(getAdapterPosition());
+                OnItemClickListener listener = getItemClickListener();
+                if (listener != null) {
+                    listener.onItemClick(getAdapterPosition());
                 }
             });
         }
     }
 
     private DateFormatter dateFormatter;
+    private UserProvider userProvider;
 
-    public ChatAdapter(Context context, DateFormatter dateFormatter) {
+    public ChatAdapter(Context context, DateFormatter dateFormatter, UserProvider userProvider) {
         super(context);
         this.dateFormatter = dateFormatter;
+        this.userProvider = userProvider;
+    }
+
+    public ChatAdapter(Context context, DateFormatter dateFormatter) {
+        this(context, dateFormatter, WhisperApplication.instance().getUserProvider());
     }
 
     @Override
@@ -57,37 +66,58 @@ public class ChatAdapter extends ArrayRecyclerViewAdapter<Chat, ChatAdapter.Chat
 
     @Override
     public void onBindViewHolder(ChatViewHolder holder, int position) {
-        Chat chat = this.items.get(position);
+        ChatViewModel chat = this.items.get(position);
+        ContactViewModel displayContact = chat.getDisplayContact();
 
         String dateText = dateFormatter.getStringFormat(getContext(), chat.getLastMessage().getCreatedAt());
         holder.msgDate.setText(dateText);
-        String name = chat.getOtherContact().getName();
+        String name = displayContact.getName();
         if (name == null) {
-            name = chat.getOtherContact().getUsername();
+            name = displayContact.getUsername();
         }
 
         holder.contactName.setText(name);
         holder.lastMessage.setText(chat.getLastMessage().getText());
+        int prefixVisibility = isMessageAuthor(chat.getLastMessage()) ? View.VISIBLE : View.GONE;
+        holder.tvMsgPrefix.setVisibility(prefixVisibility);
 
-        int statusRes = chat.getOtherContact().isOnline() ? R.drawable.circle_green : R.drawable.circle_gray;
+        int statusRes = displayContact.isOnline() ? R.drawable.circle_green : R.drawable.circle_gray;
         holder.statusImg.setImageResource(statusRes);
 
         Picasso picasso = Picasso.with(getContext());
-        picasso.setIndicatorsEnabled(true);
-        picasso.load(chat.getOtherContact().getImageUrl())
+        picasso.load(displayContact.getImage().getUrl())
                 .placeholder(R.drawable.blank_pic)
                 .into(holder.profileImg);
     }
 
-    public void update(Chat chat) {
+    private boolean isMessageAuthor(MessageViewModel message) {
+        if (userProvider != null && userProvider.getCurrentUser() != null) {
+            String userId = userProvider.getCurrentUser().getUId();
+            if (message.getAuthor().getId().equals(userId)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public int findIndexById(String id) {
+        for (int i = 0; i < items.size(); i++) {
+            ChatViewModel chat = items.get(i);
+            if (chat.getId().equals(id)) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    public void moveToTop(int position) {
         // Remove item from old position
-        int oldPosition = this.items.indexOf(chat);
-        Chat oldChat = this.items.remove(oldPosition);
-        oldChat.setLastMessage(chat.getLastMessage());
+        ChatViewModel oldChat = this.items.remove(position);
 
         // Insert item at start
         this.items.add(0, oldChat);
-        this.notifyItemChanged(oldPosition);
-        this.notifyItemMoved(oldPosition, 0);
+        this.notifyItemMoved(position, 0);
     }
 }

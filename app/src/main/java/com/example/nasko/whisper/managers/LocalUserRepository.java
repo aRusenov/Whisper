@@ -3,7 +3,7 @@ package com.example.nasko.whisper.managers;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.example.nasko.whisper.models.Image;
+import com.example.nasko.whisper.models.dto.Image;
 import com.example.nasko.whisper.models.User;
 
 public class LocalUserRepository {

@@ -11,14 +11,14 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import com.example.nasko.whisper.R;
-import com.example.nasko.whisper.models.Chat;
+import com.example.nasko.whisper.models.view.ChatViewModel;
+import com.example.nasko.whisper.models.view.MessageViewModel;
 import com.example.nasko.whisper.presenters.chats.ChatsPresenter;
 import com.example.nasko.whisper.presenters.chats.ChatsPresenterImpl;
 import com.example.nasko.whisper.utils.LastMessageDateFormatter;
 import com.example.nasko.whisper.views.adapters.ChatAdapter;
 import com.example.nasko.whisper.views.contracts.ChatsView;
 
-import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
@@ -32,7 +32,6 @@ public class ChatsFragment extends Fragment implements ChatsView {
 
     private ChatAdapter chatsAdapter;
     private LinearLayoutManager chatsLayoutManager;
-    private Date now = new Date();
 
     @BindView(R.id.progress_loading) ProgressBar loadingBar;
     @BindView(R.id.rv_chats) RecyclerView contactsView;
@@ -53,7 +52,7 @@ public class ChatsFragment extends Fragment implements ChatsView {
         chatsLayoutManager = new LinearLayoutManager(getActivity());
         chatsAdapter = new ChatAdapter(getContext(), new LastMessageDateFormatter());
         chatsAdapter.setItemClickListener(position -> {
-            Chat selectedChat = chatsAdapter.getItem(position);
+            ChatViewModel selectedChat = chatsAdapter.getItem(position);
             presenter.onChatClicked(selectedChat);
         });
 
@@ -68,7 +67,6 @@ public class ChatsFragment extends Fragment implements ChatsView {
     public void onResume() {
         super.onResume();
         presenter.onResume();
-        now = new Date();
         contactsView.scrollToPosition(0);
     }
 
@@ -80,22 +78,28 @@ public class ChatsFragment extends Fragment implements ChatsView {
     }
 
     @Override
-    public void loadChats(List<Chat> chats) {
+    public void loadChats(List<ChatViewModel> chats) {
         loadingBar.setVisibility(View.GONE);
         chatsAdapter.addAll(chats);
     }
 
     @Override
-    public void addChat(Chat chat) {
+    public void addChat(ChatViewModel chat) {
         chatsAdapter.add(0, chat);
+        scrollToTopIfVisible();
     }
 
     @Override
-    public void updateChat(Chat chat) {
-        chatsAdapter.update(chat);
-        if (chatsLayoutManager.findFirstVisibleItemPosition() == 0) {
-            contactsView.scrollToPosition(0);
+    public void updateChatLastMessage(String chatId, MessageViewModel message) {
+        int pos = chatsAdapter.findIndexById(chatId);
+        if (pos != -1) {
+            ChatViewModel chat = chatsAdapter.getItem(pos);
+            chat.setLastMessage(message);
+            chatsAdapter.notifyItemChanged(pos);
+            chatsAdapter.moveToTop(pos);
         }
+
+        scrollToTopIfVisible();
     }
 
     @Override
@@ -105,13 +109,17 @@ public class ChatsFragment extends Fragment implements ChatsView {
 
     @Override
     public void setChatStatus(String chatId, boolean online) {
-        for (int i = 0; i < chatsAdapter.size(); i++) {
-            Chat chat = chatsAdapter.getItem(i);
-            if (chat.getId().equals(chatId)) {
-                chat.getOtherContact().setOnline(online);
-                chatsAdapter.update(chat);
-                break;
-            }
+        int pos = chatsAdapter.findIndexById(chatId);
+        if (pos != -1) {
+            ChatViewModel chat = chatsAdapter.getItem(pos);
+            chat.getDisplayContact().setOnline(online);
+            chatsAdapter.notifyItemChanged(pos);
+        }
+    }
+
+    private void scrollToTopIfVisible() {
+        if (chatsLayoutManager.findFirstVisibleItemPosition() == 0) {
+            contactsView.scrollToPosition(0);
         }
     }
 }

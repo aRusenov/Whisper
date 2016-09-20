@@ -47,15 +47,30 @@
             android:ellipsize="end"
             android:id="@+id/tv_contact_name" />
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/last_message"
-            android:textSize="17sp"
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:scrollHorizontally="false"
-            android:text="Hey, buddy!" />
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tv_msg_prefix"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="17sp"
+                android:text="@string/message_you_prefix" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/last_message"
+                android:textSize="17sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="#757575"
+                android:scrollHorizontally="false"
+                android:text="Hey, buddy!" />
+
+        </LinearLayout>
 
     </LinearLayout>
 

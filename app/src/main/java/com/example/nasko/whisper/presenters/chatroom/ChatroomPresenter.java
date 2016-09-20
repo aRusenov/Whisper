@@ -5,7 +5,7 @@ import com.example.nasko.whisper.views.contracts.ChatroomView;
 
 public interface ChatroomPresenter extends Presenter<ChatroomView> {
 
-    void onMessageSend(String text);
+    void onMessageSend(String text, long identifier);
 
     boolean onScrollToTop();
 

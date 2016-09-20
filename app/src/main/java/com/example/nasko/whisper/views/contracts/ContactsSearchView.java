@@ -1,6 +1,6 @@
 package com.example.nasko.whisper.views.contracts;
 
-import com.example.nasko.whisper.models.Contact;
+import com.example.nasko.whisper.models.dto.Contact;
 
 import java.util.List;
 
