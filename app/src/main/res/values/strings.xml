@@ -2,6 +2,13 @@
     <string name="app_name">Whisper</string>
     <string name="title_activity_login">Sign in</string>
 
+    <!-- Login -->
+    <string name="label_not_member">Not a member? Register now.</string>
+    <string name="message_timeout">Server timeout. Try again later.</string>
+    <string name="message_no_internet">Internet connection error.</string>
+    <string name="message_generic_bad_request">Try again later.</string>
+    <string name="message_sign_in_loading">Signing you in...</string>
+
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password (optional)</string>
@@ -25,4 +32,10 @@
     <string name="s_spaces">"    &#x200b;    &#x200b;    &#x200b;"</string>
     <string name="m_spaces">"    &#x200b;    &#x200b;    &#x200b;    &#x200b;"</string>
     <string name="message_you_prefix">"You: "</string>
+    <string name="status_online">Online</string>
+    <string name="status_offline">Offline</string>
+    <string name="label_login">Login</string>
+    <string name="placeholder_username">Username</string>
+    <string name="placeholder_password">Password</string>
+
 </resources>

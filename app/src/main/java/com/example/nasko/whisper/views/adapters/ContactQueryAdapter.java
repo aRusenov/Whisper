@@ -77,7 +77,7 @@ public class ContactQueryAdapter extends ArrayRecyclerViewAdapter<Contact, Conta
         holder.name.setText(name);
         Picasso picasso = Picasso.with(getContext());
         picasso.setIndicatorsEnabled(true);
-        picasso.load(contact.getImageUrl())
+        picasso.load(contact.getImage().getUrl())
                 .placeholder(R.drawable.blank_pic)
                 .into(holder.image);
 

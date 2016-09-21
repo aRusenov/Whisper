@@ -1,75 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=".activities.LoginActivity"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
-    android:gravity="center_horizontal">
+    android:gravity="center_horizontal"
+    android:background="@color/color_light_turquoise">
 
-    <TextView
+    <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Email"
-        android:layout_marginTop="47dp"
-        android:layout_centerHorizontal="true" />
+        android:src="@drawable/icon_white"/>
 
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/edit_email"
-        android:ems="10"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Password"
-        android:layout_below="@+id/textView"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="40dp" />
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="textPassword"
-        android:ems="10"
-        android:id="@+id/edit_password"
-        android:layout_below="@+id/textView2"
-        android:layout_centerHorizontal="true" />
-
-    <RelativeLayout
+    <Space
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="@dimen/large_margin" />
 
-        <LinearLayout
+    <LinearLayout
+        android:id="@+id/error_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/xlarge_margin"
+        android:layout_marginRight="@dimen/xlarge_margin">
+
+        <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true">
+            android:src="@drawable/error" />
 
-            <Button
-                android:id="@+id/btn_login"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Login"
-                android:gravity="center"
-                android:layout_marginTop="20dp"/>
-            
-            <Button
-                android:id="@+id/btn_reg"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Register"
-                android:gravity="center"
-                android:layout_marginTop="20dp"/>
+        <TextView
+            android:id="@+id/tv_error_msg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="Invalid username or password"
+            style="@style/ErrorTextView"/>
 
-        </LinearLayout>
+    </LinearLayout>
 
-    </RelativeLayout>
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/small_margin" />
+
+    <EditText
+        android:id="@+id/edit_username"
+        android:hint="@string/placeholder_username"
+        android:inputType="textFilter"
+        style="@style/LoginEditText" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/normal_margin" />
+
+    <EditText
+        android:id="@+id/edit_password"
+        android:inputType="textPassword"
+        android:hint="@string/placeholder_password"
+        style="@style/LoginEditText" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/large_margin" />
+
+    <Button
+        android:id="@+id/btn_login"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/label_login"
+        style="@style/LoginButton"/>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/xlarge_margin" />
+
+    <TextView
+        android:id="@+id/tv_register"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/color_white"
+        android:textSize="@dimen/font_normal"
+        android:text="@string/label_not_member"/>
 
 </LinearLayout>

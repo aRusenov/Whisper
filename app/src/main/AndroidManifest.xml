@@ -18,10 +18,12 @@
         <activity android:name=".activities.ChatsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
                 <action android:name="YOUR_ACTION" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -30,12 +32,12 @@
             android:parentActivityName=".activities.ChatsActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activities.ChatsActivity"/>
+                android:value=".activities.ChatsActivity" />
         </activity>
         <activity
             android:name=".activities.ProfileActivity"
             android:label="@string/title_activity_profile"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
 
         <service
             android:name=".network.notifications.service.BackgroundSocketService"
@@ -45,7 +47,6 @@
                 <action android:name="START_SERVICE" />
             </intent-filter>
         </service>
-
         <service
             android:name=".network.notifications.consumer.FcmListenerService"
             android:enabled="true"
@@ -55,6 +56,7 @@
             </intent-filter>
         </service>
 
+        <activity android:name=".activities.RegisterActivity"></activity>
     </application>
 
 </manifest>

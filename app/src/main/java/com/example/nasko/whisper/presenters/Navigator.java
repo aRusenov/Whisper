@@ -7,6 +7,7 @@ import com.example.nasko.whisper.activities.ChatroomActivity;
 import com.example.nasko.whisper.activities.ChatsActivity;
 import com.example.nasko.whisper.activities.LoginActivity;
 import com.example.nasko.whisper.activities.ProfileActivity;
+import com.example.nasko.whisper.activities.RegisterActivity;
 import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.models.view.ChatViewModel;
 
@@ -39,6 +40,11 @@ public class Navigator {
         intent.putExtra(KEY_CHAT_EXTRA, chat);
         intent.putExtra(KEY_USER_EXTRA, user);
 
+        context.startActivity(intent);
+    }
+
+    public void navigateToRegisterScreen(Context context) {
+        Intent intent = new Intent(context, RegisterActivity.class);
         context.startActivity(intent);
     }
 }

@@ -1,4 +1,4 @@
-package com.example.nasko.whisper.views.fragments;
+package com.example.nasko.whisper.fragments;
 
 import android.media.Ringtone;
 import android.media.RingtoneManager;

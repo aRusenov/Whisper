@@ -2,12 +2,15 @@ package com.example.nasko.whisper.network.rest;
 
 import android.content.Context;
 
+import com.android.volley.NoConnectionError;
 import com.android.volley.RequestQueue;
+import com.android.volley.TimeoutError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.managers.ConfigLoader;
-import com.example.nasko.whisper.models.dto.Image;
 import com.example.nasko.whisper.models.User;
+import com.example.nasko.whisper.models.dto.Image;
 import com.example.nasko.whisper.network.JsonDeserializer;
 
 import org.json.JSONException;
@@ -15,6 +18,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -38,12 +42,14 @@ public class HerokuUserService implements UserService {
     private RequestQueue requestQueue;
     private OkHttpClient client;
     private JsonDeserializer deserializer;
+    private Context context;
 
     public HerokuUserService(Context context) {
         loginEndpoint = ConfigLoader.getConfigValue(context, "api_login");
         registerEndpoint = ConfigLoader.getConfigValue(context, "api_register");
         editProfileEndpoint = ConfigLoader.getConfigValue(context, "api_edit_profile");
 
+        this.context = context;
         requestQueue = Volley.newRequestQueue(context);
         client = new OkHttpClient();
         deserializer = new JsonDeserializer();
@@ -75,7 +81,24 @@ public class HerokuUserService implements UserService {
                 } catch (JSONException e) {
                     subscriber.onError(e);
                 }
-            }, error -> subscriber.onError(error.getCause()));
+            }, error -> {
+                String message = null;
+                if (error instanceof TimeoutError) {
+                    message = context.getString(R.string.message_timeout);
+                } else if (error instanceof NoConnectionError) {
+                    message = context.getString(R.string.message_no_internet);
+                } else if (error.networkResponse != null && error.networkResponse.data != null) {
+                    try {
+                        message = new String(error.networkResponse.data, "UTF-8");
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    message = context.getString(R.string.message_generic_bad_request);
+                }
+
+                subscriber.onError(new RequestFailedException(message));
+            });
 
             requestQueue.add(request);
         });

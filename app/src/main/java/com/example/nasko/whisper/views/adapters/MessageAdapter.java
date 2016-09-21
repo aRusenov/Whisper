@@ -24,6 +24,11 @@ import butterknife.ButterKnife;
 
 public class MessageAdapter extends ArrayRecyclerViewAdapter<Object, RecyclerView.ViewHolder> {
 
+    public static final int TYPE_MESSAGE = 0;
+    public static final int TYPE_SEPARATOR = 1;
+    public static final int TYPE_LOADING = 2;
+    public static final int TYPE_TYPING = 3;
+
     class MessageViewHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.container) FrameLayout container;
@@ -79,13 +84,13 @@ public class MessageAdapter extends ArrayRecyclerViewAdapter<Object, RecyclerVie
     public int getItemViewType(int position) {
         Object item = getItem(position);
         if (item instanceof MessageViewModel) {
-            return 0;
+            return TYPE_MESSAGE;
         } else if (item instanceof MessageSeparator) {
-            return 1;
+            return TYPE_SEPARATOR;
         } else if (item instanceof LoadingData) {
-            return 2;
+            return TYPE_LOADING;
         } else if (item instanceof TypingEvent) {
-            return 3;
+            return TYPE_TYPING;
         } else {
             throw new IllegalArgumentException("MessageAdapter does not support type " + item.getClass().getName());
         }

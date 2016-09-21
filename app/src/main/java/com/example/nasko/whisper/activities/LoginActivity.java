@@ -1,10 +1,15 @@
 package com.example.nasko.whisper.activities;
 
+import android.app.ProgressDialog;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.text.method.PasswordTransformationMethod;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.presenters.login.LoginPresenter;
@@ -19,11 +24,14 @@ public class LoginActivity extends BaseActivity implements LoginView {
     private static final String TAG = LoginActivity.class.getName();
 
     private LoginPresenter presenter;
+    private ProgressDialog dialog;
 
     @BindView(R.id.btn_login) Button btnLogin;
-    @BindView(R.id.btn_reg) Button btnRegister;
-    @BindView(R.id.edit_email) EditText editEmail;
+    @BindView(R.id.tv_register) TextView tvRegister;
+    @BindView(R.id.edit_username) EditText editEmail;
     @BindView(R.id.edit_password) EditText editPassword;
+    @BindView(R.id.error_container) LinearLayout errorContainer;
+    @BindView(R.id.tv_error_msg) TextView tvErrorMsg;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,16 +42,25 @@ public class LoginActivity extends BaseActivity implements LoginView {
         this.getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
-        this.btnLogin.setOnClickListener(v -> {
+        errorContainer.setVisibility(View.INVISIBLE);
+
+        editPassword.setTypeface(Typeface.DEFAULT);
+        editPassword.setTransformationMethod(new PasswordTransformationMethod());
+        btnLogin.setOnClickListener(v -> {
             String username = editEmail.getText().toString();
             String password = editPassword.getText().toString();
             presenter.onLoginClicked(username, password);
+
+            dialog = new ProgressDialog(this);
+            dialog.setIndeterminate(true);
+            dialog.setMessage(getString(R.string.message_sign_in_loading));
+            dialog.show();
+            btnLogin.setEnabled(false);
+            errorContainer.setVisibility(View.INVISIBLE);
         });
 
-        this.btnRegister.setOnClickListener(v -> {
-            String username = editEmail.getText().toString();
-            String password = editPassword.getText().toString();
-            presenter.onRegisterClicked(username, password);
+        tvRegister.setOnClickListener(v -> {
+
         });
 
         presenter = new LoginPresenterImpl();
@@ -59,7 +76,12 @@ public class LoginActivity extends BaseActivity implements LoginView {
 
     @Override
     public void displayError(String message) {
-        Toast errorToast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
-        errorToast.show();
+        if (dialog != null) {
+            dialog.dismiss();
+        }
+
+        errorContainer.setVisibility(View.VISIBLE);
+        tvErrorMsg.setText(message);
+        btnLogin.setEnabled(true);
     }
 }

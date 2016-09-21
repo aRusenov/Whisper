@@ -7,5 +7,5 @@ public interface LoginPresenter extends Presenter<LoginView> {
 
     void onLoginClicked(String username, String password);
 
-    void onRegisterClicked(String username, String password);
+    void onRegisterClicked();
 }

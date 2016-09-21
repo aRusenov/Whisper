@@ -11,7 +11,6 @@ import android.support.v7.widget.Toolbar;
 import android.widget.TextView;
 
 import com.example.nasko.whisper.R;
-import com.example.nasko.whisper.managers.ImageUrlResolver;
 import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.presenters.profile.ProfilePresenter;
 import com.example.nasko.whisper.presenters.profile.ProfilePresenterImpl;
@@ -94,9 +93,8 @@ public class ProfileActivity extends BaseActivity implements ProfileView {
 
         tvName.setText(name);
         tvUsername.setText(user.getUsername());
-        String imgUrl = ImageUrlResolver.getFullUrl(user.getImage());
         Picasso.with(this)
-                .load(imgUrl)
+                .load(user.getImage().getUrl())
                 .placeholder(R.drawable.profile)
                 .into(profileImage);
     }

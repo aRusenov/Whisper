@@ -3,7 +3,6 @@ package com.example.nasko.whisper.models.dto;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.example.nasko.whisper.managers.ImageUrlResolver;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Contact implements Parcelable {
@@ -80,16 +79,6 @@ public class Contact implements Parcelable {
 
     public void setUser(boolean user) {
         isUser = user;
-    }
-
-    public String getImageUrl() {
-        return ImageUrlResolver.getFullUrl(image);
-    }
-
-    public void setImageUrl(String url) {
-        if (image != null) {
-            image.setUrl(url);
-        }
     }
 
     @Override

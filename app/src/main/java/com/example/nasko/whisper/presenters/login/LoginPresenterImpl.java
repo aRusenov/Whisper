@@ -56,18 +56,8 @@ public class LoginPresenterImpl extends AbstractPresenter<LoginView> implements 
     }
 
     @Override
-    public void onRegisterClicked(String username, String password) {
-        Subscription sub = userService.register(username, password)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(user -> {
-                    goToChats(user);
-                }, error -> {
-                    if (view != null) {
-                        view.displayError(error.getMessage());
-                    }
-                });
-
-        subscriptions.add(sub);
+    public void onRegisterClicked() {
+        navigator.navigateToRegisterScreen(context);
     }
 
     private void goToChats(User user) {

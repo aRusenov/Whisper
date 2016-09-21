@@ -14,7 +14,7 @@ import com.example.nasko.whisper.models.view.ChatViewModel;
 import com.example.nasko.whisper.models.view.ContactViewModel;
 import com.example.nasko.whisper.presenters.chatroom.ChatroomNavBarPresenter;
 import com.example.nasko.whisper.views.contracts.ChatroomNavBarView;
-import com.example.nasko.whisper.views.fragments.ChatroomFragment;
+import com.example.nasko.whisper.fragments.ChatroomFragment;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -87,7 +87,7 @@ public class ChatroomActivity extends BaseActivity implements ChatroomNavBarView
     public void setContactStatus(boolean online) {
         int statusRes = online ? R.drawable.circle_green : R.drawable.circle_gray;
         statusImg.setImageResource(statusRes);
-        tvStatus.setText(online ? "Online" : "Offline");
+        tvStatus.setText(online ? getString(R.string.status_online) : getString(R.string.status_offline));
     }
 
     @Override

@@ -6,8 +6,8 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.util.Log;
 import android.view.ViewGroup;
 
-import com.example.nasko.whisper.views.fragments.ChatsFragment;
-import com.example.nasko.whisper.views.fragments.ContactsSearchFragment;
+import com.example.nasko.whisper.fragments.ChatsFragment;
+import com.example.nasko.whisper.fragments.ContactsSearchFragment;
 
 public class MenuFragmentPageAdapter extends FragmentPagerAdapter {
 

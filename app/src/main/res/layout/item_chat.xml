@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:baselineAligned="false"
     android:layout_marginBottom="10dp">
 
     <FrameLayout
@@ -16,7 +18,7 @@
             android:layout_height="50dp"
             android:src="@drawable/profile"
             app:civ_border_width="1dp"
-            app:civ_border_color="#DFDFDF"
+            app:civ_border_color="@color/color_light_grey"
             android:layout_margin="5dp"/>
 
         <ImageView
@@ -24,72 +26,73 @@
             android:layout_width="15dp"
             android:layout_height="15dp"
             android:src="@drawable/circle_green"
-            android:layout_gravity="bottom|right"
+            android:layout_gravity="bottom|end"
             android:layout_marginRight="10dp"
+            android:layout_marginEnd="10dp"
             android:layout_marginBottom="10dp"/>
 
     </FrameLayout>
 
-    <LinearLayout
-        android:layout_width="0dp"
+    <TableLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_weight="4"
         android:layout_gravity="center_vertical">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Gosho"
-            android:textSize="22sp"
-            android:textColor="#000"
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:id="@+id/tv_contact_name" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+        <TableRow>
 
             <TextView
-                android:id="@+id/tv_msg_prefix"
-                android:layout_width="wrap_content"
+                android:id="@+id/tv_contact_name"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:textSize="17sp"
-                android:text="@string/message_you_prefix" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/last_message"
-                android:textSize="17sp"
+                android:layout_weight="1"
+                tools:text="Gosho"
+                android:textSize="@dimen/font_large"
+                android:textColor="@color/color_black"
                 android:maxLines="1"
-                android:ellipsize="end"
-                android:textColor="#757575"
-                android:scrollHorizontally="false"
-                android:text="Hey, buddy!" />
+                android:ellipsize="end" />
 
-        </LinearLayout>
+            <TextView
+                android:id="@+id/message_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="Jun 22"
+                android:textSize="@dimen/font_normal"
+                android:gravity="end"
+                android:layout_marginEnd="5dp"
+                android:layout_marginRight="5dp" />
 
-    </LinearLayout>
+        </TableRow>
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        <TableRow android:weightSum="8">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:id="@+id/message_date"
-            android:textSize="15sp"
-            android:text="Jun 22"
-            android:gravity="right"
-            android:layout_marginEnd="5dp"
-            android:layout_marginRight="5dp"
-            android:layout_weight="2" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_weight="6">
 
-    </LinearLayout>
+                <TextView
+                    android:id="@+id/tv_msg_prefix"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/font_large"
+                    android:text="@string/message_you_prefix" />
+
+                <TextView
+                    android:id="@+id/last_message"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="Hey, buddy!"
+                    android:textSize="@dimen/font_large"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:textColor="@color/color_grey"
+                    android:scrollHorizontally="false" />
+
+            </LinearLayout>
+
+        </TableRow>
+
+    </TableLayout>
 
 </LinearLayout>

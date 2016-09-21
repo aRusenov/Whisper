@@ -5,8 +5,6 @@ import android.util.Log;
 
 import com.example.nasko.whisper.managers.AppState;
 import com.example.nasko.whisper.managers.AppUserProvider;
-import com.example.nasko.whisper.managers.ConfigLoader;
-import com.example.nasko.whisper.managers.ImageUrlResolver;
 import com.example.nasko.whisper.managers.LocalUserRepository;
 import com.example.nasko.whisper.managers.MessageNotificationController;
 import com.example.nasko.whisper.managers.UserProvider;
@@ -44,9 +42,6 @@ public class WhisperApplication extends Application {
         serviceBinder = new SocketServiceBinder(getApplicationContext());
         userProvider = new AppUserProvider();
         notificationController = new MessageNotificationController(userProvider, getApplicationContext());
-        ImageUrlResolver.setEndpoint(
-                ConfigLoader.getConfigValue(this, "api_images")
-        );
     }
 
     public UserProvider getUserProvider() {
