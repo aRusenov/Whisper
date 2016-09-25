@@ -1,8 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.nasko.whisper.activities.RegisterActivity">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:background="@color/color_light_turquoise">
 
-</RelativeLayout>
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/xlarge_margin" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/color_white"
+        android:textSize="@dimen/font_xlarge"
+        android:text="New Whisper Account"
+        android:gravity="center"
+        android:drawableLeft="@drawable/new_profile"
+        android:drawablePadding="5dp"/>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/large_margin" />
+
+    <TextView
+        android:id="@+id/tv_error_msg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:text="Invalid username or password"
+        android:drawableLeft="@drawable/error"
+        style="@style/ErrorTextView"/>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/small_margin" />
+
+    <EditText
+        android:id="@+id/edit_username"
+        android:hint="@string/placeholder_username"
+        android:inputType="textFilter"
+        style="@style/LoginEditText" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/normal_margin" />
+
+    <EditText
+        android:id="@+id/edit_password"
+        android:inputType="textPassword"
+        android:hint="@string/placeholder_password"
+        style="@style/LoginEditText" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/normal_margin" />
+
+    <EditText
+        android:id="@+id/edit_name"
+        android:hint="@string/placeholder_name"
+        android:inputType="textFilter"
+        style="@style/LoginEditText" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/large_margin" />
+
+    <Button
+        android:id="@+id/btn_register"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/label_register"
+        style="@style/LoginButton"/>
+
+</LinearLayout>

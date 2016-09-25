@@ -25,7 +25,9 @@
         <item name="android:maxLines">1</item>
         <item name="android:textSize">@dimen/font_normal</item>
         <item name="android:textColor">@color/color_white</item>
-        <item name="android:layout_marginLeft">@dimen/small_margin</item>
+        <item name="android:layout_marginLeft">@dimen/xlarge_margin</item>
+        <item name="android:layout_marginRight">@dimen/xlarge_margin</item>
+        <item name="android:drawablePadding">5dp</item>
     </style>
 
 </resources>

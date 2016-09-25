@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.nasko.whisper.R;
@@ -30,7 +29,6 @@ public class LoginActivity extends BaseActivity implements LoginView {
     @BindView(R.id.tv_register) TextView tvRegister;
     @BindView(R.id.edit_username) EditText editEmail;
     @BindView(R.id.edit_password) EditText editPassword;
-    @BindView(R.id.error_container) LinearLayout errorContainer;
     @BindView(R.id.tv_error_msg) TextView tvErrorMsg;
 
     @Override
@@ -42,7 +40,7 @@ public class LoginActivity extends BaseActivity implements LoginView {
         this.getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
-        errorContainer.setVisibility(View.INVISIBLE);
+        tvErrorMsg.setVisibility(View.INVISIBLE);
 
         editPassword.setTypeface(Typeface.DEFAULT);
         editPassword.setTransformationMethod(new PasswordTransformationMethod());
@@ -56,11 +54,11 @@ public class LoginActivity extends BaseActivity implements LoginView {
             dialog.setMessage(getString(R.string.message_sign_in_loading));
             dialog.show();
             btnLogin.setEnabled(false);
-            errorContainer.setVisibility(View.INVISIBLE);
+            tvErrorMsg.setVisibility(View.INVISIBLE);
         });
 
         tvRegister.setOnClickListener(v -> {
-
+            presenter.onRegisterClicked();
         });
 
         presenter = new LoginPresenterImpl();
@@ -80,7 +78,7 @@ public class LoginActivity extends BaseActivity implements LoginView {
             dialog.dismiss();
         }
 
-        errorContainer.setVisibility(View.VISIBLE);
+        tvErrorMsg.setVisibility(View.VISIBLE);
         tvErrorMsg.setText(message);
         btnLogin.setEnabled(true);
     }

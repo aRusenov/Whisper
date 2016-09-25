@@ -16,26 +16,13 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/large_margin" />
 
-    <LinearLayout
-        android:id="@+id/error_container"
+    <TextView
+        android:id="@+id/tv_error_msg"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/xlarge_margin"
-        android:layout_marginRight="@dimen/xlarge_margin">
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/error" />
-
-        <TextView
-            android:id="@+id/tv_error_msg"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:text="Invalid username or password"
-            style="@style/ErrorTextView"/>
-
-    </LinearLayout>
+        tools:text="Invalid username or password"
+        android:drawableLeft="@drawable/error"
+        style="@style/ErrorTextView"/>
 
     <Space
         android:layout_width="match_parent"

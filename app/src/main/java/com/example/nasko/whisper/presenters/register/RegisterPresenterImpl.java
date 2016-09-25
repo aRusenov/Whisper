@@ -1,33 +1,32 @@
-package com.example.nasko.whisper.presenters.login;
+package com.example.nasko.whisper.presenters.register;
 
 import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.managers.LocalUserRepository;
 import com.example.nasko.whisper.managers.UserProvider;
+import com.example.nasko.whisper.models.RegisterModel;
 import com.example.nasko.whisper.network.rest.UserService;
 import com.example.nasko.whisper.presenters.AbstractPresenter;
 import com.example.nasko.whisper.presenters.Navigator;
-import com.example.nasko.whisper.views.contracts.LoginView;
+import com.example.nasko.whisper.views.contracts.RegisterView;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 
-public class LoginPresenterImpl extends AbstractPresenter<LoginView> implements LoginPresenter {
-
-    private static final String TAG = LoginPresenterImpl.class.getName();
+public class RegisterPresenterImpl extends AbstractPresenter<RegisterView> implements RegisterPresenter {
 
     private UserService userService;
     private Navigator navigator;
     private UserProvider userProvider;
     private LocalUserRepository localUserRepository;
 
-    public LoginPresenterImpl() {
+    public RegisterPresenterImpl() {
         this(WhisperApplication.instance().getUserService(),
                 WhisperApplication.instance().getNavigator(),
                 WhisperApplication.instance().getUserProvider(),
                 WhisperApplication.instance().getLocalUserRepository());
     }
 
-    public LoginPresenterImpl(UserService userService,
+    public RegisterPresenterImpl(UserService userService,
                               Navigator navigator,
                               UserProvider userProvider,
                               LocalUserRepository localUserRepository) {
@@ -38,8 +37,8 @@ public class LoginPresenterImpl extends AbstractPresenter<LoginView> implements 
     }
 
     @Override
-    public void onLoginClicked(String username, String password) {
-        Subscription sub = userService.login(username, password)
+    public void onRegisterClick(RegisterModel registerModel) {
+        Subscription registerSub = userService.register(registerModel)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(user -> {
                     userProvider.setCurrentUser(user);
@@ -51,11 +50,6 @@ public class LoginPresenterImpl extends AbstractPresenter<LoginView> implements 
                     }
                 });
 
-        subscriptions.add(sub);
-    }
-
-    @Override
-    public void onRegisterClicked() {
-        navigator.navigateToRegisterScreen(context);
+        subscriptions.add(registerSub);
     }
 }

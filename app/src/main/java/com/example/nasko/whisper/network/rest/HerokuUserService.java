@@ -1,14 +1,17 @@
 package com.example.nasko.whisper.network.rest;
 
 import android.content.Context;
+import android.support.annotation.Nullable;
 
 import com.android.volley.NoConnectionError;
 import com.android.volley.RequestQueue;
 import com.android.volley.TimeoutError;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.managers.ConfigLoader;
+import com.example.nasko.whisper.models.RegisterModel;
 import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.models.dto.Image;
 import com.example.nasko.whisper.network.JsonDeserializer;
@@ -82,21 +85,7 @@ public class HerokuUserService implements UserService {
                     subscriber.onError(e);
                 }
             }, error -> {
-                String message = null;
-                if (error instanceof TimeoutError) {
-                    message = context.getString(R.string.message_timeout);
-                } else if (error instanceof NoConnectionError) {
-                    message = context.getString(R.string.message_no_internet);
-                } else if (error.networkResponse != null && error.networkResponse.data != null) {
-                    try {
-                        message = new String(error.networkResponse.data, "UTF-8");
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    message = context.getString(R.string.message_generic_bad_request);
-                }
-
+                String message = getErrorMessage(error);
                 subscriber.onError(new RequestFailedException(message));
             });
 
@@ -104,13 +93,33 @@ public class HerokuUserService implements UserService {
         });
     }
 
+    @Nullable
+    private String getErrorMessage(VolleyError error) {
+        String message = null;
+        if (error instanceof TimeoutError) {
+            message = context.getString(R.string.message_timeout);
+        } else if (error instanceof NoConnectionError) {
+            message = context.getString(R.string.message_no_internet);
+        } else if (error.networkResponse != null && error.networkResponse.data != null) {
+            try {
+                message = new String(error.networkResponse.data, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        } else {
+            message = context.getString(R.string.message_generic_bad_request);
+        }
+        return message;
+    }
+
     @Override
-    public Observable<User> register(String username, String password) {
+    public Observable<User> register(RegisterModel registerModel) {
         return Observable.create(subscriber -> {
             JSONObject loginData = new JSONObject();
             try {
-                loginData.put("username", username);
-                loginData.put("password", password);
+                loginData.put("username", registerModel.getUsername());
+                loginData.put("password", registerModel.getPassword());
+                loginData.put("name", registerModel.getName());
             } catch (JSONException e) {
                 subscriber.onError(e);
                 return;
@@ -123,6 +132,7 @@ public class HerokuUserService implements UserService {
                             response.getString("uId"),
                             response.getString("token"));
 
+                    user.setName(response.getString("name"));
                     String imageUrl = response.getJSONObject("image").getString("url");
                     user.setImage(new Image(imageUrl));
 
@@ -131,7 +141,10 @@ public class HerokuUserService implements UserService {
                 } catch (JSONException e) {
                     subscriber.onError(e);
                 }
-            }, error -> subscriber.onError(error.getCause()));
+            }, error -> {
+                String message = getErrorMessage(error);
+                subscriber.onError(new RequestFailedException(message));
+            });
 
             requestQueue.add(request);
         });
