@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import com.example.nasko.whisper.R;
-import com.example.nasko.whisper.activities.ViewCoordnator;
+import com.example.nasko.whisper.activities.ViewCoordinator;
 import com.example.nasko.whisper.models.view.ChatViewModel;
 import com.example.nasko.whisper.models.view.MessageViewModel;
 import com.example.nasko.whisper.presenters.chats.ChatsPresenter;
@@ -31,7 +31,7 @@ public class ChatsFragment extends BaseFragment<ChatsPresenter> implements Chats
 
     private ChatAdapter chatsAdapter;
     private LinearLayoutManager chatsLayoutManager;
-    private ViewCoordnator viewCoordnator;
+    private ViewCoordinator viewCoordinator;
 
     @BindView(R.id.progress_loading) ProgressBar loadingBar;
     @BindView(R.id.rv_chats) RecyclerView contactsView;
@@ -39,17 +39,17 @@ public class ChatsFragment extends BaseFragment<ChatsPresenter> implements Chats
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof ViewCoordnator) {
-            viewCoordnator = (ViewCoordnator) context;
+        if (context instanceof ViewCoordinator) {
+            viewCoordinator = (ViewCoordinator) context;
         } else {
-            throw new IllegalArgumentException("Activity must implement " + ViewCoordnator.class.getSimpleName());
+            throw new IllegalArgumentException("Activity must implement " + ViewCoordinator.class.getSimpleName());
         }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        viewCoordnator = null;
+        viewCoordinator = null;
     }
 
     @Override
@@ -70,7 +70,7 @@ public class ChatsFragment extends BaseFragment<ChatsPresenter> implements Chats
         chatsAdapter.setItemClickListener(position -> {
             ChatViewModel selectedChat = chatsAdapter.getItem(position);
             getPresenter().onChatClicked(selectedChat);
-            viewCoordnator.onChatItemClicked(selectedChat);
+            viewCoordinator.onChatItemClicked(selectedChat);
         });
 
         contactsView.setAdapter(this.chatsAdapter);

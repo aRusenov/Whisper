@@ -20,7 +20,7 @@ import com.example.nasko.whisper.views.contracts.ChatsNavBarView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends BaseActivity<NavBarPresenter> implements ChatsNavBarView, ViewCoordnator {
+public class MainActivity extends BaseActivity<NavBarPresenter> implements ChatsNavBarView, ViewCoordinator {
 
     private static final String TAG = "MainActivity";
     public static final String FRAGMENT_TAG = "fragment_chatroom";
