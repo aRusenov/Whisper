@@ -7,13 +7,13 @@ import com.example.nasko.whisper.views.contracts.View;
 
 import rx.subscriptions.CompositeSubscription;
 
-public abstract class AbstractPresenter<V extends View> implements Presenter<V> {
+public abstract class BasePresenter<V extends View> implements Presenter<V> {
 
     protected V view;
     protected Context context;
     protected CompositeSubscription subscriptions;
 
-    public AbstractPresenter() {
+    public BasePresenter() {
         subscriptions = new CompositeSubscription();
     }
 
@@ -40,19 +40,9 @@ public abstract class AbstractPresenter<V extends View> implements Presenter<V> 
         // Empty
     }
 
-    @Override
-    public void onRestoreInstanceState(Bundle savedInstanceState) {
-        // Empty
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outBundle) {
-        // Empty
-    }
-
     public void detachView() {
         view = null;
         context = null;
-        subscriptions.unsubscribe();
+        subscriptions.clear();
     }
 }

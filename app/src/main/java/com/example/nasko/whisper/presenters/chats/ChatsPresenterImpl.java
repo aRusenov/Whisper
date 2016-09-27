@@ -135,10 +135,9 @@ public class ChatsPresenterImpl extends ServiceBoundPresenter<ChatsView> impleme
 
     @Override
     public void onChatClicked(ChatViewModel clickedChat) {
-        navigator.navigateToChatroom(
-                context,
-                userProvider.getCurrentUser(),
-                clickedChat);
+//        navigator.navigateToChatroom(
+//                context,
+//                clickedChat);
     }
 
     private void setDisplayContact(ChatViewModel chat, List<Contact> participants) {

@@ -16,7 +16,12 @@ public class MessageViewModel implements Parcelable {
     private ContactViewModel author;
 
     public MessageViewModel(String text, Date createdAt, ContactViewModel author) {
-        status = MessageStatus.SENT;
+        this(text, createdAt, author, 0, MessageStatus.SENT);
+    }
+
+    public MessageViewModel(String text, Date createdAt, ContactViewModel author, long uId, MessageStatus status) {
+        this.uId = uId;
+        this.status = status;
         this.text = text;
         this.createdAt = createdAt;
         this.author = author;

@@ -28,7 +28,6 @@ public class ChatroomPresenterImpl extends ServiceBoundPresenter<ChatroomView> i
     private static final String TAG = ChatroomPresenter.class.getName();
     private static final int PAGE_SIZE = 10;
     private static final int DEFAULT_MESSAGE_SEQ = -1;
-    private static final String LAST_MESSAGE_SEQ = "lastMessageSeq";
 
     private ChatViewModel chat;
     private int lastLoadedMessageSeq = DEFAULT_MESSAGE_SEQ;
@@ -51,21 +50,31 @@ public class ChatroomPresenterImpl extends ServiceBoundPresenter<ChatroomView> i
 
     @Override
     public void attachView(ChatroomView view, Context context, Bundle extras) {
-        chat = extras.getParcelable("chat");
-        if (chat != null) {
-            notificationController.removeNotification(chat.getDisplayContact().getId());
+        if (extras != null) {
+            chat = extras.getParcelable("chat");
+            if (chat != null) {
+                notificationController.removeNotification(chat.getDisplayContact().getId()); // TODO: Use chatId instead
+            }
         }
 
-        super.attachView(view, context, extras);
+        super.attachView(view, context, extras); // TODO: Move to top
     }
 
     @Override
     public void onServiceBind(SocketService service) {
         super.onServiceBind(service);
+//        if (chat == null) {
+//            return;
+//        }
+
         if (lastLoadedMessageSeq == DEFAULT_MESSAGE_SEQ) {
             loadMesages();
         }
 
+        registerSubscriptions();
+    }
+
+    private void registerSubscriptions() {
         Subscription authSub = service.connectionService()
                 .onAuthenticated()
                 .observeOn(AndroidSchedulers.mainThread())
@@ -84,8 +93,7 @@ public class ChatroomPresenterImpl extends ServiceBoundPresenter<ChatroomView> i
 
                     List<Message> messages = response.getMessages();
                     if (messages.size() > 0) {
-                        int messageSeq = messages.get(0).getSeq();
-                        lastLoadedMessageSeq = messageSeq;
+                        lastLoadedMessageSeq = messages.get(0).getSeq();
                         if (view != null) {
                             List<MessageViewModel> viewModelList = Mapper.toMessageViewModelList(messages);
                             view.loadMessages(viewModelList);
@@ -95,13 +103,12 @@ public class ChatroomPresenterImpl extends ServiceBoundPresenter<ChatroomView> i
 
         Subscription newMsgSub = service.messageService()
                 .onNewMessage()
+                .filter(message -> message.getChatId().equals(chat.getId()))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(message -> {
-                    if (message.getChatId().equals(chat.getId())) {
-                        if (view != null) {
-                            MessageViewModel msg = Mapper.toMessageViewModel(message);
-                            view.addMessage(msg);
-                        }
+                    if (view != null) {
+                        MessageViewModel msg = Mapper.toMessageViewModel(message);
+                        view.addMessage(msg);
                     }
                 });
 
@@ -116,18 +123,20 @@ public class ChatroomPresenterImpl extends ServiceBoundPresenter<ChatroomView> i
 
         Subscription startTypingSub = service.messageService()
                 .onStartTyping()
+                .filter(typingEvent -> typingEvent.getChatId().equals(chat.getId()))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(typingEvent -> {
-                    if (typingEvent.getChatId().equals(chat.getId()) && view != null) {
+                    if (view != null) {
                         view.displayTypingStarted(typingEvent);
                     }
                 });
 
         Subscription stopTypingSub = service.messageService()
                 .onStopTyping()
+                .filter(typingEvent -> typingEvent.getChatId().equals(chat.getId()))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(typingEvent -> {
-                    if (typingEvent.getChatId().equals(chat.getId()) && view != null) {
+                    if (view != null) {
                         view.displayTypingStopped(typingEvent);
                     }
                 });
@@ -182,15 +191,36 @@ public class ChatroomPresenterImpl extends ServiceBoundPresenter<ChatroomView> i
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outBundle) {
-        outBundle.putInt(LAST_MESSAGE_SEQ, lastLoadedMessageSeq);
+    public void onChatDisplayRequested(ChatViewModel chat) {
+//        if (!serviceBinder.isBound()) {
+//            return;
+//        }
+//
+//        if (this.chat.getId().equals(chat.getId())) {
+//            return;
+//        }
+//
+//        if (lastLoadedMessageSeq == DEFAULT_MESSAGE_SEQ) {
+//            loadMesages();
+//        }
+//
+//        subscriptions.clear();
+//        registerSubscriptions();
     }
 
     @Override
-    public void onRestoreInstanceState(Bundle savedInstanceState) {
-        if (savedInstanceState.containsKey(LAST_MESSAGE_SEQ)) {
-            lastLoadedMessageSeq = savedInstanceState.getInt(LAST_MESSAGE_SEQ);
-        }
+    public void onChatClosed() {
+
+    }
+
+    @Override
+    public void setLastLoadedMessageId(int lastLoadedMessageId) {
+        lastLoadedMessageSeq = lastLoadedMessageId;
+    }
+
+    @Override
+    public int getLastLoadedMessageId() {
+        return lastLoadedMessageSeq;
     }
 
     @Override

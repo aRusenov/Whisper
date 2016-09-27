@@ -3,10 +3,11 @@ package com.example.nasko.whisper.views.contracts;
 import com.example.nasko.whisper.models.MessageStatus;
 import com.example.nasko.whisper.models.TypingEvent;
 import com.example.nasko.whisper.models.view.MessageViewModel;
+import com.example.nasko.whisper.presenters.chatroom.ChatroomPresenter;
 
 import java.util.List;
 
-public interface ChatroomView extends View {
+public interface ChatroomView extends View<ChatroomPresenter> {
 
     void addMessage(MessageViewModel message);
 

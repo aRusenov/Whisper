@@ -1,4 +1,6 @@
 package com.example.nasko.whisper.views.contracts;
 
-public interface View {
+import com.example.nasko.whisper.presenters.Presenter;
+
+public interface View<P extends Presenter> {
 }

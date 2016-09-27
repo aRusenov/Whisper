@@ -10,7 +10,7 @@ import com.example.nasko.whisper.managers.LocalUserRepository;
 import com.example.nasko.whisper.managers.RealPathUtil;
 import com.example.nasko.whisper.managers.UserProvider;
 import com.example.nasko.whisper.network.rest.UserService;
-import com.example.nasko.whisper.presenters.AbstractPresenter;
+import com.example.nasko.whisper.presenters.BasePresenter;
 import com.example.nasko.whisper.views.contracts.ProfileView;
 
 import java.io.File;
@@ -18,7 +18,7 @@ import java.io.File;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 
-public class ProfilePresenterImpl extends AbstractPresenter<ProfileView> implements ProfilePresenter {
+public class ProfilePresenterImpl extends BasePresenter<ProfileView> implements ProfilePresenter {
 
     private static final String TAG = ProfilePresenterImpl.class.getName();
 

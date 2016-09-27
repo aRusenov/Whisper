@@ -15,7 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         <activity android:name=".activities.LoginActivity" />
-        <activity android:name=".activities.ChatsActivity">
+        <activity android:name=".activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -29,10 +29,10 @@
         </activity>
         <activity
             android:name=".activities.ChatroomActivity"
-            android:parentActivityName=".activities.ChatsActivity">
+            android:parentActivityName=".activities.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activities.ChatsActivity" />
+                android:value=".activities.MainActivity" />
         </activity>
         <activity
             android:name=".activities.ProfileActivity"
@@ -50,13 +50,13 @@
         <service
             android:name=".network.notifications.consumer.FcmListenerService"
             android:enabled="true"
-            android:exported="true">
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
 
-        <activity android:name=".activities.RegisterActivity"></activity>
+        <activity android:name=".activities.RegisterActivity"/>
     </application>
 
 </manifest>

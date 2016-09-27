@@ -1,6 +1,8 @@
 package com.example.nasko.whisper.views.contracts;
 
-public interface ChatsNavBarView extends View {
+import com.example.nasko.whisper.presenters.chats.NavBarPresenter;
+
+public interface ChatsNavBarView extends View<NavBarPresenter> {
 
     void setNetworkStatus(String message);
 }

@@ -21,12 +21,11 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class ProfileActivity extends BaseActivity implements ProfileView {
+public class ProfileActivity extends BaseActivity<ProfilePresenter> implements ProfileView {
 
-    private static final String TAG = ProfileActivity.class.getName();
+    private static final String TAG = "ProfileActivity";
     private static final int GALLERY_PICK_IMAGE = 2;
 
-    private ProfilePresenter presenter;
     private Uri galleryPickedImageUri;
 
     @BindView(R.id.profile_image) CircleImageView profileImage;
@@ -55,9 +54,8 @@ public class ProfileActivity extends BaseActivity implements ProfileView {
                     "Select Picture"), GALLERY_PICK_IMAGE);
         });
 
-        presenter = new ProfilePresenterImpl();
-        Bundle extras = getIntent().getExtras();
-        presenter.attachView(this, this, extras);
+        setPresenter(new ProfilePresenterImpl());
+        getPresenter().attachView(this, this, getIntent().getExtras());
     }
 
     @Override
@@ -72,16 +70,9 @@ public class ProfileActivity extends BaseActivity implements ProfileView {
     protected void onStart() {
         super.onStart();
         if (galleryPickedImageUri != null) {
-            presenter.onImagePickedFromGallery(galleryPickedImageUri);
+            getPresenter().onImagePickedFromGallery(galleryPickedImageUri);
             galleryPickedImageUri = null;
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        presenter.detachView();
-        presenter = null;
     }
 
     @Override

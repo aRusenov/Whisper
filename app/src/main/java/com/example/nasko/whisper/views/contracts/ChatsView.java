@@ -2,10 +2,11 @@ package com.example.nasko.whisper.views.contracts;
 
 import com.example.nasko.whisper.models.view.ChatViewModel;
 import com.example.nasko.whisper.models.view.MessageViewModel;
+import com.example.nasko.whisper.presenters.chats.ChatsPresenter;
 
 import java.util.List;
 
-public interface ChatsView extends View {
+public interface ChatsView extends View<ChatsPresenter> {
 
     void loadChats(List<ChatViewModel> chats);
 

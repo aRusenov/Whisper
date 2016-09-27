@@ -18,12 +18,9 @@ import com.example.nasko.whisper.views.contracts.RegisterView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class RegisterActivity extends BaseActivity implements RegisterView {
-
-    private RegisterPresenter presenter;
+public class RegisterActivity extends BaseActivity<RegisterPresenter> implements RegisterView {
 
     private ProgressDialog dialog;
-    private String imageUriPath;
 
     @BindView(R.id.tv_error_msg) TextView tvErrorMsg;
     @BindView(R.id.edit_username) EditText editUsername;
@@ -49,13 +46,13 @@ public class RegisterActivity extends BaseActivity implements RegisterView {
                 dialog.setMessage(getString(R.string.message_sign_in_loading));
                 dialog.show();
 
-                presenter.onRegisterClick(registerModel);
+                getPresenter().onRegisterClick(registerModel);
                 tvErrorMsg.setVisibility(View.INVISIBLE);
             }
         });
 
-        presenter = new RegisterPresenterImpl();
-        presenter.attachView(this, this, null);
+        setPresenter(new RegisterPresenterImpl());
+        getPresenter().attachView(this, this, null);
     }
 
     private RegisterModel validateFields() {
@@ -95,5 +92,13 @@ public class RegisterActivity extends BaseActivity implements RegisterView {
         tvErrorMsg.setVisibility(View.VISIBLE);
         tvErrorMsg.setText(message);
         btnRegister.setEnabled(true);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (dialog != null) {
+            dialog.dismiss();
+        }
     }
 }

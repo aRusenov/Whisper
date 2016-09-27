@@ -12,13 +12,13 @@ import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.util.SimpleArrayMap;
 
 import com.example.nasko.whisper.R;
-import com.example.nasko.whisper.activities.ChatroomActivity;
-import com.example.nasko.whisper.models.dto.Chat;
+import com.example.nasko.whisper.activities.MainActivity;
 import com.example.nasko.whisper.models.dto.Message;
+import com.example.nasko.whisper.models.view.ChatViewModel;
+import com.example.nasko.whisper.utils.Mapper;
 
 public class MessageNotificationController implements NotificationDismissedListener {
 
-    private NotificationDismissedReceiver notificationDismissedReceiver;
     private UserProvider userProvider;
     private Context context;
     private NotificationManager notificationManager;
@@ -34,7 +34,7 @@ public class MessageNotificationController implements NotificationDismissedListe
         alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         contactsNotificationIds = new SimpleArrayMap<>();
 
-        notificationDismissedReceiver = new NotificationDismissedReceiver(context, this);
+        NotificationDismissedReceiver notificationDismissedReceiver = new NotificationDismissedReceiver(context, this);
         notificationDismissedReceiver.start();
     }
 
@@ -46,24 +46,23 @@ public class MessageNotificationController implements NotificationDismissedListe
             contactsNotificationIds.put(contactId, notificationId);
         }
 
-        Chat chat = new Chat();
-        chat.setId(message.getChatId());
-        chat.setOtherContact(message.getAuthor());
+        ChatViewModel chat = new ChatViewModel(message.getChatId(), Mapper.toMessageViewModel(message));
+        chat.setDisplayContact(Mapper.toContactViewModel(message.getAuthor()));
 
-        Notification notification = buildNotification(message, chat, notificationId);
+        Notification notification = buildNotification(chat, notificationId);
 
         notificationManager.notify(notificationId, notification);
     }
 
-    private Notification buildNotification(Message message, Chat chat, int notificationId) {
+    private Notification buildNotification(ChatViewModel chat, int notificationId) {
         // Add intent extras
-        Intent chatroomLaunchIntent = new Intent(context, ChatroomActivity.class);
+        Intent chatroomLaunchIntent = new Intent(context, MainActivity.class);
         chatroomLaunchIntent.putExtra("chat", chat);
         chatroomLaunchIntent.putExtra("user", userProvider.getCurrentUser());
 
         // Add backstack with parent activity (for navigating back)
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
-        stackBuilder.addParentStack(ChatroomActivity.class);
+//        stackBuilder.addParentStack(MainActivity.class);
         stackBuilder.addNextIntent(chatroomLaunchIntent);
         PendingIntent resultPendingIntent =
                 stackBuilder.getPendingIntent(
@@ -73,12 +72,12 @@ public class MessageNotificationController implements NotificationDismissedListe
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                 .setSmallIcon(R.drawable.profile)
-                .setContentTitle(message.getAuthor().getUsername())
-                .setContentText(message.getText())
+                .setContentTitle(chat.getDisplayContact().getUsername())
+                .setContentText(chat.getLastMessage().getText())
                 .setSound(alarmSound)
                 .setAutoCancel(true)
                 .setContentIntent(resultPendingIntent)
-                .setDeleteIntent(createOnDismissedIntent(chat.getOtherContact().getId(), notificationId));
+                .setDeleteIntent(createOnDismissedIntent(chat.getDisplayContact().getId(), notificationId));
 
         return builder.build();
     }

@@ -18,11 +18,10 @@ import com.example.nasko.whisper.views.contracts.LoginView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class LoginActivity extends BaseActivity implements LoginView {
+public class LoginActivity extends BaseActivity<LoginPresenter> implements LoginView {
 
-    private static final String TAG = LoginActivity.class.getName();
+    private static final String TAG = "LoginActivity";
 
-    private LoginPresenter presenter;
     private ProgressDialog dialog;
 
     @BindView(R.id.btn_login) Button btnLogin;
@@ -47,7 +46,7 @@ public class LoginActivity extends BaseActivity implements LoginView {
         btnLogin.setOnClickListener(v -> {
             String username = editEmail.getText().toString();
             String password = editPassword.getText().toString();
-            presenter.onLoginClicked(username, password);
+            getPresenter().onLoginClicked(username, password);
 
             dialog = new ProgressDialog(this);
             dialog.setIndeterminate(true);
@@ -58,18 +57,11 @@ public class LoginActivity extends BaseActivity implements LoginView {
         });
 
         tvRegister.setOnClickListener(v -> {
-            presenter.onRegisterClicked();
+            getPresenter().onRegisterClicked();
         });
 
-        presenter = new LoginPresenterImpl();
-        presenter.attachView(this, this, null);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        presenter.detachView();
-        presenter = null;
+        setPresenter(new LoginPresenterImpl());
+        getPresenter().attachView(this, this, null);
     }
 
     @Override
@@ -81,5 +73,13 @@ public class LoginActivity extends BaseActivity implements LoginView {
         tvErrorMsg.setVisibility(View.VISIBLE);
         tvErrorMsg.setText(message);
         btnLogin.setEnabled(true);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (dialog != null) {
+            dialog.dismiss();
+        }
     }
 }

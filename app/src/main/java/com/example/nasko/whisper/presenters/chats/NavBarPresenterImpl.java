@@ -8,7 +8,6 @@ import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.managers.LocalUserRepository;
 import com.example.nasko.whisper.managers.UserProvider;
 import com.example.nasko.whisper.models.User;
-import com.example.nasko.whisper.network.JsonDeserializer;
 import com.example.nasko.whisper.network.notifications.consumer.SocketServiceBinder;
 import com.example.nasko.whisper.network.notifications.service.SocketService;
 import com.example.nasko.whisper.presenters.Navigator;
@@ -25,21 +24,17 @@ public class NavBarPresenterImpl extends ServiceBoundPresenter<ChatsNavBarView> 
     private LocalUserRepository localUserRepository;
     private UserProvider userProvider;
     private Navigator navigator;
-    private JsonDeserializer deserializer = new JsonDeserializer();
 
     public NavBarPresenterImpl() {
-        this(WhisperApplication.instance().getLocalUserRepository(),
-                WhisperApplication.instance().getUserProvider(),
+        this(WhisperApplication.instance().getUserProvider(),
                 WhisperApplication.instance().getNavigator(),
                 WhisperApplication.instance().getServiceBinder());
     }
 
-    public NavBarPresenterImpl(LocalUserRepository localUserRepository,
-                               UserProvider userProvider,
+    public NavBarPresenterImpl(UserProvider userProvider,
                                Navigator navigator,
                                SocketServiceBinder socketServiceBinder) {
         super(socketServiceBinder);
-        this.localUserRepository = localUserRepository;
         this.userProvider = userProvider;
         this.navigator = navigator;
     }
@@ -119,8 +114,7 @@ public class NavBarPresenterImpl extends ServiceBoundPresenter<ChatsNavBarView> 
     }
 
     private void logout() {
-        LocalUserRepository localUserRepository = new LocalUserRepository(context);
-        localUserRepository.logout();
+        userProvider.logout();
         serviceBinder.stop(true);
         navigator.navigateToLoginScreen(context);
     }

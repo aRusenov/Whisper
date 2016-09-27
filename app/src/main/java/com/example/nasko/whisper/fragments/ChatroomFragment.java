@@ -5,21 +5,27 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ProgressBar;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.example.nasko.whisper.R;
+import com.example.nasko.whisper.WhisperApplication;
+import com.example.nasko.whisper.managers.UserProvider;
 import com.example.nasko.whisper.models.LoadingData;
 import com.example.nasko.whisper.models.MessageSeparator;
 import com.example.nasko.whisper.models.MessageStatus;
@@ -43,40 +49,83 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class ChatroomFragment extends Fragment implements ChatroomView {
+public class ChatroomFragment extends BaseFragment<ChatroomPresenter> implements ChatroomView {
 
-    private ChatroomPresenter presenter;
+    private static final String KEY_LAST_LOADED_MESSAGE_ID = "lastLoadedMessageId";
+    private static final String KEY_MESSAGES = "messages";
+
+    private UserProvider userProvider;
     private DateFormatter dateFormatter;
-    private User user;
-    private ChatViewModel chat;
 
     private LinearLayoutManager layoutManager;
     private EndlessUpScrollListener endlessScrollListener;
     private MessageAdapter adapter;
 
-    private boolean isTyping;
+    private ChatViewModel chat;
+
+    private boolean typing;
     private ContactViewModel userContact;
 
     @BindView(R.id.message_list) RecyclerView messageList;
-    @BindView(R.id.progress_loading_bar) ProgressBar loadingBar;
+//    @BindView(R.id.progress_loading_bar) ProgressBar loadingBar;
     @BindView(R.id.edit_new_message) EditText messageEdit;
     @BindView(R.id.btn_send_message) ImageButton sendButton;
+
+    @BindView(R.id.toolbar_main) Toolbar myToolbar;
+    @BindView(R.id.tv_contact_name) TextView tvName;
+    @BindView(R.id.tv_status) TextView tvStatus;
+    @BindView(R.id.status_image) ImageView statusImg;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        dateFormatter = new MessageSeparatorDateFormatter();
-
+        userProvider = WhisperApplication.instance().getUserProvider();
+        User user = userProvider.getCurrentUser();
         chat = getArguments().getParcelable("chat");
-        user = getArguments().getParcelable("user");
         userContact = new ContactViewModel(user.getUId(), user.getUsername(), user.getName(), user.getImage(), false);
 
-        presenter = new ChatroomPresenterImpl();
+        setPresenter(new ChatroomPresenterImpl());
         if (savedInstanceState != null) {
-            presenter.onRestoreInstanceState(savedInstanceState);
+            getPresenter().setLastLoadedMessageId(savedInstanceState.getInt(KEY_LAST_LOADED_MESSAGE_ID));
         }
 
-        presenter.attachView(this, getContext(), getArguments());
+        getPresenter().attachView(this, getContext(), getArguments());
+        dateFormatter = new MessageSeparatorDateFormatter();
+    }
+
+    private void setToolbar() {
+        AppCompatActivity hostActivity = (AppCompatActivity) getActivity();
+        hostActivity.setSupportActionBar(myToolbar);
+        ActionBar actionBar = hostActivity.getSupportActionBar();
+        if (actionBar == null) {
+            myToolbar.setVisibility(View.GONE);
+            return;
+        }
+
+        actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setDisplayShowHomeEnabled(true);
+
+        ContactViewModel displayContact = chat.getDisplayContact();
+        if (displayContact == null) {
+            return;
+        }
+
+        TypedValue tv = new TypedValue();
+        if (hostActivity.getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true))
+        {
+            int actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data,getResources().getDisplayMetrics());
+            tvName.setText(displayContact.getUsername());
+            tvName.setTextSize(TypedValue.COMPLEX_UNIT_PX, actionBarHeight / 3);
+            tvStatus.setTextSize(TypedValue.COMPLEX_UNIT_PX, actionBarHeight / 4);
+            setContactStatus(displayContact.isOnline());
+        }
+    }
+
+    public void setContactStatus(boolean online) {
+        int statusRes = online ? R.drawable.circle_green : R.drawable.circle_gray;
+        statusImg.setImageResource(statusRes);
+        tvStatus.setText(online ? getString(R.string.status_online) : getString(R.string.status_offline));
     }
 
     @Nullable
@@ -85,30 +134,28 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
         View view = inflater.inflate(R.layout.fragment_chatroom, container, false);
         ButterKnife.bind(this, view);
 
-        loadingBar.setVisibility(View.VISIBLE);
+        setToolbar();
+
+//        loadingBar.setVisibility(View.VISIBLE);
         DisplayMetrics metrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
-
         int width = metrics.widthPixels;
-        adapter = new MessageAdapter(getContext(), user, chat.getId(), width);
-        if (savedInstanceState != null) {
-            ArrayList<MessageViewModel> messages = savedInstanceState.getParcelableArrayList("messages");
-            for (Object msg : messages) {
-                adapter.add(msg);
-            }
-            loadingBar.setVisibility(View.INVISIBLE);
-        }
+        adapter = new MessageAdapter(getActivity(), userContact, chat.getId(), width);
 
-        layoutManager = new LinearLayoutManager(getContext());
+        layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setStackFromEnd(true);
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
 
-        messageList.setAdapter(adapter);
+        // Without the line below the view scrolls down whenever something is inserted (only on multi-pane mode)
+        // More info: https://code.google.com/p/android/issues/detail?id=203574
+        layoutManager.setAutoMeasureEnabled(false);
+
         messageList.setLayoutManager(layoutManager);
-
+        messageList.setAdapter(adapter);
         endlessScrollListener = new EndlessUpScrollListener(layoutManager) {
             @Override
             public void onLoadMore() {
-                boolean loading = presenter.onScrollToTop();
+                boolean loading = getPresenter().onScrollToTop();
                 if (loading) {
                     adapter.add(0, new LoadingData());
                 }
@@ -127,7 +174,7 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
         });
 
         messageEdit.setOnFocusChangeListener((v, hasFocus) -> {
-            if (!hasFocus && isTyping) {
+            if (!hasFocus && typing) {
                 stopTyping();
             }
         });
@@ -141,33 +188,30 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (s.length() > 0 && !isTyping) {
+                if (s.length() > 0 && !typing) {
                     startTyping();
-                } else if (s.length() == 0 && isTyping) {
+                } else if (s.length() == 0 && typing) {
                     stopTyping();
                 }
             }
         });
 
+        if (savedInstanceState != null) {
+            // Restore adapter state
+            getPresenter().setLastLoadedMessageId(savedInstanceState.getInt(KEY_LAST_LOADED_MESSAGE_ID));
+            ArrayList<MessageViewModel> messages = savedInstanceState.getParcelableArrayList(KEY_MESSAGES);
+            for (Object msg : messages) {
+                adapter.add(msg);
+            }
+//            loadingBar.setVisibility(View.INVISIBLE);
+        }
+
         return view;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        presenter.onResume();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        presenter.onPause();
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        presenter.onSaveInstanceState(outState);
         ArrayList<MessageViewModel> savedMessages = new ArrayList<>();
         for (Object msg : adapter) {
             if (msg instanceof MessageViewModel) {
@@ -175,20 +219,14 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
             }
         }
 
-        outState.putParcelableArrayList("messages", savedMessages);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        presenter.detachView();
-        presenter = null;
+        outState.putParcelableArrayList(KEY_MESSAGES, savedMessages);
+        outState.putInt(KEY_LAST_LOADED_MESSAGE_ID, getPresenter().getLastLoadedMessageId());
     }
 
     @Override
     public void loadMessages(List<MessageViewModel> messages) {
         // TODO: Remove and use empty view
-        loadingBar.setVisibility(View.INVISIBLE);
+//        loadingBar.setVisibility(View.INVISIBLE);
         if (adapter.size() > 0 && adapter.getItem(0) instanceof LoadingData) {
             adapter.removeAt(0);
         }
@@ -251,7 +289,7 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
         msg.setUId(System.nanoTime());
         addMessage(msg);
 
-        presenter.onMessageSend(text, msg.getUId());
+        getPresenter().onMessageSend(text, msg.getUId());
         messageEdit.setText("");
     }
 
@@ -266,7 +304,7 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
         adapter.add(insertPosition, message);
         if (scroll) {
             scrollToPosition(adapter.getItemCount() - 1);
-        } else if (!user.getUId().equals(message.getAuthor().getId())) {
+        } else if (!userContact.getId().equals(message.getAuthor().getId())) {
             playNewMessageSound();
         }
     }
@@ -288,13 +326,13 @@ public class ChatroomFragment extends Fragment implements ChatroomView {
     }
 
     private void stopTyping() {
-        isTyping = false;
-        presenter.onStopTyping();
+        typing = false;
+        getPresenter().onStopTyping();
     }
 
     private void startTyping() {
-        isTyping = true;
-        presenter.onStartTyping();
+        typing = true;
+        getPresenter().onStartTyping();
     }
 
     private boolean isLastItemVisible() {

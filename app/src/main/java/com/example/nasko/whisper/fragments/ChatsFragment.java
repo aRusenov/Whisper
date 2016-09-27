@@ -1,8 +1,8 @@
 package com.example.nasko.whisper.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import com.example.nasko.whisper.R;
+import com.example.nasko.whisper.activities.ViewCoordnator;
 import com.example.nasko.whisper.models.view.ChatViewModel;
 import com.example.nasko.whisper.models.view.MessageViewModel;
 import com.example.nasko.whisper.presenters.chats.ChatsPresenter;
@@ -24,23 +25,38 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class ChatsFragment extends Fragment implements ChatsView {
+public class ChatsFragment extends BaseFragment<ChatsPresenter> implements ChatsView {
 
-    private  static final String TAG = ChatsFragment.class.getName();
-
-    private ChatsPresenter presenter;
+    private  static final String TAG = "ChatsFragment";
 
     private ChatAdapter chatsAdapter;
     private LinearLayoutManager chatsLayoutManager;
+    private ViewCoordnator viewCoordnator;
 
     @BindView(R.id.progress_loading) ProgressBar loadingBar;
     @BindView(R.id.rv_chats) RecyclerView contactsView;
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof ViewCoordnator) {
+            viewCoordnator = (ViewCoordnator) context;
+        } else {
+            throw new IllegalArgumentException("Activity must implement " + ViewCoordnator.class.getSimpleName());
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        viewCoordnator = null;
+    }
+
+    @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        presenter = new ChatsPresenterImpl();
-        presenter.attachView(this, getContext(), null);
+        setPresenter(new ChatsPresenterImpl());
+        getPresenter().attachView(this, getContext(), null);
     }
 
     @Nullable
@@ -53,7 +69,8 @@ public class ChatsFragment extends Fragment implements ChatsView {
         chatsAdapter = new ChatAdapter(getContext(), new LastMessageDateFormatter());
         chatsAdapter.setItemClickListener(position -> {
             ChatViewModel selectedChat = chatsAdapter.getItem(position);
-            presenter.onChatClicked(selectedChat);
+            getPresenter().onChatClicked(selectedChat);
+            viewCoordnator.onChatItemClicked(selectedChat);
         });
 
         contactsView.setAdapter(this.chatsAdapter);
@@ -66,15 +83,7 @@ public class ChatsFragment extends Fragment implements ChatsView {
     @Override
     public void onResume() {
         super.onResume();
-        presenter.onResume();
         contactsView.scrollToPosition(0);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        presenter.detachView();
-        presenter = null;
     }
 
     @Override

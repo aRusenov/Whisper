@@ -2,7 +2,6 @@ package com.example.nasko.whisper.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -15,8 +14,8 @@ import android.widget.TextView;
 
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.models.dto.Contact;
-import com.example.nasko.whisper.presenters.chats.ContactsSearchPresenterImpl;
 import com.example.nasko.whisper.presenters.chats.ContactsSearchPresenter;
+import com.example.nasko.whisper.presenters.chats.ContactsSearchPresenterImpl;
 import com.example.nasko.whisper.views.adapters.ContactQueryAdapter;
 import com.example.nasko.whisper.views.contracts.ContactsSearchView;
 
@@ -26,9 +25,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class ContactsSearchFragment extends Fragment implements ContactsSearchView {
-
-    private ContactsSearchPresenter presenter;
+public class ContactsSearchFragment extends BaseFragment<ContactsSearchPresenter> implements ContactsSearchView {
 
     private ContactQueryAdapter contactQueryAdapter;
 
@@ -39,8 +36,8 @@ public class ContactsSearchFragment extends Fragment implements ContactsSearchVi
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        presenter = new ContactsSearchPresenterImpl();
-        presenter.attachView(this, getContext(), null);
+        setPresenter(new ContactsSearchPresenterImpl());
+        getPresenter().attachView(this, getContext(), null);
     }
 
     @Nullable
@@ -51,16 +48,16 @@ public class ContactsSearchFragment extends Fragment implements ContactsSearchVi
 
         contactQueryAdapter = new ContactQueryAdapter(getContext());
         contactQueryAdapter.setInvitationIconClickListener(position -> {
-            if (presenter != null) {
-                Contact contact = contactQueryAdapter.getItem(position);
-                presenter.onContactSendRequestClick(contact);
-            }
+            Contact contact = contactQueryAdapter.getItem(position);
+            getPresenter().onContactSendRequestClick(contact);
         });
 
         if (savedInstanceState != null) {
             ArrayList<Contact> contacts = savedInstanceState.getParcelableArrayList("contacts");
-            for (Contact contact : contacts) {
-                contactQueryAdapter.add(contact);
+            if (contacts != null) {
+                for (Contact contact : contacts) {
+                    contactQueryAdapter.add(contact);
+                }
             }
         }
 
@@ -70,10 +67,8 @@ public class ContactsSearchFragment extends Fragment implements ContactsSearchVi
         editSearch.addTextChangedListener(new TextWatcher() {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (presenter != null) {
-                    String query = s.toString();
-                    presenter.onQueryEntered(query);
-                }
+                String query = s.toString();
+                getPresenter().onQueryEntered(query);
             }
 
             @Override
@@ -84,13 +79,6 @@ public class ContactsSearchFragment extends Fragment implements ContactsSearchVi
         });
 
         return view;
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        presenter.detachView();
-        presenter = null;
     }
 
     @Override

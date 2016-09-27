@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.example.nasko.whisper.activities.ChatroomActivity;
-import com.example.nasko.whisper.activities.ChatsActivity;
+import com.example.nasko.whisper.activities.MainActivity;
 import com.example.nasko.whisper.activities.LoginActivity;
 import com.example.nasko.whisper.activities.ProfileActivity;
 import com.example.nasko.whisper.activities.RegisterActivity;
@@ -23,7 +23,7 @@ public class Navigator {
     }
 
     public void navigateToChatsScreen(Context context, User user) {
-        Intent intent = new Intent(context, ChatsActivity.class);
+        Intent intent = new Intent(context, MainActivity.class);
         intent.putExtra(KEY_USER_EXTRA, user);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         context.startActivity(intent);
@@ -35,10 +35,9 @@ public class Navigator {
         context.startActivity(launchIntent);
     }
 
-    public void navigateToChatroom(Context context, User user, ChatViewModel chat) {
+    public void navigateToChatroom(Context context, ChatViewModel chat) {
         Intent intent = new Intent(context, ChatroomActivity.class);
         intent.putExtra(KEY_CHAT_EXTRA, chat);
-        intent.putExtra(KEY_USER_EXTRA, user);
 
         context.startActivity(intent);
     }

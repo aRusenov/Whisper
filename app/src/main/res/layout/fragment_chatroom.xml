@@ -1,43 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <ProgressBar
-        android:id="@+id/progress_loading_bar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:indeterminate="true"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="100dp"/>
+    <include layout="@layout/action_bar_chatroom"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:focusableInTouchMode="true"
         android:background="#D2DBE2">
 
-        <LinearLayout
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/message_list"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
+            android:scrollbars="vertical"
+            android:divider="@null"
+            android:dividerHeight="0dp"
             android:paddingLeft="5dp"
-            android:paddingRight="5dp">
+            android:paddingRight="5dp"/>
 
-            <android.support.v7.widget.RecyclerView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:id="@+id/message_list"
-                android:scrollbars="vertical"
-                android:stackFromBottom="true"
-                android:divider="@null"
-                android:dividerHeight="0dp" />
-
-        </LinearLayout>
-
-        <View
+        <Space
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="#bdbdbd"
@@ -46,7 +33,6 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:minHeight="50dp"
             android:orientation="horizontal"
             android:layout_gravity="center_vertical"
             android:background="#fff">
@@ -60,8 +46,8 @@
                 android:inputType="text"
                 android:hint="@string/placeholder_send_message"
                 android:background="@android:color/transparent"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
-                android:paddingRight="@dimen/activity_horizontal_margin"/>
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"/>
 
             <ImageButton
                 android:layout_width="30dp"
@@ -72,10 +58,10 @@
                 android:scaleType="centerInside"
                 android:layout_gravity="center"
                 android:background="@android:color/transparent"
-                android:layout_marginRight="@dimen/activity_horizontal_margin"/>
+                android:layout_margin="16dp"/>
 
         </LinearLayout>
 
     </LinearLayout>
 
-</RelativeLayout>
+</LinearLayout>

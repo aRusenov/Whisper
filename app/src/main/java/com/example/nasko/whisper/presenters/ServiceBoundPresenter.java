@@ -8,7 +8,7 @@ import com.example.nasko.whisper.network.notifications.consumer.SocketServiceBin
 import com.example.nasko.whisper.network.notifications.service.SocketService;
 import com.example.nasko.whisper.views.contracts.View;
 
-public abstract class ServiceBoundPresenter<V extends View> extends AbstractPresenter<V> implements OnServiceBoundListener {
+public abstract class ServiceBoundPresenter<V extends View> extends BasePresenter<V> implements OnServiceBoundListener {
 
     protected SocketServiceBinder serviceBinder;
     protected SocketService service;
@@ -36,6 +36,7 @@ public abstract class ServiceBoundPresenter<V extends View> extends AbstractPres
     @Override
     public void onServiceUnbind() {
         service = null;
+        subscriptions.clear();
     }
 
     @Override

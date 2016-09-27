@@ -14,7 +14,7 @@ import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.models.LoadingData;
 import com.example.nasko.whisper.models.MessageSeparator;
 import com.example.nasko.whisper.models.TypingEvent;
-import com.example.nasko.whisper.models.User;
+import com.example.nasko.whisper.models.view.ContactViewModel;
 import com.example.nasko.whisper.models.view.MessageViewModel;
 
 import java.util.Date;
@@ -69,11 +69,11 @@ public class MessageAdapter extends ArrayRecyclerViewAdapter<Object, RecyclerVie
         }
     }
 
-    private User currentUser;
+    private ContactViewModel currentUser;
     private String currentChatId;
     private int messageMaxWidth;
 
-    public MessageAdapter(Context context, User currentUser, String currentChatId, int messageMaxWidth) {
+    public MessageAdapter(Context context, ContactViewModel currentUser, String currentChatId, int messageMaxWidth) {
         super(context);
         this.currentUser = currentUser;
         this.currentChatId = currentChatId;
@@ -135,7 +135,7 @@ public class MessageAdapter extends ArrayRecyclerViewAdapter<Object, RecyclerVie
                 String dateString = String.format("%02d:%02d", date.getHours(), date.getMinutes());
                 holder.tvTime.setText(dateString);
 
-                boolean isMyMessage = message.getAuthor().getId().equals(currentUser.getUId());
+                boolean isMyMessage = message.getAuthor().getId().equals(currentUser.getId());
                 int drawableId = isMyMessage ? R.drawable.bubble_final_right : R.drawable.bubble_final_left;
                 int gravity = isMyMessage ? Gravity.RIGHT : Gravity.NO_GRAVITY;
                 holder.container.setBackgroundResource(drawableId);

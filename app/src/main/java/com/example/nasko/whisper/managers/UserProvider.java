@@ -7,4 +7,6 @@ public interface UserProvider {
     User getCurrentUser();
 
     void setCurrentUser(User user);
+
+    void logout();
 }

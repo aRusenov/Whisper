@@ -1,45 +1,32 @@
-package com.example.nasko.whisper.activities;
+package com.example.nasko.whisper.fragments;
 
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.app.Fragment;
 
-import com.example.nasko.whisper.WhisperApplication;
-import com.example.nasko.whisper.managers.AppState;
 import com.example.nasko.whisper.presenters.Presenter;
 import com.example.nasko.whisper.views.contracts.View;
 
-public class BaseActivity<P extends Presenter> extends AppCompatActivity implements View<P> {
+public abstract class BaseFragment<P extends Presenter> extends Fragment implements View<P> {
 
     private P presenter;
-    private AppState appState;
-
-    public BaseActivity() {
-        this(WhisperApplication.instance().getAppState());
-    }
-
-    public BaseActivity(AppState appState) {
-        this.appState = appState;
-    }
 
     @Override
-    protected void onPause() {
+    public void onPause() {
         super.onPause();
-        appState.onActivityPause();
         if (presenter != null) {
             presenter.onPause();
         }
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
-        appState.onActivityResume();
         if (presenter != null) {
             presenter.onResume();
         }
     }
 
     @Override
-    protected void onDestroy() {
+    public void onDestroy() {
         super.onDestroy();
         if (presenter != null) {
             presenter.detachView();

@@ -13,9 +13,5 @@ public interface Presenter<V extends View> {
 
     void onResume();
 
-    void onSaveInstanceState(Bundle outBundle);
-
-    void onRestoreInstanceState(Bundle savedInstanceState);
-
     void detachView();
 }
