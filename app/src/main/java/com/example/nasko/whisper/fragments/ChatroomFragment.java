@@ -5,23 +5,17 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.WhisperApplication;
@@ -71,11 +65,6 @@ public class ChatroomFragment extends BaseFragment<ChatroomPresenter> implements
     @BindView(R.id.edit_new_message) EditText messageEdit;
     @BindView(R.id.btn_send_message) ImageButton sendButton;
 
-    @BindView(R.id.toolbar_main) Toolbar myToolbar;
-    @BindView(R.id.tv_contact_name) TextView tvName;
-    @BindView(R.id.tv_status) TextView tvStatus;
-    @BindView(R.id.status_image) ImageView statusImg;
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,48 +82,11 @@ public class ChatroomFragment extends BaseFragment<ChatroomPresenter> implements
         dateFormatter = new MessageSeparatorDateFormatter();
     }
 
-    private void setToolbar() {
-        AppCompatActivity hostActivity = (AppCompatActivity) getActivity();
-        hostActivity.setSupportActionBar(myToolbar);
-        ActionBar actionBar = hostActivity.getSupportActionBar();
-        if (actionBar == null) {
-            myToolbar.setVisibility(View.GONE);
-            return;
-        }
-
-        actionBar.setDisplayShowTitleEnabled(false);
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setDisplayShowHomeEnabled(true);
-
-        ContactViewModel displayContact = chat.getDisplayContact();
-        if (displayContact == null) {
-            return;
-        }
-
-        TypedValue tv = new TypedValue();
-        if (hostActivity.getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true))
-        {
-            int actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data,getResources().getDisplayMetrics());
-            tvName.setText(displayContact.getUsername());
-            tvName.setTextSize(TypedValue.COMPLEX_UNIT_PX, actionBarHeight / 3);
-            tvStatus.setTextSize(TypedValue.COMPLEX_UNIT_PX, actionBarHeight / 4);
-            setContactStatus(displayContact.isOnline());
-        }
-    }
-
-    public void setContactStatus(boolean online) {
-        int statusRes = online ? R.drawable.circle_green : R.drawable.circle_gray;
-        statusImg.setImageResource(statusRes);
-        tvStatus.setText(online ? getString(R.string.status_online) : getString(R.string.status_offline));
-    }
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_chatroom, container, false);
         ButterKnife.bind(this, view);
-
-        setToolbar();
 
 //        loadingBar.setVisibility(View.VISIBLE);
         DisplayMetrics metrics = new DisplayMetrics();

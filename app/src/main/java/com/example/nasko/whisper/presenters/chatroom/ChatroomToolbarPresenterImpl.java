@@ -1,28 +1,26 @@
 package com.example.nasko.whisper.presenters.chatroom;
 
 import com.example.nasko.whisper.WhisperApplication;
+import com.example.nasko.whisper.models.view.ContactViewModel;
 import com.example.nasko.whisper.network.notifications.consumer.SocketServiceBinder;
-import com.example.nasko.whisper.network.notifications.service.SocketService;
 import com.example.nasko.whisper.presenters.ServiceBoundPresenter;
 import com.example.nasko.whisper.views.contracts.ChatroomNavBarView;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 
-public class ChatroomNavBarPresenter extends ServiceBoundPresenter<ChatroomNavBarView> {
+public class ChatroomToolbarPresenterImpl extends ServiceBoundPresenter<ChatroomNavBarView> implements ChatroomToolbarPresenter {
 
-    protected ChatroomNavBarPresenter(SocketServiceBinder binder) {
+    protected ChatroomToolbarPresenterImpl(SocketServiceBinder binder) {
         super(binder);
     }
 
-    public ChatroomNavBarPresenter() {
+    public ChatroomToolbarPresenterImpl() {
         this(WhisperApplication.instance().getServiceBinder());
     }
 
     @Override
-    public void onServiceBind(SocketService service) {
-        super.onServiceBind(service);
-
+    public void updateContactStatus(ContactViewModel contact) {
         Subscription userOnlineSub = service.contactsService()
                 .onUserOnline()
                 .observeOn(AndroidSchedulers.mainThread())

@@ -2,14 +2,13 @@ package com.example.nasko.whisper.presenters.chatroom;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.managers.MessageNotificationController;
 import com.example.nasko.whisper.managers.UserProvider;
-import com.example.nasko.whisper.models.dto.Message;
 import com.example.nasko.whisper.models.MessageStatus;
 import com.example.nasko.whisper.models.User;
+import com.example.nasko.whisper.models.dto.Message;
 import com.example.nasko.whisper.models.view.ChatViewModel;
 import com.example.nasko.whisper.models.view.MessageViewModel;
 import com.example.nasko.whisper.network.notifications.consumer.SocketServiceBinder;
@@ -150,13 +149,6 @@ public class ChatroomPresenterImpl extends ServiceBoundPresenter<ChatroomView> i
     }
 
     @Override
-    public void detachView() {
-        super.detachView();
-        Log.d(TAG, "Detaching presenter");
-        lastLoadedMessageSeq = DEFAULT_MESSAGE_SEQ;
-    }
-
-    @Override
     public void onMessageSend(String text, long msgIdentifier) {
         service.messageService()
                 .sendMessage(chat.getId(), text.trim(), msgIdentifier);
@@ -188,29 +180,6 @@ public class ChatroomPresenterImpl extends ServiceBoundPresenter<ChatroomView> i
         if (service != null) {
             service.messageService().stopTyping(chat.getId(), userProvider.getCurrentUser().getUsername());
         }
-    }
-
-    @Override
-    public void onChatDisplayRequested(ChatViewModel chat) {
-//        if (!serviceBinder.isBound()) {
-//            return;
-//        }
-//
-//        if (this.chat.getId().equals(chat.getId())) {
-//            return;
-//        }
-//
-//        if (lastLoadedMessageSeq == DEFAULT_MESSAGE_SEQ) {
-//            loadMesages();
-//        }
-//
-//        subscriptions.clear();
-//        registerSubscriptions();
-    }
-
-    @Override
-    public void onChatClosed() {
-
     }
 
     @Override

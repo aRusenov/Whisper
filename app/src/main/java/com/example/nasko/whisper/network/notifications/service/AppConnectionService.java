@@ -8,7 +8,7 @@ import org.json.JSONObject;
 import io.socket.client.Socket;
 import rx.Observable;
 
-public class HerokuConnectionService implements ConnectionService {
+public class AppConnectionService implements ConnectionService {
 
     public static final String EVENT_CONNECT = Socket.EVENT_CONNECT;
     public static final String EVENT_CONNECT_TIMEOUT = Socket.EVENT_CONNECT_TIMEOUT;
@@ -19,11 +19,11 @@ public class HerokuConnectionService implements ConnectionService {
 
     public static final String EMIT_AUTHENTICATE = "authentication";
 
-    private static final String TAG = HerokuConnectionService.class.getName();
+    private static final String TAG = AppConnectionService.class.getName();
 
     private SocketManager socketManager;
 
-    public HerokuConnectionService(SocketManager socketManager) {
+    public AppConnectionService(SocketManager socketManager) {
         this.socketManager = socketManager;
     }
 

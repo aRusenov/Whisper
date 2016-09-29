@@ -9,7 +9,7 @@ import org.json.JSONObject;
 
 import rx.Observable;
 
-public class HerokuContactsService implements ContactsService {
+public class AppContactsService implements ContactsService {
 
     public static final String EVENT_NEW_CONTACT = "new contact";
     public static final String EVENT_SHOW_CHATS = "show chats";
@@ -20,11 +20,11 @@ public class HerokuContactsService implements ContactsService {
     public static final String EMIT_QUERY_CONTACTS = "query contacts";
     public static final String EMIT_ADD_CONTACT = "add contact";
 
-    private static final String TAG = HerokuContactsService.class.getName();
+    private static final String TAG = AppContactsService.class.getName();
 
     private SocketManager socketManager;
 
-    public HerokuContactsService(SocketManager socketManager) {
+    public AppContactsService(SocketManager socketManager) {
         this.socketManager = socketManager;
     }
 

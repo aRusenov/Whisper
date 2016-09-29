@@ -5,13 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <fragment
-        android:id="@+id/fragment_main"
+    <include layout="@layout/toolbar_main"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="1"
-        class="com.example.nasko.whisper.fragments.MainFragment"
-        tools:layout="@layout/fragment_main" />
+        android:layout_weight="1"/>
 
     <Space
         android:layout_width="1dp"
@@ -19,12 +16,33 @@
         android:background="@color/color_grey"/>
 
     <LinearLayout
-        android:id="@+id/container_chatroom_fragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:focusableInTouchMode="true"
         android:layout_weight="2"
-        android:orientation="horizontal"
-        tools:layout="@layout/fragment_chatroom" />
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/container_toolbar_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:orientation="horizontal" />
+
+        <LinearLayout
+            android:id="@+id/container_chatroom_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/tv_empty_chatroom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_empty_chatroom_screen"
+                android:textSize="@dimen/font_xxlarge"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
 
 </LinearLayout>

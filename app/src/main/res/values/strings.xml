@@ -40,5 +40,6 @@
     <string name="label_register">Register</string>
     <string name="placeholder_name">Name</string>
     <string name="placeholder_send_message">Send a message</string>
+    <string name="label_empty_chatroom_screen">Tap someone to chat with!</string>
 
 </resources>

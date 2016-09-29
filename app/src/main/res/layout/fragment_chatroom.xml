@@ -4,8 +4,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <include layout="@layout/action_bar_chatroom"/>
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -19,16 +17,14 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:scrollbars="vertical"
-            android:divider="@null"
-            android:dividerHeight="0dp"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"/>
+            android:paddingLeft="@dimen/small_margin"
+            android:paddingRight="@dimen/small_margin"/>
 
         <Space
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="#bdbdbd"
-            android:layout_marginTop="10dp"/>
+            android:layout_marginTop="@dimen/normal_margin"/>
 
         <LinearLayout
             android:layout_width="match_parent"

@@ -11,7 +11,7 @@ import org.json.JSONObject;
 
 import rx.Observable;
 
-public class HerokuMessagesService implements MessagesService {
+public class AppMessagesService implements MessagesService {
 
     public static final String EVENT_SHOW_MESSAGES = "show messages";
     public static final String EVENT_NEW_MESSAGE = "new message";
@@ -19,12 +19,12 @@ public class HerokuMessagesService implements MessagesService {
     public static final String EMIT_SHOW_MESSAGES = "show messages";
     public static final String EMIT_SEND_MESSAGE = "send message";
 
-    private static final String TAG = HerokuContactsService.class.getName();
+    private static final String TAG = AppContactsService.class.getName();
 
     private SocketManager socketManager;
     private JsonDeserializer deserializer = new JsonDeserializer();
 
-    public HerokuMessagesService(SocketManager socketManager) {
+    public AppMessagesService(SocketManager socketManager) {
         this.socketManager = socketManager;
     }
 

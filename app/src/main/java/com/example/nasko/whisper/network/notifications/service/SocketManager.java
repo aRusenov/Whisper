@@ -81,7 +81,8 @@ public class SocketManager {
         socket.connect();
     }
 
-    public void disconnect() {
+    public void dispose() {
         socket.disconnect();
+        observables.clear();
     }
 }

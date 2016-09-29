@@ -5,11 +5,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <fragment
-        android:id="@+id/fragment_main"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        class="com.example.nasko.whisper.fragments.MainFragment"
-        tools:layout="@layout/fragment_main" />
+    <include layout="@layout/toolbar_main"/>
 
 </LinearLayout>

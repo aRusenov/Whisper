@@ -1,19 +1,13 @@
 package com.example.nasko.whisper.network.notifications.service;
 
-import android.app.Notification;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
-import com.example.nasko.whisper.R;
-import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.managers.ConfigLoader;
-import com.example.nasko.whisper.managers.MessageNotificationController;
 
 import java.net.URISyntaxException;
 
@@ -28,10 +22,9 @@ public class BackgroundSocketService extends Service implements SocketService {
         }
     }
 
-    private static final String TAG = BackgroundSocketService.class.getName();
+    private static final String TAG = "BackgroundSocketService";
 
     private final IBinder binder = new LocalBinder();
-    private MessageNotificationController notificationController;
     private NetworkStateReceiver networkStateReceiver;
 
     private ConnectionService connectionService;
@@ -42,7 +35,6 @@ public class BackgroundSocketService extends Service implements SocketService {
 
     private SocketManager socketManager;
     private String token;
-    private boolean isPaused;
     private boolean isClosing;
 
     @Override
@@ -57,12 +49,11 @@ public class BackgroundSocketService extends Service implements SocketService {
             stopSelf();
         }
 
-        connectionService = new HerokuConnectionService(socketManager);
-        contactsService = new HerokuContactsService(socketManager);
-        messagesService = new HerokuMessagesService(socketManager);
+        connectionService = new AppConnectionService(socketManager);
+        contactsService = new AppContactsService(socketManager);
+        messagesService = new AppMessagesService(socketManager);
         setOwnSocketListeners();
 
-        notificationController = WhisperApplication.instance().getNotificationController();
         networkStateReceiver = new NetworkStateReceiver(this) {
             @Override
             public void onNetworkConnected() {
@@ -82,7 +73,7 @@ public class BackgroundSocketService extends Service implements SocketService {
 
     private void setOwnSocketListeners() {
         subscriptions = new CompositeSubscription();
-        Subscription connectSub = socketManager.on(HerokuConnectionService.EVENT_CONNECT, Object.class)
+        Subscription connectSub = socketManager.on(AppConnectionService.EVENT_CONNECT, Object.class)
                 .subscribe(o -> {
                     Log.d(TAG, "Connected");
                     if (token != null) {
@@ -90,19 +81,12 @@ public class BackgroundSocketService extends Service implements SocketService {
                     }
                 });
 
-        Subscription disconnectSub = socketManager.on(HerokuConnectionService.EVENT_DISCONNECT, String.class)
+        Subscription disconnectSub = socketManager.on(AppConnectionService.EVENT_DISCONNECT, String.class)
                 .subscribe(o -> {
                     if (networkStateReceiver.isConnected()) {
                         socketManager.connect();
                     }
                 });
-
-//        Subscription newMsgSub = socketManager.on(HerokuMessagesService.EVENT_NEW_MESSAGE, Message.class)
-//                .subscribe(message -> {
-//                    if (isPaused) {
-//                        notificationController.createMessageNotification(message);
-//                    }
-//                });
 
         subscriptions.add(connectSub);
         subscriptions.add(disconnectSub);
@@ -112,22 +96,6 @@ public class BackgroundSocketService extends Service implements SocketService {
         if (! socketManager.connected() && token != null) {
             reconnect();
         }
-    }
-
-    private void startServiceInForeground() {
-        Intent notificationIntent = new Intent(this, BackgroundSocketService.class);
-
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
-                notificationIntent, 0);
-
-        Notification notification = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.icon)
-                .setContentTitle("Whisper")
-                .setContentText("is listening.")
-                .setContentIntent(pendingIntent)
-                .build();
-
-        startForeground(1, notification);
     }
 
     @Override
@@ -151,12 +119,9 @@ public class BackgroundSocketService extends Service implements SocketService {
         return binder;
     }
 
-    public void pause() {
-        isPaused = true;
-    }
+    public void pause() {}
 
     public void resume() {
-        isPaused = false;
         if (networkStateReceiver.isConnected() && !socketManager.connected()) {
             reconnect();
         }
@@ -184,12 +149,12 @@ public class BackgroundSocketService extends Service implements SocketService {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        subscriptions.unsubscribe();
 
-        socketManager.disconnect();
+        subscriptions.clear();
+        socketManager.dispose();
         networkStateReceiver.stop();
-
         isClosing = true;
+
         Log.d(TAG, "Service destroyed");
     }
 }
