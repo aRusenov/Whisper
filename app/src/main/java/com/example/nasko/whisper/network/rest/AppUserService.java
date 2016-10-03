@@ -33,7 +33,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import rx.Observable;
 
-public class HerokuUserService implements UserService {
+public class AppUserService implements UserService {
 
     public static final String KEY_USERNAME = "username";
     public static final String KEY_PASSWORD = "password";
@@ -47,7 +47,7 @@ public class HerokuUserService implements UserService {
     private JsonDeserializer deserializer;
     private Context context;
 
-    public HerokuUserService(Context context) {
+    public AppUserService(Context context) {
         loginEndpoint = ConfigLoader.getConfigValue(context, "api_login");
         registerEndpoint = ConfigLoader.getConfigValue(context, "api_register");
         editProfileEndpoint = ConfigLoader.getConfigValue(context, "api_edit_profile");

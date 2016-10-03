@@ -1,13 +1,13 @@
 package com.example.nasko.whisper.network.notifications.service;
 
 import android.support.annotation.NonNull;
+import android.support.v4.util.SimpleArrayMap;
 import android.util.Log;
 
 import com.example.nasko.whisper.network.JsonDeserializer;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 
 import io.socket.client.Ack;
 import io.socket.client.IO;
@@ -17,17 +17,25 @@ import rx.Observable;
 
 public class SocketManager {
 
-    private HashMap<String, Observable<?>> observables;
+    private SimpleArrayMap<String, Observable<?>> observables;
     private Socket socket;
     private JsonDeserializer deserializer;
 
     public SocketManager(String endpoint) throws URISyntaxException {
         socket = IO.socket(endpoint);
-        observables = new HashMap<>();
+        observables = new SimpleArrayMap<>();
         deserializer = new JsonDeserializer();
     }
 
     public <R> Observable<R> on(String event, Class<R> responseType) {
+        return getObservable(event, responseType);
+    }
+
+    public <R> Observable<R> on(String event) {
+        return getObservable(event, null);
+    }
+
+    public <R> Observable<R> getObservable(String event, Class<R> responseType) {
         Observable<?> eventObservable = observables.get(event);
         if (eventObservable == null) {
             eventObservable = createObservable(event, responseType);
@@ -48,18 +56,22 @@ public class SocketManager {
                         return;
                     }
 
-                    R result = null;
+                    if (responseType == Object.class) {
+                        // Nothing to deserialize
+                        subscriber.onNext(null);
+                    }
+
                     if (args.length > 0) {
                         String json = args[0].toString();
                         try {
-                            result = deserializer.deserialize(json, responseType);
+                            R result = deserializer.deserialize(json, responseType);
+                            Log.d("OnNext", event + " " + socket.listeners(event).size());
+                            subscriber.onNext(result);
                         } catch (IOException e) {
                             e.printStackTrace();
+                            subscriber.onError(e);
                         }
                     }
-
-                    Log.d("OnNext", event + " " + socket.listeners(event).size());
-                    subscriber.onNext(result);
                 }
             });
         });

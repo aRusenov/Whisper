@@ -28,6 +28,7 @@ import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.models.view.ChatViewModel;
 import com.example.nasko.whisper.models.view.ContactViewModel;
 import com.example.nasko.whisper.models.view.MessageViewModel;
+import com.example.nasko.whisper.presenters.Navigator;
 import com.example.nasko.whisper.presenters.chatroom.ChatroomPresenter;
 import com.example.nasko.whisper.presenters.chatroom.ChatroomPresenterImpl;
 import com.example.nasko.whisper.utils.DateFormatter;
@@ -60,7 +61,7 @@ public class ChatroomFragment extends BaseFragment<ChatroomPresenter> implements
     private boolean typing;
     private ContactViewModel userContact;
 
-    @BindView(R.id.message_list) RecyclerView messageList;
+    @BindView(R.id.rv_messages) RecyclerView messageList;
 //    @BindView(R.id.progress_loading_bar) ProgressBar loadingBar;
     @BindView(R.id.edit_new_message) EditText messageEdit;
     @BindView(R.id.btn_send_message) ImageButton sendButton;
@@ -70,7 +71,7 @@ public class ChatroomFragment extends BaseFragment<ChatroomPresenter> implements
         super.onCreate(savedInstanceState);
         userProvider = WhisperApplication.instance().getUserProvider();
         User user = userProvider.getCurrentUser();
-        chat = getArguments().getParcelable("chat");
+        chat = getArguments().getParcelable(Navigator.EXTRA_CHAT);
         userContact = new ContactViewModel(user.getUId(), user.getUsername(), user.getName(), user.getImage(), false);
 
         setPresenter(new ChatroomPresenterImpl());

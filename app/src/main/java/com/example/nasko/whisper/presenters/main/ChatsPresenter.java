@@ -1,4 +1,4 @@
-package com.example.nasko.whisper.presenters.chats;
+package com.example.nasko.whisper.presenters.main;
 
 import com.example.nasko.whisper.models.view.ChatViewModel;
 import com.example.nasko.whisper.presenters.Presenter;

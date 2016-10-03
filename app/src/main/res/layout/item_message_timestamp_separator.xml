@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/small_margin"
+    android:layout_marginBottom="@dimen/small_margin">
+
+    <TextView
+        android:id="@+id/tv_timestamp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:text="Yesterday"
+        android:fontFamily="sans-serif-condensed"
+        android:textSize="@dimen/font_normal"
+        android:textColor="@color/color_material_grey"
+        android:gravity="center_horizontal"/>
+
+</LinearLayout>

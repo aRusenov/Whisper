@@ -2,7 +2,7 @@ package com.example.nasko.whisper.views.contracts;
 
 import com.example.nasko.whisper.models.view.ChatViewModel;
 import com.example.nasko.whisper.models.view.MessageViewModel;
-import com.example.nasko.whisper.presenters.chats.ChatsPresenter;
+import com.example.nasko.whisper.presenters.main.ChatsPresenter;
 
 import java.util.List;
 

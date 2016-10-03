@@ -1,6 +1,6 @@
 package com.example.nasko.whisper.views.contracts;
 
-import com.example.nasko.whisper.presenters.chats.NavBarPresenter;
+import com.example.nasko.whisper.presenters.main.NavBarPresenter;
 
 public interface ChatsNavBarView extends View<NavBarPresenter> {
 

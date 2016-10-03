@@ -8,7 +8,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.nasko.whisper.R;
-import com.example.nasko.whisper.models.dto.Contact;
+import com.example.nasko.whisper.WhisperApplication;
+import com.example.nasko.whisper.managers.UserProvider;
+import com.example.nasko.whisper.models.User;
+import com.example.nasko.whisper.models.view.ContactViewModel;
 import com.example.nasko.whisper.views.listeners.OnItemClickListener;
 import com.squareup.picasso.Picasso;
 
@@ -16,7 +19,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class ContactQueryAdapter extends ArrayRecyclerViewAdapter<Contact, ContactQueryAdapter.ContactViewHolder> {
+public class ContactQueryAdapter extends ArrayRecyclerViewAdapter<ContactViewModel, ContactQueryAdapter.ContactViewHolder> {
 
     class ContactViewHolder extends RecyclerView.ViewHolder {
 
@@ -37,11 +40,16 @@ public class ContactQueryAdapter extends ArrayRecyclerViewAdapter<Contact, Conta
         }
     }
 
-    private String userId = "";
     private OnItemClickListener invitationIconClickListener;
+    private UserProvider userProvider;
+
+    public ContactQueryAdapter(Context context, UserProvider userProvider) {
+        super(context);
+        this.userProvider = userProvider;
+    }
 
     public ContactQueryAdapter(Context context) {
-        super(context);
+        this(context, WhisperApplication.instance().getUserProvider());
     }
 
     public OnItemClickListener getInvitationIconClickListener() {
@@ -52,10 +60,6 @@ public class ContactQueryAdapter extends ArrayRecyclerViewAdapter<Contact, Conta
         this.invitationIconClickListener = invitationIconClickListener;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
     @Override
     public ContactViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = this.getInflater().inflate(R.layout.item_contact_query, parent, false);
@@ -64,17 +68,15 @@ public class ContactQueryAdapter extends ArrayRecyclerViewAdapter<Contact, Conta
 
     @Override
     public void onBindViewHolder(ContactViewHolder holder, int position) {
-        Contact contact = this.getItem(position);
-        boolean isContactUser = userId.equals(contact.getId());
-        String name = contact.getName();
-        if (name == null) {
-            name = contact.getUsername();
-        }
+        ContactViewModel contact = this.getItem(position);
+        User user = userProvider.getCurrentUser();
+        boolean isContactUser = user.getUId().equals(contact.getId());
+
+        holder.name.setText(contact.getUsername());
         if (isContactUser) {
-            name += " (You)";
+            holder.name.append(getContext().getString(R.string.prefix_contact_item_user));
         }
 
-        holder.name.setText(name);
         Picasso picasso = Picasso.with(getContext());
         picasso.setIndicatorsEnabled(true);
         picasso.load(contact.getImage().getUrl())
@@ -95,7 +97,7 @@ public class ContactQueryAdapter extends ArrayRecyclerViewAdapter<Contact, Conta
         }
     }
 
-    public void setContactToFriend(Contact contact) {
+    public void setContactToFriend(ContactViewModel contact) {
         // Find contact index in array
         int i;
         for (i = 0; i < this.items.size(); i++) {
@@ -106,7 +108,7 @@ public class ContactQueryAdapter extends ArrayRecyclerViewAdapter<Contact, Conta
 
         // Update if present
         if (i != -1 && i < items.size()) {
-            Contact contactRef = this.items.get(i);
+            ContactViewModel contactRef = this.items.get(i);
             contactRef.setFriend(true);
             this.notifyItemChanged(i);
         }

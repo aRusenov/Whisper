@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="NewMessageEditText">
+        <item name="android:imeOptions">actionDone</item>
+        <item name="android:inputType">text</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:paddingLeft">@dimen/large_margin</item>
+        <item name="android:paddingRight">@dimen/large_margin</item>
+    </style>
+    <!--android:adjustViewBounds="true"-->
+    <!--android:scaleType="centerInside"-->
+    <!--android:background="@android:color/transparent"-->
+    <!--android:layout_margin="@dimen/large_margin"-->
+    <style name="MessageSendButton">
+        <item name="android:adjustViewBounds">true</item>
+        <item name="android:scaleType">centerInside</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:layout_margin">@dimen/large_margin</item>
+    </style>
+</resources>

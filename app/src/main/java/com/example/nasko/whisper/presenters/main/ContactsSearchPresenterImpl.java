@@ -1,38 +1,40 @@
-package com.example.nasko.whisper.presenters.chats;
+package com.example.nasko.whisper.presenters.main;
 
 import android.util.Log;
 
 import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.managers.UserProvider;
+import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.models.dto.Chat;
 import com.example.nasko.whisper.models.dto.Contact;
-import com.example.nasko.whisper.models.User;
+import com.example.nasko.whisper.models.view.ContactViewModel;
 import com.example.nasko.whisper.network.notifications.consumer.SocketServiceBinder;
 import com.example.nasko.whisper.network.notifications.service.SocketService;
 import com.example.nasko.whisper.presenters.ServiceBoundPresenter;
+import com.example.nasko.whisper.utils.Mapper;
 import com.example.nasko.whisper.views.contracts.ContactsSearchView;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.subjects.PublishSubject;
 
 public class ContactsSearchPresenterImpl extends ServiceBoundPresenter<ContactsSearchView> implements ContactsSearchPresenter {
 
     private static final String TAG = ContactsSearchPresenterImpl.class.getName();
+    private static final long TYPING_EVENT_WAIT_MS = 500;
 
     private UserProvider userProvider;
-
-    private boolean hasPendingQuery;
-    private String contactQuery;
+    private PublishSubject<String> searchRequestSubject = PublishSubject.create();
 
     public ContactsSearchPresenterImpl() {
         this(WhisperApplication.instance().getServiceBinder(),
                 WhisperApplication.instance().getUserProvider());
     }
 
-    public ContactsSearchPresenterImpl(SocketServiceBinder serviceBinder,
-                                       UserProvider userProvider) {
+    public ContactsSearchPresenterImpl(SocketServiceBinder serviceBinder, UserProvider userProvider) {
         super(serviceBinder);
         this.userProvider = userProvider;
     }
@@ -44,21 +46,10 @@ public class ContactsSearchPresenterImpl extends ServiceBoundPresenter<ContactsS
                 .onContactQueryResponse()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(response -> {
-                    User currentUser = userProvider.getCurrentUser();
-                    for (Contact contact : response.getContacts()) {
-                        if (contact.getId().equals(currentUser.getUId())) {
-                            contact.setUser(true);
-                        }
-                    }
+                    List<ContactViewModel> result = Mapper.toContactViewModelList(response.getContacts());
 
-                    view.loadQueryResults(response.getContacts());
-
-                    if (contactQuery.equals(response.getSearch())) {
-                        hasPendingQuery = false;
-                    } else {
-                        service.contactsService().searchContacts(contactQuery);
-                        Log.d(TAG, "Performing contact query: " + contactQuery);
-                    }
+                    view.showQueryResults(result);
+                    view.hideLoading();
                 });
 
         Subscription newChatSub = service.contactsService()
@@ -66,9 +57,19 @@ public class ContactsSearchPresenterImpl extends ServiceBoundPresenter<ContactsS
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(chat -> {
                     setOtherContact(chat);
-                    view.markContactAsFriend(chat.getOtherContact());
+                    view.markContactAsFriend(
+                            Mapper.toContactViewModel(chat.getOtherContact()));
                 });
 
+        Subscription searchResultSub = searchRequestSubject
+                .debounce(TYPING_EVENT_WAIT_MS, TimeUnit.MILLISECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(query -> {
+                    view.showLoading();
+                    service.contactsService().searchContacts(query);
+                });
+
+        subscriptions.add(searchResultSub);
         subscriptions.add(contactsQuerySub);
         subscriptions.add(newChatSub);
     }
@@ -93,25 +94,14 @@ public class ContactsSearchPresenterImpl extends ServiceBoundPresenter<ContactsS
             return;
         }
 
-        contactQuery = query;
-        if (!hasPendingQuery) {
-            hasPendingQuery = true;
-            service.contactsService().searchContacts(query);
-            Log.d(TAG, "Performing contact query: " + query);
-        }
+        searchRequestSubject.onNext(query);
     }
 
     @Override
-    public void onContactSendRequestClick(Contact contact) {
-        Log.d(TAG, "Performing add contact query");
-        if (!contact.isFriend() && !contact.isUser()) {
+    public void onContactSendRequestClick(ContactViewModel contact) {
+        if (!contact.isFriend() && !contact.getId().equals(userProvider.getCurrentUser().getUId())) {
+            Log.d(TAG, "Performing add contact query");
             service.contactsService().addContact(contact.getId());
         }
-    }
-
-    @Override
-    public void detachView() {
-        super.detachView();
-        Log.d(TAG, "Presenter detached");
     }
 }

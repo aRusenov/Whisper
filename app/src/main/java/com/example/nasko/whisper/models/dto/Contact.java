@@ -18,12 +18,7 @@ public class Contact implements Parcelable {
     @JsonProperty("online")
     private boolean isOnline;
 
-    public Contact() { }
-
-    public Contact(String id, String username) {
-        this.id = id;
-        this.username = username;
-    }
+    public Contact() {}
 
     public boolean isFriend() {
         return isFriend;

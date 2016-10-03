@@ -3,6 +3,7 @@ package com.example.nasko.whisper.activities;
 import android.app.ProgressDialog;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.text.method.PasswordTransformationMethod;
 import android.view.View;
 import android.view.WindowManager;
@@ -48,20 +49,28 @@ public class LoginActivity extends BaseActivity<LoginPresenter> implements Login
             String password = editPassword.getText().toString();
             getPresenter().onLoginClicked(username, password);
 
-            dialog = new ProgressDialog(this);
-            dialog.setIndeterminate(true);
-            dialog.setMessage(getString(R.string.message_sign_in_loading));
-            dialog.show();
-            btnLogin.setEnabled(false);
-            tvErrorMsg.setVisibility(View.INVISIBLE);
+            displayDialog();
         });
 
         tvRegister.setOnClickListener(v -> {
             getPresenter().onRegisterClicked();
         });
 
+        if (savedInstanceState != null && savedInstanceState.getBoolean("loading")) {
+            displayDialog();
+        }
+
         setPresenter(new LoginPresenterImpl());
         getPresenter().attachView(this, this, null);
+    }
+
+    private void displayDialog() {
+        dialog = new ProgressDialog(this);
+        dialog.setIndeterminate(true);
+        dialog.setMessage(getString(R.string.message_sign_in_loading));
+        dialog.show();
+        btnLogin.setEnabled(false);
+        tvErrorMsg.setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -73,6 +82,12 @@ public class LoginActivity extends BaseActivity<LoginPresenter> implements Login
         tvErrorMsg.setVisibility(View.VISIBLE);
         tvErrorMsg.setText(message);
         btnLogin.setEnabled(true);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        super.onSaveInstanceState(outState, outPersistentState);
+        outState.putBoolean("loading", true);
     }
 
     @Override

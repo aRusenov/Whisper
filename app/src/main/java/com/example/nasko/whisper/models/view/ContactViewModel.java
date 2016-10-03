@@ -11,6 +11,7 @@ public class ContactViewModel implements Parcelable {
     private String username;
     private String name;
     private Image image;
+    private boolean friend;
     private boolean online;
 
     public ContactViewModel(String id, String username, String name, Image image, boolean online) {
@@ -21,12 +22,18 @@ public class ContactViewModel implements Parcelable {
         this.online = online;
     }
 
+    public ContactViewModel(String id, String username, String name, Image image, boolean online, boolean friend) {
+        this(id, username, name, image, online);
+        this.friend = friend;
+    }
+
     protected ContactViewModel(Parcel in) {
         id = in.readString();
         username = in.readString();
         name = in.readString();
         image = in.readParcelable(Image.class.getClassLoader());
         online = in.readInt() == 1;
+        friend = in.readInt() == 1;
     }
 
     public static final Creator<ContactViewModel> CREATOR = new Creator<ContactViewModel>() {
@@ -65,6 +72,14 @@ public class ContactViewModel implements Parcelable {
         this.name = name;
     }
 
+    public boolean isFriend() {
+        return friend;
+    }
+
+    public void setFriend(boolean friend) {
+        this.friend = friend;
+    }
+
     public Image getImage() {
         return image;
     }
@@ -93,5 +108,12 @@ public class ContactViewModel implements Parcelable {
         dest.writeString(name);
         dest.writeParcelable(image, flags);
         dest.writeInt(online ? 1 : 0);
+        dest.writeInt(friend ? 1 : 0);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        ContactViewModel other = (ContactViewModel) o;
+        return this.getId().equals(other.getId());
     }
 }

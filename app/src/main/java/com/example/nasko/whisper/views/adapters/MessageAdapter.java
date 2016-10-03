@@ -100,13 +100,13 @@ public class MessageAdapter extends ArrayRecyclerViewAdapter<Object, RecyclerVie
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         switch (viewType) {
             case 0: {
-                View view = this.getInflater().inflate(R.layout.item_chat_message_new, parent, false);
+                View view = this.getInflater().inflate(R.layout.item_message, parent, false);
                 MessageViewHolder holder = new MessageViewHolder(view);
                 holder.tvText.setMaxWidth((messageMaxWidth * 4) / 5);
                 return holder;
             }
             case 1: {
-                View view = this.getInflater().inflate(R.layout.item_message_separator, parent, false);
+                View view = this.getInflater().inflate(R.layout.item_message_timestamp_separator, parent, false);
                 return new TimeLabelViewHolder(view);
             }
             case 2: {
@@ -137,7 +137,7 @@ public class MessageAdapter extends ArrayRecyclerViewAdapter<Object, RecyclerVie
 
                 boolean isMyMessage = message.getAuthor().getId().equals(currentUser.getId());
                 int drawableId = isMyMessage ? R.drawable.bubble_final_right : R.drawable.bubble_final_left;
-                int gravity = isMyMessage ? Gravity.RIGHT : Gravity.NO_GRAVITY;
+                int gravity = isMyMessage ? Gravity.END : Gravity.NO_GRAVITY;
                 holder.container.setBackgroundResource(drawableId);
 
                 LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) holder.container.getLayoutParams();
@@ -182,7 +182,7 @@ public class MessageAdapter extends ArrayRecyclerViewAdapter<Object, RecyclerVie
                 TypingEvent typingEvent = (TypingEvent) getItem(position);
                 TypingViewHolder holder = (TypingViewHolder) absHolder;
 
-                holder.tvLabel.setText(typingEvent.getUsername() + " is typing...");
+                holder.tvLabel.setText(String.format("%s is typing...", typingEvent.getUsername()));
                 break;
             }
             default:

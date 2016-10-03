@@ -23,7 +23,8 @@ public class Mapper {
                 contact.getUsername(),
                 contact.getName(),
                 contact.getImage(),
-                contact.isOnline());
+                contact.isOnline(),
+                contact.isFriend());
     }
 
     public static List<MessageViewModel> toMessageViewModelList(List<Message> messages) {
@@ -33,6 +34,15 @@ public class Mapper {
         }
 
         return msgs;
+    }
+
+    public static List<ContactViewModel> toContactViewModelList(List<Contact> contacts) {
+        List<ContactViewModel> result = new ArrayList<>(contacts.size());
+        for (int i = 0; i < contacts.size(); i++) {
+            result.add(Mapper.toContactViewModel(contacts.get(i)));
+        }
+
+        return result;
     }
 
     public static List<ChatViewModel> toChatViewModelList(Chat[] chats) {

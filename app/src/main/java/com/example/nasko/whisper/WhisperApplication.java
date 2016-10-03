@@ -8,7 +8,7 @@ import com.example.nasko.whisper.managers.LocalUserRepository;
 import com.example.nasko.whisper.managers.MessageNotificationController;
 import com.example.nasko.whisper.managers.UserProvider;
 import com.example.nasko.whisper.network.notifications.consumer.SocketServiceBinder;
-import com.example.nasko.whisper.network.rest.HerokuUserService;
+import com.example.nasko.whisper.network.rest.AppUserService;
 import com.example.nasko.whisper.network.rest.UserService;
 import com.example.nasko.whisper.presenters.Navigator;
 
@@ -36,7 +36,7 @@ public class WhisperApplication extends Application {
         navigator = new Navigator();
         LocalUserRepository localUserRepository = new LocalUserRepository(getApplicationContext());
         userProvider = new AppUserProvider(localUserRepository);
-        userService = new HerokuUserService(getApplicationContext());
+        userService = new AppUserService(getApplicationContext());
         serviceBinder = new SocketServiceBinder(getApplicationContext());
         notificationController = new MessageNotificationController(userProvider, getApplicationContext());
     }

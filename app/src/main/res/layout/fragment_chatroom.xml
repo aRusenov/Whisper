@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -12,7 +12,7 @@
         android:background="#D2DBE2">
 
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/message_list"
+            android:id="@+id/rv_messages"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -34,30 +34,23 @@
             android:background="#fff">
 
             <EditText
+                android:id="@+id/edit_new_message"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:id="@+id/edit_new_message"
-                android:imeOptions="actionDone"
-                android:inputType="text"
                 android:hint="@string/placeholder_send_message"
-                android:background="@android:color/transparent"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp"/>
+                style="@style/NewMessageEditText"/>
 
             <ImageButton
+                android:id="@+id/btn_send_message"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
-                android:id="@+id/btn_send_message"
                 android:src="@drawable/send"
-                android:adjustViewBounds="true"
-                android:scaleType="centerInside"
                 android:layout_gravity="center"
-                android:background="@android:color/transparent"
-                android:layout_margin="16dp"/>
+                style="@style/MessageSendButton"/>
 
         </LinearLayout>
 
     </LinearLayout>
 
-</LinearLayout>
+</FrameLayout>

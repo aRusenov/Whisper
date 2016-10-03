@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:android="http://schemas.android.com/apk/res/android">
+    <style name="ContactCircularImageView">
+        <item name="android:layout_width">50dp</item>
+        <item name="android:layout_height">50dp</item>
+        <item name="android:layout_margin">@dimen/normal_margin</item>
+        <item name="civ_border_color">@color/color_light_grey</item>
+        <item name="civ_border_width">1dp</item>
+    </style>
+</resources>

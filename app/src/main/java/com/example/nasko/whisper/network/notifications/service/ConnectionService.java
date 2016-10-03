@@ -10,7 +10,7 @@ public interface ConnectionService {
 
     Observable onError();
 
-    Observable<String> onDisconnect();
+    Observable onDisconnect();
 
     Observable<User> onAuthenticated();
 

@@ -43,7 +43,8 @@
                 android:layout_height="@dimen/font_small"
                 android:adjustViewBounds="true"
                 android:src="@drawable/tick_sent"
-                android:layout_marginLeft="5dp"/>
+                android:layout_marginLeft="@dimen/small_margin"
+                android:layout_marginStart="@dimen/small_margin" />
 
         </LinearLayout>
 

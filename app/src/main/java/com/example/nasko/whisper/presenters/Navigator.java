@@ -13,8 +13,8 @@ import com.example.nasko.whisper.models.view.ChatViewModel;
 
 public class Navigator {
 
-    public static final String KEY_CHAT_EXTRA = "chat";
-    public static final String KEY_USER_EXTRA = "user";
+    public static final String EXTRA_CHAT = "chat";
+    public static final String EXTRA_USER = "user";
 
     public void navigateToLoginScreen(Context context) {
         Intent launchIntent = new Intent(context, LoginActivity.class);
@@ -24,20 +24,20 @@ public class Navigator {
 
     public void navigateToChatsScreen(Context context, User user) {
         Intent intent = new Intent(context, MainActivity.class);
-        intent.putExtra(KEY_USER_EXTRA, user);
+        intent.putExtra(EXTRA_USER, user);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         context.startActivity(intent);
     }
 
     public void navigateToProfileScreen(Context context, User user) {
         Intent launchIntent = new Intent(context, ProfileActivity.class);
-        launchIntent.putExtra(KEY_USER_EXTRA, user);
+        launchIntent.putExtra(EXTRA_USER, user);
         context.startActivity(launchIntent);
     }
 
     public void navigateToChatroom(Context context, ChatViewModel chat) {
         Intent intent = new Intent(context, ChatroomActivity.class);
-        intent.putExtra(KEY_CHAT_EXTRA, chat);
+        intent.putExtra(EXTRA_CHAT, chat);
 
         context.startActivity(intent);
     }

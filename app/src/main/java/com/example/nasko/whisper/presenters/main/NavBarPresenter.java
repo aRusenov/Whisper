@@ -1,4 +1,4 @@
-package com.example.nasko.whisper.presenters.chats;
+package com.example.nasko.whisper.presenters.main;
 
 import com.example.nasko.whisper.presenters.Presenter;
 import com.example.nasko.whisper.views.contracts.ChatsNavBarView;

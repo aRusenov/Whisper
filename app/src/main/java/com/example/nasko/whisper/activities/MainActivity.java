@@ -4,8 +4,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -16,14 +14,15 @@ import android.widget.TextView;
 
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.WhisperApplication;
-import com.example.nasko.whisper.fragments.ChatroomToolbarFragment;
 import com.example.nasko.whisper.fragments.ChatroomFragment;
+import com.example.nasko.whisper.fragments.ChatroomToolbarFragment;
+import com.example.nasko.whisper.helpers.FragmentHelperUtil;
 import com.example.nasko.whisper.managers.UserProvider;
 import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.models.view.ChatViewModel;
 import com.example.nasko.whisper.presenters.Navigator;
-import com.example.nasko.whisper.presenters.chats.NavBarPresenter;
-import com.example.nasko.whisper.presenters.chats.NavBarPresenterImpl;
+import com.example.nasko.whisper.presenters.main.NavBarPresenter;
+import com.example.nasko.whisper.presenters.main.NavBarPresenterImpl;
 import com.example.nasko.whisper.views.adapters.MenuFragmentPageAdapter;
 import com.example.nasko.whisper.views.contracts.ChatsNavBarView;
 
@@ -135,7 +134,9 @@ public class MainActivity extends BaseActivity<NavBarPresenter> implements Chats
 
     @Override
     public void setNetworkStatus(String status) {
-        getSupportActionBar().setTitle(status);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(status);
+        }
     }
 
     @Override
@@ -145,31 +146,25 @@ public class MainActivity extends BaseActivity<NavBarPresenter> implements Chats
 
     private void handleChatNavigation(ChatViewModel chat) {
         Bundle args = new Bundle();
-        args.putParcelable("chat", chat);
+        args.putParcelable(Navigator.EXTRA_CHAT, chat);
         if (multipane) {
             if (tvEmptyChatroom != null && tvEmptyChatroom.getVisibility() != View.GONE) {
                 tvEmptyChatroom.setVisibility(View.GONE);
             }
-            addOrReplaceFragment(new ChatroomFragment(), R.id.container_chatroom_fragment, args, FRAGMENT_CHATROOM_TAG);
-            addOrReplaceFragment(new ChatroomToolbarFragment(), R.id.container_toolbar_fragment, args, FRAGMENT_TOOLBAR_TAG);
+            FragmentHelperUtil.addOrReplaceFragment(this,
+                    new ChatroomFragment(),
+                    R.id.container_chatroom_fragment,
+                    args,
+                    FRAGMENT_CHATROOM_TAG);
+
+            FragmentHelperUtil.addOrReplaceFragment(this,
+                    new ChatroomToolbarFragment(),
+                    R.id.container_toolbar_fragment,
+                    args,
+                    FRAGMENT_TOOLBAR_TAG);
         } else {
             // Not multipane -> navigate to chatroom activtiy
             navigator.navigateToChatroom(this, chat);
-        }
-    }
-
-    private void addOrReplaceFragment(Fragment fragment, int containerId, Bundle args, String tag) {
-        FragmentManager fm = getSupportFragmentManager();
-        fragment.setArguments(args);
-
-        if (fm.findFragmentByTag(tag) == null) {
-            fm.beginTransaction()
-                    .add(containerId, fragment, tag)
-                    .commit();
-        } else {
-            fm.beginTransaction()
-                    .replace(containerId, fragment, tag)
-                    .commit();
         }
     }
 }

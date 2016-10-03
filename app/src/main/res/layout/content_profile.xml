@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginTop="@dimen/activity_horizontal_margin"
@@ -13,151 +15,95 @@
         android:orientation="vertical">
 
         <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:padding="@dimen/activity_horizontal_margin">
+            style="@style/ClickableContainer">
 
             <ImageView
-                android:id="@+id/ivContactItem1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="@dimen/activity_horizontal_margin"
-                android:layout_marginRight="@dimen/activity_horizontal_margin"
+                android:id="@+id/image_username"
+                style="@style/ItemIcon"
                 android:src="@drawable/username" />
 
             <TextView
-                android:id="@+id/tv_username"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                android:layout_marginStart="@dimen/activity_horizontal_margin"
-                android:layout_toEndOf="@id/ivContactItem1"
-                android:layout_toRightOf="@id/ivContactItem1"
-                android:text="nasko@abv.bg"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                android:textColor="#212121" />
+                android:id="@+id/tv_username_title"
+                style="@style/ItemTitle"
+                android:layout_toEndOf="@id/image_username"
+                android:layout_toRightOf="@id/image_username"
+                tools:text="nasko@abv.bg" />
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/tv_username"
-                android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                android:layout_marginStart="@dimen/activity_horizontal_margin"
-                android:layout_marginTop="8dp"
-                android:layout_toEndOf="@id/ivContactItem1"
-                android:layout_toRightOf="@id/ivContactItem1"
-                android:text="Username"
-                android:textAppearance="@style/TextAppearance.AppCompat.Small"
-                android:textColor="#727272" />
+                style="@style/ItemDescription"
+                android:layout_below="@id/tv_username_title"
+                android:layout_toEndOf="@id/image_username"
+                android:layout_toRightOf="@id/image_username"
+                android:text="@string/description_username"/>
 
         </RelativeLayout>
 
         <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:padding="@dimen/activity_horizontal_margin">
+           style="@style/ClickableContainer">
 
             <ImageView
-                android:id="@+id/ivContactItem2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="@dimen/activity_horizontal_margin"
-                android:layout_marginRight="@dimen/activity_horizontal_margin"
+                android:id="@+id/image_name"
+                style="@style/ItemIcon"
+                android:layout_marginEnd="@dimen/large_margin"
+                android:layout_marginRight="@dimen/large_margin"
                 android:src="@drawable/pencil" />
 
             <TextView
-                android:id="@+id/tv_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                android:layout_marginStart="@dimen/activity_horizontal_margin"
-                android:layout_toEndOf="@id/ivContactItem2"
-                android:layout_toRightOf="@id/ivContactItem2"
-                android:text="Atanas Rusenov"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                android:textColor="#212121" />
+                android:id="@+id/tv_name_title"
+                style="@style/ItemTitle"
+                android:layout_toEndOf="@id/image_name"
+                android:layout_toRightOf="@id/image_name"
+                tools:text="Atanas Rusenov" />
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/tv_name"
-                android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                android:layout_marginStart="@dimen/activity_horizontal_margin"
-                android:layout_marginTop="8dp"
-                android:layout_toEndOf="@id/ivContactItem2"
-                android:layout_toRightOf="@id/ivContactItem2"
-                android:text="Full Name"
-                android:textAppearance="@style/TextAppearance.AppCompat.Small"
-                android:textColor="#727272" />
+                style="@style/ItemDescription"
+                android:layout_below="@id/tv_name_title"
+                android:layout_toEndOf="@id/image_name"
+                android:layout_toRightOf="@id/image_name"
+                android:text="@string/description_name" />
 
         </RelativeLayout>
 
         <include layout="@layout/item_divider" />
 
         <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:padding="@dimen/activity_horizontal_margin">
+            style="@style/ClickableContainer">
 
             <ImageView
-                android:id="@+id/ivContactItem3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="@dimen/activity_horizontal_margin"
-                android:layout_marginRight="@dimen/activity_horizontal_margin"
+                android:id="@+id/image_notifications"
+                style="@style/ItemIcon"
                 android:src="@drawable/wifi" />
 
             <TextView
-                android:id="@+id/tvNumber3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                android:layout_marginStart="@dimen/activity_horizontal_margin"
-                android:layout_toEndOf="@id/ivContactItem3"
-                android:layout_toLeftOf="@+id/switch_only_wifi"
-                android:layout_toRightOf="@id/ivContactItem3"
-                android:layout_toStartOf="@+id/switch_only_wifi"
+                android:id="@+id/tv_notifications_title"
+                style="@style/ItemTitle"
+                android:layout_toEndOf="@id/image_notifications"
+                android:layout_toLeftOf="@+id/switch_enable_notifications"
+                android:layout_toRightOf="@id/image_notifications"
+                android:layout_toStartOf="@+id/switch_enable_notifications"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:text="Notifications"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                android:textColor="#212121" />
+                android:text="@string/title_notifications" />
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/tvNumber3"
-                android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                android:layout_marginStart="@dimen/activity_horizontal_margin"
-                android:layout_marginTop="8dp"
-                android:layout_toEndOf="@id/ivContactItem3"
-                android:layout_toRightOf="@id/ivContactItem3"
-                android:layout_toLeftOf="@+id/switch_only_wifi"
-                android:layout_toStartOf="@+id/switch_only_wifi"
-                android:text="Allow Whisper to notify you for new messages"
-                android:textAppearance="@style/TextAppearance.AppCompat.Small"
-                android:textColor="#727272" />
+                style="@style/ItemDescription"
+                android:layout_below="@id/tv_notifications_title"
+                android:layout_toEndOf="@id/image_notifications"
+                android:layout_toRightOf="@id/image_notifications"
+                android:layout_toLeftOf="@+id/switch_enable_notifications"
+                android:layout_toStartOf="@+id/switch_enable_notifications"
+                android:text="@string/description_notifications" />
 
             <Switch
-                android:id="@+id/switch_only_wifi"
+                android:id="@+id/switch_enable_notifications"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:checked="true"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                android:layout_marginStart="@dimen/activity_horizontal_margin"
-                />
+                android:layout_marginLeft="@dimen/large_margin"
+                android:layout_marginStart="@dimen/large_margin" />
 
         </RelativeLayout>
 

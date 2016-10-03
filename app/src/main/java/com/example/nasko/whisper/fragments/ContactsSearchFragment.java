@@ -10,12 +10,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.nasko.whisper.R;
-import com.example.nasko.whisper.models.dto.Contact;
-import com.example.nasko.whisper.presenters.chats.ContactsSearchPresenter;
-import com.example.nasko.whisper.presenters.chats.ContactsSearchPresenterImpl;
+import com.example.nasko.whisper.models.view.ContactViewModel;
+import com.example.nasko.whisper.presenters.main.ContactsSearchPresenter;
+import com.example.nasko.whisper.presenters.main.ContactsSearchPresenterImpl;
 import com.example.nasko.whisper.views.adapters.ContactQueryAdapter;
 import com.example.nasko.whisper.views.contracts.ContactsSearchView;
 
@@ -27,11 +28,14 @@ import butterknife.ButterKnife;
 
 public class ContactsSearchFragment extends BaseFragment<ContactsSearchPresenter> implements ContactsSearchView {
 
+    private static final String EXTRA_CONTACTS = "contacts";
+
     private ContactQueryAdapter contactQueryAdapter;
 
     @BindView(R.id.edit_query) EditText editSearch;
     @BindView(R.id.rv_new_contacts) RecyclerView rvContacts;
     @BindView(R.id.tv_query_message) TextView tvQueryMessage;
+    @BindView(R.id.progress_loading) ProgressBar progressLoading;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -48,14 +52,14 @@ public class ContactsSearchFragment extends BaseFragment<ContactsSearchPresenter
 
         contactQueryAdapter = new ContactQueryAdapter(getContext());
         contactQueryAdapter.setInvitationIconClickListener(position -> {
-            Contact contact = contactQueryAdapter.getItem(position);
+            ContactViewModel contact = contactQueryAdapter.getItem(position);
             getPresenter().onContactSendRequestClick(contact);
         });
 
         if (savedInstanceState != null) {
-            ArrayList<Contact> contacts = savedInstanceState.getParcelableArrayList("contacts");
+            ArrayList<ContactViewModel> contacts = savedInstanceState.getParcelableArrayList(EXTRA_CONTACTS);
             if (contacts != null) {
-                for (Contact contact : contacts) {
+                for (ContactViewModel contact : contacts) {
                     contactQueryAdapter.add(contact);
                 }
             }
@@ -68,7 +72,9 @@ public class ContactsSearchFragment extends BaseFragment<ContactsSearchPresenter
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 String query = s.toString();
+//                handler.postDelayed(() -> {
                 getPresenter().onQueryEntered(query);
+//                });
             }
 
             @Override
@@ -82,10 +88,10 @@ public class ContactsSearchFragment extends BaseFragment<ContactsSearchPresenter
     }
 
     @Override
-    public void loadQueryResults(List<Contact> contacts) {
+    public void showQueryResults(List<ContactViewModel> contacts) {
         if (contacts.size() == 0) {
             tvQueryMessage.setVisibility(View.VISIBLE);
-            tvQueryMessage.setText("No results");
+            tvQueryMessage.setText(R.string.message_no_results);
         } else {
             tvQueryMessage.setVisibility(View.GONE);
         }
@@ -95,23 +101,32 @@ public class ContactsSearchFragment extends BaseFragment<ContactsSearchPresenter
     }
 
     @Override
-    public void markContactAsFriend(Contact contact) {
+    public void markContactAsFriend(ContactViewModel contact) {
         contactQueryAdapter.setContactToFriend(contact);
     }
 
     @Override
-    public void displayInfoText(String text) {
+    public void showLoading() {
+        progressLoading.setVisibility(View.VISIBLE);
+    }
 
+    @Override
+    public void hideLoading() {
+        progressLoading.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    public void displayInfoText(String text) {
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        ArrayList<Contact> savedContacts = new ArrayList<>();
-        for (Contact contact : contactQueryAdapter) {
-            savedContacts.add(contact);
+        ArrayList<ContactViewModel> savedContacts = new ArrayList<>(contactQueryAdapter.size());
+        for (int i = 0; i < savedContacts.size(); i++) {
+            savedContacts.add(contactQueryAdapter.getItem(i));
         }
 
-        outState.putParcelableArrayList("contacts", savedContacts);
+        outState.putParcelableArrayList(EXTRA_CONTACTS, savedContacts);
     }
 }

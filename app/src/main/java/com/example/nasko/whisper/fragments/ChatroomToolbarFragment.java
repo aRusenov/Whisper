@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.models.view.ChatViewModel;
 import com.example.nasko.whisper.models.view.ContactViewModel;
+import com.example.nasko.whisper.presenters.Navigator;
 import com.example.nasko.whisper.presenters.chatroom.ChatroomToolbarPresenter;
 import com.example.nasko.whisper.presenters.chatroom.ChatroomToolbarPresenterImpl;
 import com.example.nasko.whisper.views.contracts.ChatroomNavBarView;
@@ -35,7 +36,7 @@ public class ChatroomToolbarFragment extends BaseFragment<ChatroomToolbarPresent
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ChatViewModel chat = getArguments().getParcelable("chat");
+        ChatViewModel chat = getArguments().getParcelable(Navigator.EXTRA_CHAT);
         if (chat != null) {
             displayContact = chat.getDisplayContact();
         }
@@ -47,7 +48,7 @@ public class ChatroomToolbarFragment extends BaseFragment<ChatroomToolbarPresent
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_chatroom_bar, container, false);
+        View view = inflater.inflate(R.layout.fragment_chatroom_toolbar, container, false);
         ButterKnife.bind(this, view);
 
         if (displayContact == null) {

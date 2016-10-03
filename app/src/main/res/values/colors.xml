@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="color_dark_white">#ECEEF1</color>
+    <color name="color_material_grey">#616161</color>
     <color name="color_turquoise">#26A69A</color>
     <color name="color_light_turquoise">#26AE90</color>
     <color name="color_black">#000</color>

@@ -1,12 +1,13 @@
 package com.example.nasko.whisper.activities;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 
 import com.example.nasko.whisper.R;
-import com.example.nasko.whisper.fragments.ChatroomToolbarFragment;
 import com.example.nasko.whisper.fragments.ChatroomFragment;
+import com.example.nasko.whisper.fragments.ChatroomToolbarFragment;
+import com.example.nasko.whisper.helpers.FragmentHelperUtil;
 import com.example.nasko.whisper.models.view.ChatViewModel;
+import com.example.nasko.whisper.presenters.Navigator;
 
 public class ChatroomActivity extends BaseActivity {
 
@@ -15,21 +16,21 @@ public class ChatroomActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chatroom);
 
-        ChatViewModel chat = getIntent().getParcelableExtra("chat");
+        ChatViewModel chat = getIntent().getParcelableExtra(Navigator.EXTRA_CHAT);
         if (savedInstanceState == null) {
             Bundle args = new Bundle();
-            args.putParcelable("chat", chat);
-            addFragment(new ChatroomFragment(), R.id.container_chatroom_fragment, args);
-            addFragment(new ChatroomToolbarFragment(), R.id.container_toolbar_fragment, args);
+            args.putParcelable(Navigator.EXTRA_CHAT, chat);
+            FragmentHelperUtil.addFragment(this,
+                    new ChatroomToolbarFragment(),
+                    R.id.container_toolbar_fragment,
+                    args,
+                    null);
+
+            FragmentHelperUtil.addFragment(this,
+                    new ChatroomFragment(),
+                    R.id.container_chatroom_fragment,
+                    args,
+                    null);
         }
-    }
-
-    private void addFragment(Fragment fragment, int containerId, Bundle args) {
-        fragment.setArguments(args);
-
-        getSupportFragmentManager()
-                .beginTransaction()
-                .add(containerId, fragment)
-                .commit();
     }
 }

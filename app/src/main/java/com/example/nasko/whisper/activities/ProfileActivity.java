@@ -25,12 +25,14 @@ public class ProfileActivity extends BaseActivity<ProfilePresenter> implements P
 
     private static final String TAG = "ProfileActivity";
     private static final int GALLERY_PICK_IMAGE = 2;
+    private static final String INTENT_TYPE_IMAGE = "image/*";
+    private static final String TITLE_SELECT_PROFILE_IMAGE = "Select Profile Image";
 
     private Uri galleryPickedImageUri;
 
     @BindView(R.id.profile_image) CircleImageView profileImage;
-    @BindView(R.id.tv_username) TextView tvUsername;
-    @BindView(R.id.tv_name) TextView tvName;
+    @BindView(R.id.tv_username_title) TextView tvUsername;
+    @BindView(R.id.tv_name_title) TextView tvName;
     @BindView(R.id.coordinator_layout) CoordinatorLayout coordinatorLayout;
     @BindView(R.id.fab_pick_image) FloatingActionButton galleryFab;
     @BindView(R.id.toolbar) Toolbar toolbar;
@@ -48,10 +50,11 @@ public class ProfileActivity extends BaseActivity<ProfilePresenter> implements P
 
         galleryFab.setOnClickListener(v -> {
             Intent intent = new Intent();
-            intent.setType("image/*");
+            intent.setType(INTENT_TYPE_IMAGE);
             intent.setAction(Intent.ACTION_GET_CONTENT);
-            startActivityForResult(Intent.createChooser(intent,
-                    "Select Picture"), GALLERY_PICK_IMAGE);
+            startActivityForResult(
+                    Intent.createChooser(intent, TITLE_SELECT_PROFILE_IMAGE),
+                    GALLERY_PICK_IMAGE);
         });
 
         setPresenter(new ProfilePresenterImpl());
@@ -79,7 +82,7 @@ public class ProfileActivity extends BaseActivity<ProfilePresenter> implements P
     public void setUserData(User user) {
         String name = user.getName();
         if (name == null) {
-            name = "N/A";
+            name = getString(R.string.user_name_empty);
         }
 
         tvName.setText(name);

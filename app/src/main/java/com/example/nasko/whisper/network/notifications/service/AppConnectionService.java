@@ -28,15 +28,15 @@ public class AppConnectionService implements ConnectionService {
     }
 
     public Observable onConnect() {
-        return socketManager.on(EVENT_CONNECT, Object.class);
+        return socketManager.on(EVENT_CONNECT);
     }
 
     public Observable onError() {
-        return socketManager.on(EVENT_CONNECT_ERROR, Object.class);
+        return socketManager.on(EVENT_CONNECT_ERROR);
     }
 
-    public Observable<String> onDisconnect() {
-        return socketManager.on(EVENT_DISCONNECT, String.class);
+    public Observable onDisconnect() {
+        return socketManager.on(EVENT_DISCONNECT);
     }
 
     public Observable<User> onAuthenticated() {

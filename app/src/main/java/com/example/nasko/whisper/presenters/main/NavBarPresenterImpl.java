@@ -1,4 +1,4 @@
-package com.example.nasko.whisper.presenters.chats;
+package com.example.nasko.whisper.presenters.main;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -77,7 +77,7 @@ public class NavBarPresenterImpl extends ServiceBoundPresenter<ChatsNavBarView> 
         Subscription disconnectSub = service.connectionService()
                 .onDisconnect()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(res -> {
+                .subscribe($ -> {
                     Log.d(TAG, "Disconnect");
                     view.setNetworkStatus("Connecting..");
                 });

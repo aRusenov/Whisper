@@ -7,7 +7,7 @@
     <string name="message_timeout">Server timeout. Try again later.</string>
     <string name="message_no_internet">Internet connection error.</string>
     <string name="message_generic_bad_request">Try again later.</string>
-    <string name="message_sign_in_loading">Signing you in...</string>
+    <string name="message_sign_in_loading">Signing you in…</string>
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
@@ -41,5 +41,12 @@
     <string name="placeholder_name">Name</string>
     <string name="placeholder_send_message">Send a message</string>
     <string name="label_empty_chatroom_screen">Tap someone to chat with!</string>
+    <string name="user_name_empty">N/A</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="description_notifications">Allow Whisper to notify you for new messages</string>
+    <string name="description_username">Username</string>
+    <string name="description_name">Full Name</string>
+    <string name="message_no_results">No results</string>
+    <string name="prefix_contact_item_user">" (You)"</string>
 
 </resources>
