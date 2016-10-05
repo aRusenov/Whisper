@@ -13,15 +13,17 @@ import com.example.nasko.whisper.network.notifications.service.SocketService;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SocketServiceBinder implements AppStateChecker.AppBackgroundListener {
+import rx.android.schedulers.AndroidSchedulers;
+
+public class SocketServiceBinder {
 
     private static final String TAG = SocketServiceBinder.class.getName();
 
-    private Context context;
-    private boolean isBound;
     private BackgroundSocketService service;
     private List<OnServiceBoundListener> serviceBoundListeners;
     private AppStateChecker appStateChecker;
+    private Context context;
+    private boolean isBound;
     private String token;
 
     private ServiceConnection connection = new ServiceConnection() {
@@ -48,8 +50,12 @@ public class SocketServiceBinder implements AppStateChecker.AppBackgroundListene
         serviceBoundListeners = new ArrayList<>();
 
         appStateChecker = new AppStateChecker();
-        appStateChecker.setAppInBackgroundListener(this);
-        appStateChecker.start();
+        appStateChecker.onAppInBackground()
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe($ -> {
+                Log.d(TAG, "App is in background -> stopping socket service");
+                stop(true);
+            });
     }
 
     public boolean isBound() {
@@ -126,11 +132,5 @@ public class SocketServiceBinder implements AppStateChecker.AppBackgroundListene
         for (OnServiceBoundListener listener : serviceBoundListeners) {
             listener.onServiceUnbind();
         }
-    }
-
-    @Override
-    public void onAppInBackground() {
-        Log.d(TAG, "App is in background -> stopping socket service");
-        stop(true);
     }
 }
