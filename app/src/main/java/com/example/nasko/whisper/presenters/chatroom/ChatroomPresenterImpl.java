@@ -14,7 +14,7 @@ import com.example.nasko.whisper.models.view.MessageViewModel;
 import com.example.nasko.whisper.network.notifications.consumer.SocketServiceBinder;
 import com.example.nasko.whisper.network.notifications.service.SocketService;
 import com.example.nasko.whisper.presenters.ServiceBoundPresenter;
-import com.example.nasko.whisper.utils.Mapper;
+import com.example.nasko.whisper.helpers.Mapper;
 import com.example.nasko.whisper.views.contracts.ChatroomView;
 
 import java.util.List;

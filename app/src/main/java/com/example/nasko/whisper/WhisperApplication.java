@@ -4,13 +4,17 @@ import android.app.Application;
 
 import com.example.nasko.whisper.managers.AppState;
 import com.example.nasko.whisper.managers.AppUserProvider;
+import com.example.nasko.whisper.managers.ConfigLoader;
 import com.example.nasko.whisper.managers.LocalUserRepository;
 import com.example.nasko.whisper.managers.MessageNotificationController;
 import com.example.nasko.whisper.managers.UserProvider;
 import com.example.nasko.whisper.network.notifications.consumer.SocketServiceBinder;
-import com.example.nasko.whisper.network.rest.AppUserService;
 import com.example.nasko.whisper.network.rest.UserService;
 import com.example.nasko.whisper.presenters.Navigator;
+
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
+import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public class WhisperApplication extends Application {
 
@@ -36,9 +40,17 @@ public class WhisperApplication extends Application {
         navigator = new Navigator();
         LocalUserRepository localUserRepository = new LocalUserRepository(getApplicationContext());
         userProvider = new AppUserProvider(localUserRepository);
-        userService = new AppUserService(getApplicationContext());
         serviceBinder = new SocketServiceBinder(getApplicationContext());
         notificationController = new MessageNotificationController(userProvider, getApplicationContext());
+
+        String apiUrl = ConfigLoader.getConfigValue(getApplicationContext(), "api_url");
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(apiUrl)
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .addConverterFactory(JacksonConverterFactory.create())
+                .build();
+
+        userService = retrofit.create(UserService.class);
     }
 
     public UserProvider getUserProvider() {

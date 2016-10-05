@@ -11,7 +11,7 @@ import com.example.nasko.whisper.network.notifications.consumer.SocketServiceBin
 import com.example.nasko.whisper.network.notifications.service.SocketService;
 import com.example.nasko.whisper.presenters.Navigator;
 import com.example.nasko.whisper.presenters.ServiceBoundPresenter;
-import com.example.nasko.whisper.utils.Mapper;
+import com.example.nasko.whisper.helpers.Mapper;
 import com.example.nasko.whisper.views.contracts.ChatsView;
 import com.google.firebase.messaging.FirebaseMessaging;
 

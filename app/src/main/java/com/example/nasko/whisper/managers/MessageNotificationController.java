@@ -15,7 +15,7 @@ import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.activities.MainActivity;
 import com.example.nasko.whisper.models.dto.Message;
 import com.example.nasko.whisper.models.view.ChatViewModel;
-import com.example.nasko.whisper.utils.Mapper;
+import com.example.nasko.whisper.helpers.Mapper;
 
 public class MessageNotificationController implements NotificationDismissedListener {
 

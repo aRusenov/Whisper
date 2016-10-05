@@ -1,4 +1,4 @@
-package com.example.nasko.whisper.utils;
+package com.example.nasko.whisper.helpers;
 
 import com.example.nasko.whisper.models.dto.Chat;
 import com.example.nasko.whisper.models.dto.Contact;
@@ -47,9 +47,9 @@ public class Mapper {
 
     public static List<ChatViewModel> toChatViewModelList(Chat[] chats) {
         List<ChatViewModel> result = new ArrayList<>(chats.length);
-        for (int i = 0; i < chats.length; i++) {
+        for (Chat chat : chats) {
             result.add(
-                    toChatViewModel(chats[i])
+                    toChatViewModel(chat)
             );
         }
 

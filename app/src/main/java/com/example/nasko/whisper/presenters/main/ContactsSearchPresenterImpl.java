@@ -11,7 +11,7 @@ import com.example.nasko.whisper.models.view.ContactViewModel;
 import com.example.nasko.whisper.network.notifications.consumer.SocketServiceBinder;
 import com.example.nasko.whisper.network.notifications.service.SocketService;
 import com.example.nasko.whisper.presenters.ServiceBoundPresenter;
-import com.example.nasko.whisper.utils.Mapper;
+import com.example.nasko.whisper.helpers.Mapper;
 import com.example.nasko.whisper.views.contracts.ContactsSearchView;
 
 import java.util.List;
@@ -65,6 +65,11 @@ public class ContactsSearchPresenterImpl extends ServiceBoundPresenter<ContactsS
                 .debounce(TYPING_EVENT_WAIT_MS, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(query -> {
+                    if (query.length() < 2) {
+                        view.displayQueryTooShortError();
+                        return;
+                    }
+
                     view.showLoading();
                     service.contactsService().searchContacts(query);
                 });
@@ -90,10 +95,6 @@ public class ContactsSearchPresenterImpl extends ServiceBoundPresenter<ContactsS
 
     @Override
     public void onQueryEntered(String query) {
-        if (query.length() < 2) {
-            return;
-        }
-
         searchRequestSubject.onNext(query);
     }
 

@@ -4,7 +4,7 @@
 
     <!-- Login -->
     <string name="label_not_member">Not a member? Register now.</string>
-    <string name="message_timeout">Server timeout. Try again later.</string>
+    <string name="message_timeout">Connection error. Try again later.</string>
     <string name="message_no_internet">Internet connection error.</string>
     <string name="message_generic_bad_request">Try again later.</string>
     <string name="message_sign_in_loading">Signing you in…</string>
@@ -48,5 +48,6 @@
     <string name="description_name">Full Name</string>
     <string name="message_no_results">No results</string>
     <string name="prefix_contact_item_user">" (You)"</string>
+    <string name="error_search_too_short">Search must be at least 2 characters</string>
 
 </resources>

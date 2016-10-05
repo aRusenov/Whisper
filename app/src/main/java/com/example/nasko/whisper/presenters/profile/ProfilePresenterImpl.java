@@ -6,17 +6,21 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.example.nasko.whisper.WhisperApplication;
+import com.example.nasko.whisper.helpers.RealPathUtil;
 import com.example.nasko.whisper.managers.LocalUserRepository;
-import com.example.nasko.whisper.managers.RealPathUtil;
 import com.example.nasko.whisper.managers.UserProvider;
+import com.example.nasko.whisper.network.RetrofitErrorMapper;
 import com.example.nasko.whisper.network.rest.UserService;
 import com.example.nasko.whisper.presenters.BasePresenter;
 import com.example.nasko.whisper.views.contracts.ProfileView;
 
 import java.io.File;
 
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 public class ProfilePresenterImpl extends BasePresenter<ProfileView> implements ProfilePresenter {
 
@@ -56,8 +60,12 @@ public class ProfilePresenterImpl extends BasePresenter<ProfileView> implements 
     public void onImagePickedFromGallery(Uri imageUri) {
         String realPath = RealPathUtil.getRealPathFromUri(context, imageUri);
         File file = new File(realPath);
+        RequestBody token = RequestBody.create(MediaType.parse("text/plain"), userProvider.getCurrentUser().getSessionToken());
+        RequestBody fileBody = RequestBody.create(MediaType.parse("image/*"), file);
 
-        Subscription sub = userService.editProfile(userProvider.getCurrentUser().getSessionToken(), file.getName(), file)
+        Subscription sub = userService.editProfile(token, fileBody)
+                .subscribeOn(Schedulers.io())
+                .onErrorResumeNext(new RetrofitErrorMapper<>(context))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(user -> {
                     LocalUserRepository userRepository = new LocalUserRepository(context);

@@ -72,9 +72,7 @@ public class ContactsSearchFragment extends BaseFragment<ContactsSearchPresenter
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 String query = s.toString();
-//                handler.postDelayed(() -> {
                 getPresenter().onQueryEntered(query);
-//                });
             }
 
             @Override
@@ -89,6 +87,7 @@ public class ContactsSearchFragment extends BaseFragment<ContactsSearchPresenter
 
     @Override
     public void showQueryResults(List<ContactViewModel> contacts) {
+        editSearch.setError(null);
         if (contacts.size() == 0) {
             tvQueryMessage.setVisibility(View.VISIBLE);
             tvQueryMessage.setText(R.string.message_no_results);
@@ -116,7 +115,8 @@ public class ContactsSearchFragment extends BaseFragment<ContactsSearchPresenter
     }
 
     @Override
-    public void displayInfoText(String text) {
+    public void displayQueryTooShortError() {
+        editSearch.setError(getContext().getString(R.string.error_search_too_short));
     }
 
     @Override

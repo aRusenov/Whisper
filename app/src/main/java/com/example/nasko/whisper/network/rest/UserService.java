@@ -1,17 +1,25 @@
 package com.example.nasko.whisper.network.rest;
 
+import com.example.nasko.whisper.models.LoginModel;
 import com.example.nasko.whisper.models.RegisterModel;
 import com.example.nasko.whisper.models.User;
 
-import java.io.File;
-
+import okhttp3.RequestBody;
+import retrofit2.http.Body;
+import retrofit2.http.Multipart;
+import retrofit2.http.POST;
+import retrofit2.http.Part;
 import rx.Observable;
 
 public interface UserService {
 
-    Observable<User> login(String username, String password);
+    @POST("/login")
+    Observable<User> login(@Body LoginModel loginModel);
 
-    Observable<User> register(RegisterModel registerModel);
+    @POST("/register")
+    Observable<User> register(@Body RegisterModel registerModel);
 
-    Observable<User> editProfile(String token, String fileName, File sourceFile);
+    @Multipart
+    @POST("/edit")
+    Observable<User> editProfile(@Part("token") RequestBody token, @Part("image") RequestBody sourceFile);
 }

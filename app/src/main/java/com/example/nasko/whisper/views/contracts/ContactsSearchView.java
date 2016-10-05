@@ -15,5 +15,5 @@ public interface ContactsSearchView extends View<ContactsSearchPresenter> {
 
     void hideLoading();
 
-    void displayInfoText(String text);
+    void displayQueryTooShortError();
 }
