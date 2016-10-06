@@ -13,6 +13,7 @@ import com.example.nasko.whisper.network.notifications.service.SocketService;
 import com.example.nasko.whisper.presenters.Navigator;
 import com.example.nasko.whisper.presenters.ServiceBoundPresenter;
 import com.example.nasko.whisper.views.contracts.ChatsNavBarView;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -114,6 +115,7 @@ public class NavBarPresenterImpl extends ServiceBoundPresenter<ChatsNavBarView> 
     }
 
     private void logout() {
+        FirebaseMessaging.getInstance().unsubscribeFromTopic(userProvider.getCurrentUser().getUId());
         userProvider.logout();
         serviceBinder.stop(true);
         navigator.navigateToLoginScreen(context);

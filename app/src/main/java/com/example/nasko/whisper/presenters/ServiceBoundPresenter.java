@@ -3,12 +3,16 @@ package com.example.nasko.whisper.presenters;
 import android.content.Context;
 import android.os.Bundle;
 
-import com.example.nasko.whisper.network.notifications.consumer.OnServiceBoundListener;
 import com.example.nasko.whisper.network.notifications.consumer.SocketServiceBinder;
 import com.example.nasko.whisper.network.notifications.service.SocketService;
 import com.example.nasko.whisper.views.contracts.View;
 
-public abstract class ServiceBoundPresenter<V extends View> extends BasePresenter<V> implements OnServiceBoundListener {
+import rx.Subscription;
+
+public abstract class ServiceBoundPresenter<V extends View> extends BasePresenter<V> {
+
+    private Subscription bindSub;
+    private Subscription unbindSub;
 
     protected SocketServiceBinder serviceBinder;
     protected SocketService service;
@@ -25,18 +29,19 @@ public abstract class ServiceBoundPresenter<V extends View> extends BasePresente
             onServiceBind(service);
         }
 
-        serviceBinder.addServiceBoundListener(this);
+        bindSub = serviceBinder.onBindService()
+                .subscribe(this::onServiceBind);
+
+        unbindSub = serviceBinder.onUnbindService()
+                .subscribe($ -> onServiceUnbind());
     }
 
-    @Override
     public void onServiceBind(SocketService service) {
         this.service = service;
     }
 
-    @Override
     public void onServiceUnbind() {
         service = null;
-        subscriptions.clear();
     }
 
     @Override
@@ -55,6 +60,7 @@ public abstract class ServiceBoundPresenter<V extends View> extends BasePresente
     public void detachView() {
         super.detachView();
         service = null;
-        serviceBinder.removeServiceBoundListener(this);
+        bindSub.unsubscribe();
+        unbindSub.unsubscribe();
     }
 }

@@ -65,6 +65,10 @@ public class ContactsSearchPresenterImpl extends ServiceBoundPresenter<ContactsS
                 .debounce(TYPING_EVENT_WAIT_MS, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(query -> {
+                    if (query.length() == 0) {
+                        return;
+                    }
+
                     if (query.length() < 2) {
                         view.displayQueryTooShortError();
                         return;

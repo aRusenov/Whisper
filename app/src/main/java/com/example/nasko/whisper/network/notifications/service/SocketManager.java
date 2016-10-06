@@ -56,9 +56,10 @@ public class SocketManager {
                         return;
                     }
 
-                    if (responseType == Object.class) {
+                    if (responseType == null) {
                         // Nothing to deserialize
                         subscriber.onNext(null);
+                        return;
                     }
 
                     if (args.length > 0) {

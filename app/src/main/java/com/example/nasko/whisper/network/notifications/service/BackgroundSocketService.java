@@ -47,6 +47,7 @@ public class BackgroundSocketService extends Service implements SocketService {
         } catch (URISyntaxException e) {
             Log.wtf(TAG, "Invalid socket endpoint :(");
             stopSelf();
+            return;
         }
 
         connectionService = new AppConnectionService(socketManager);
@@ -73,7 +74,7 @@ public class BackgroundSocketService extends Service implements SocketService {
 
     private void setOwnSocketListeners() {
         subscriptions = new CompositeSubscription();
-        Subscription connectSub = socketManager.on(AppConnectionService.EVENT_CONNECT, Object.class)
+        Subscription connectSub = socketManager.on(AppConnectionService.EVENT_CONNECT)
                 .subscribe(o -> {
                     Log.d(TAG, "Connected");
                     if (token != null) {
@@ -81,8 +82,8 @@ public class BackgroundSocketService extends Service implements SocketService {
                     }
                 });
 
-        Subscription disconnectSub = socketManager.on(AppConnectionService.EVENT_DISCONNECT, String.class)
-                .subscribe(o -> {
+        Subscription disconnectSub = socketManager.on(AppConnectionService.EVENT_DISCONNECT)
+                .subscribe($ -> {
                     if (networkStateReceiver.isConnected()) {
                         socketManager.connect();
                     }

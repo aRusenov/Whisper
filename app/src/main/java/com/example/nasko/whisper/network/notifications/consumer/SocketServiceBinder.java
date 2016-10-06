@@ -5,25 +5,26 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.example.nasko.whisper.network.notifications.service.BackgroundSocketService;
 import com.example.nasko.whisper.network.notifications.service.SocketService;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.subjects.PublishSubject;
 
 public class SocketServiceBinder {
 
     private static final String TAG = SocketServiceBinder.class.getName();
 
+    private PublishSubject<BackgroundSocketService> serviceBoundSubject = PublishSubject.create();
+    private PublishSubject<Void> serviceUnboundSubject = PublishSubject.create();
+
     private BackgroundSocketService service;
-    private List<OnServiceBoundListener> serviceBoundListeners;
     private AppStateChecker appStateChecker;
     private Context context;
-    private boolean isBound;
     private String token;
 
     private ServiceConnection connection = new ServiceConnection() {
@@ -31,23 +32,20 @@ public class SocketServiceBinder {
         public void onServiceConnected(ComponentName name, IBinder binder) {
             Log.d(TAG, "Connected to service");
             service = ((BackgroundSocketService.LocalBinder) binder).getService();
-            isBound = true;
             service.onBind();
-            signalBinding(service);
+            serviceBoundSubject.onNext(service);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
             Log.d(TAG, "Disconnected from service");
             service = null;
-            isBound = false;
-            signalUnbinding();
+            serviceUnboundSubject.onNext(null);
         }
     };
 
     public SocketServiceBinder(Context context) {
         this.context = context;
-        serviceBoundListeners = new ArrayList<>();
 
         appStateChecker = new AppStateChecker();
         appStateChecker.onAppInBackground()
@@ -59,36 +57,45 @@ public class SocketServiceBinder {
     }
 
     public boolean isBound() {
-        return isBound;
+        return service != null;
     }
 
     public SocketService getService() {
         return service;
     }
 
-    public void addServiceBoundListener(OnServiceBoundListener listener) {
-        serviceBoundListeners.add(listener);
+    public Observable<BackgroundSocketService> onBindService() {
+        return serviceBoundSubject;
     }
 
-    public boolean removeServiceBoundListener(OnServiceBoundListener listener) {
-        return serviceBoundListeners.remove(listener);
+    public Observable<Void> onUnbindService() {
+        return serviceUnboundSubject;
     }
 
     public void start(String token) {
-        if (!isBound) {
-            Intent intent = new Intent("START_SERVICE");
-            this.token = token;
-            intent.putExtra("token", token);
-            intent.setPackage(context.getPackageName());
-            context.bindService(intent, connection, context.BIND_AUTO_CREATE);
-            context.startService(intent);
+        if (isBound()) {
+            return;
         }
+
+        this.token = token;
+        Intent intent = prepareServiceStartIntent(token);
+        context.bindService(intent, connection, context.BIND_AUTO_CREATE);
+        context.startService(intent);
+    }
+
+    @NonNull
+    private Intent prepareServiceStartIntent(String token) {
+        Intent intent = new Intent("START_SERVICE");
+        intent.putExtra("token", token);
+        intent.setPackage(context.getPackageName());
+        return intent;
     }
 
     public void stop(boolean closeService) {
-        if (isBound) {
+        if (isBound()) {
             context.unbindService(connection);
         }
+
         if (closeService) {
             Intent intent = new Intent("START_SERVICE");
             intent.setPackage(context.getPackageName());
@@ -100,13 +107,13 @@ public class SocketServiceBinder {
         }
 
         service = null;
-        isBound = false;
-        signalUnbinding();
+        serviceUnboundSubject.onNext(null);
     }
 
     public void resume() {
-        if (service == null) {
+        if (! isBound()) {
             if (token != null) {
+                // Restart
                 start(token);
             }
         } else {
@@ -116,21 +123,9 @@ public class SocketServiceBinder {
     }
 
     public void pause() {
-        if (service != null) {
+        if (isBound()) {
             appStateChecker.onPause();
             service.pause();
-        }
-    }
-
-    private void signalBinding(SocketService boundService) {
-        for (OnServiceBoundListener listener : serviceBoundListeners) {
-            listener.onServiceBind(boundService);
-        }
-    }
-
-    private void signalUnbinding() {
-        for (OnServiceBoundListener listener : serviceBoundListeners) {
-            listener.onServiceUnbind();
         }
     }
 }

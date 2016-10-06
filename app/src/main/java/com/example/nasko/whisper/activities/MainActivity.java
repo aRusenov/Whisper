@@ -25,6 +25,7 @@ import com.example.nasko.whisper.presenters.main.NavBarPresenter;
 import com.example.nasko.whisper.presenters.main.NavBarPresenterImpl;
 import com.example.nasko.whisper.views.adapters.MenuFragmentPageAdapter;
 import com.example.nasko.whisper.views.contracts.ChatsNavBarView;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -54,7 +55,7 @@ public class MainActivity extends BaseActivity<NavBarPresenter> implements Chats
         UserProvider userProvider = WhisperApplication.instance().getUserProvider();
         navigator = WhisperApplication.instance().getNavigator();
 
-        // Check if user credentials are invalid
+        // Check if user is logged in
         User currentUser = userProvider.getCurrentUser();
         if (currentUser == null || currentUser.getSessionToken() == null) {
             navigator.navigateToLoginScreen(this);
@@ -78,6 +79,7 @@ public class MainActivity extends BaseActivity<NavBarPresenter> implements Chats
 
         setPresenter(new NavBarPresenterImpl());
         getPresenter().attachView(this, this, getIntent().getExtras());
+        FirebaseMessaging.getInstance().subscribeToTopic(currentUser.getUId());
     }
 
     private void setupTabLayout() {
@@ -151,6 +153,7 @@ public class MainActivity extends BaseActivity<NavBarPresenter> implements Chats
             if (tvEmptyChatroom != null && tvEmptyChatroom.getVisibility() != View.GONE) {
                 tvEmptyChatroom.setVisibility(View.GONE);
             }
+
             FragmentHelperUtil.addOrReplaceFragment(this,
                     new ChatroomFragment(),
                     R.id.container_chatroom_fragment,

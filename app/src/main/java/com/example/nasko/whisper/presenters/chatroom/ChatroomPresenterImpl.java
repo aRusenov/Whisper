@@ -62,10 +62,6 @@ public class ChatroomPresenterImpl extends ServiceBoundPresenter<ChatroomView> i
     @Override
     public void onServiceBind(SocketService service) {
         super.onServiceBind(service);
-//        if (chat == null) {
-//            return;
-//        }
-
         if (lastLoadedMessageSeq == DEFAULT_MESSAGE_SEQ) {
             loadMesages();
         }

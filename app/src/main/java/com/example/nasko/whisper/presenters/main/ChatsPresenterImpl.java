@@ -3,17 +3,16 @@ package com.example.nasko.whisper.presenters.main;
 import android.util.Log;
 
 import com.example.nasko.whisper.WhisperApplication;
+import com.example.nasko.whisper.helpers.Mapper;
 import com.example.nasko.whisper.managers.UserProvider;
-import com.example.nasko.whisper.models.dto.Contact;
 import com.example.nasko.whisper.models.User;
+import com.example.nasko.whisper.models.dto.Contact;
 import com.example.nasko.whisper.models.view.ChatViewModel;
 import com.example.nasko.whisper.network.notifications.consumer.SocketServiceBinder;
 import com.example.nasko.whisper.network.notifications.service.SocketService;
 import com.example.nasko.whisper.presenters.Navigator;
 import com.example.nasko.whisper.presenters.ServiceBoundPresenter;
-import com.example.nasko.whisper.helpers.Mapper;
 import com.example.nasko.whisper.views.contracts.ChatsView;
-import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.List;
 
@@ -25,7 +24,6 @@ public class ChatsPresenterImpl extends ServiceBoundPresenter<ChatsView> impleme
     private static final String TAG = ChatsPresenterImpl.class.getName();
 
     private UserProvider userProvider;
-    private Navigator navigator;
 
     public ChatsPresenterImpl() {
         this(WhisperApplication.instance().getServiceBinder(),
@@ -38,8 +36,6 @@ public class ChatsPresenterImpl extends ServiceBoundPresenter<ChatsView> impleme
                               Navigator navigator) {
         super(serviceBinder);
         this.userProvider = userProvider;
-        this.navigator = navigator;
-        FirebaseMessaging.getInstance().subscribeToTopic("chats");
     }
 
     @Override

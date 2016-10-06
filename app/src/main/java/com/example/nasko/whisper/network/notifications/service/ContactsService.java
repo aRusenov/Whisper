@@ -12,8 +12,6 @@ public interface ContactsService {
 
     Observable<Chat[]> onLoadChats();
 
-    Observable<Chat> onChatUpdate();
-
     Observable<ContactStateChange> onUserOnline();
 
     Observable<ContactStateChange> onUserOffline();

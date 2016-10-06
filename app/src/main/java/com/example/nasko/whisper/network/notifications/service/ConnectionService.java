@@ -8,13 +8,9 @@ public interface ConnectionService {
 
     Observable onConnect();
 
-    Observable onError();
-
     Observable onDisconnect();
 
     Observable<User> onAuthenticated();
-
-    Observable<String> onUnauthorized();
 
     void authenticate(String token);
 }
