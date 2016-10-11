@@ -2,15 +2,14 @@ package com.example.nasko.whisper;
 
 import android.app.Application;
 
-import com.example.nasko.whisper.managers.AppState;
-import com.example.nasko.whisper.managers.AppUserProvider;
-import com.example.nasko.whisper.managers.ConfigLoader;
-import com.example.nasko.whisper.managers.LocalUserRepository;
-import com.example.nasko.whisper.managers.MessageNotificationController;
-import com.example.nasko.whisper.managers.UserProvider;
-import com.example.nasko.whisper.network.notifications.consumer.SocketServiceBinder;
-import com.example.nasko.whisper.network.rest.UserService;
-import com.example.nasko.whisper.presenters.Navigator;
+import com.example.nasko.whisper.data.local.AppUserProvider;
+import com.example.nasko.whisper.utils.helpers.ConfigLoader;
+import com.example.nasko.whisper.data.local.LocalUserRepository;
+import com.example.nasko.whisper.data.socket.consumer.MessageNotificationController;
+import com.example.nasko.whisper.data.local.UserProvider;
+import com.example.nasko.whisper.data.socket.consumer.SocketServiceBinder;
+import com.example.nasko.whisper.data.rest.UserService;
+import com.example.nasko.whisper.utils.Navigator;
 
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;

@@ -15,15 +15,10 @@
             android:layout_height="wrap_content"
             android:layout_width="match_parent">
 
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar_main"
+            <FrameLayout
+                android:id="@+id/toolbar_container"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="@color/color_turquoise"
-                app:titleTextColor="@color/color_white"
-                android:theme="@style/ToolbarStyle">
-
-            </android.support.v7.widget.Toolbar>
+                android:layout_height="wrap_content"/>
 
             <android.support.design.widget.TabLayout
                 android:id="@+id/tabs"
