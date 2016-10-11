@@ -1,44 +1,45 @@
 package com.example.nasko.whisper.chatroom;
 
-import com.example.nasko.whisper.ServiceBoundPresenter;
+import com.example.nasko.whisper.SocketPresenter;
 import com.example.nasko.whisper.data.local.UserProvider;
-import com.example.nasko.whisper.data.socket.consumer.SocketServiceBinder;
-import com.example.nasko.whisper.data.socket.service.SocketService;
+import com.example.nasko.whisper.data.socket.SocketService;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.subscriptions.CompositeSubscription;
 
-public class ToolbarPresenter extends ServiceBoundPresenter implements ToolbarContract.Presenter {
+public class ToolbarPresenter extends SocketPresenter implements ToolbarContract.Presenter {
 
     private ToolbarContract.View view;
 
-    public ToolbarPresenter(ToolbarContract.View view, SocketServiceBinder binder, UserProvider userProvider) {
-        super(binder, userProvider);
+    public ToolbarPresenter(ToolbarContract.View view, SocketService socketService, UserProvider userProvider) {
+        super(socketService, userProvider);
         this.view = view;
+        initListeners();
     }
 
-    @Override
-    public void onServiceBind(SocketService service, CompositeSubscription serviceSubscriptions) {
-        Subscription userOnlineSub = service.contactsService()
-                .onUserOnline()
+    private void initListeners() {
+        Subscription userOnlineSub = socketService.contactsService()
+                .onContactOnline()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(stateChange -> {
                     view.setContactStatus(true);
                 });
 
-        serviceSubscriptions.add(userOnlineSub);
+        subscriptions.add(userOnlineSub);
 
-        Subscription userOfflineSub = service.contactsService()
-                .onUserOffline()
+        Subscription userOfflineSub = socketService.contactsService()
+                .onContactOffline()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(stateChange -> {
                     view.setContactStatus(false);
                 });
 
-        serviceSubscriptions.add(userOfflineSub);
+        subscriptions.add(userOfflineSub);
     }
 
     @Override
-    public void onServiceUnbind() { }
+    public void destroy() {
+        super.destroy();
+        view = null;
+    }
 }

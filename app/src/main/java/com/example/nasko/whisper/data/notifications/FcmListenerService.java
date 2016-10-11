@@ -1,4 +1,4 @@
-package com.example.nasko.whisper.data.socket.consumer;
+package com.example.nasko.whisper.data.notifications;
 
 import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.AppState;

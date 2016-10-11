@@ -4,13 +4,15 @@
     <color name="color_material_grey">#616161</color>
     <color name="color_turquoise">#26A69A</color>
     <color name="color_light_turquoise">#26AE90</color>
-    <color name="color_black">#000</color>
-    <color name="color_white">#fff</color>
+    <color name="color_black">#000000</color>
+    <color name="color_white">#ffffff</color>
     <color name="color_grey">#757575</color>
     <color name="color_light_grey">#DFDFDF</color>
     <color name="color_bluish_grey">#5d8482</color>
-    <color name="color_primary">#3F51B5</color>
-    <color name="color_primary_dark">#303F9F</color>
-    <color name="color_accent">#FF4081</color>
+
+    <color name="color_primary">#26a69a</color>
+    <color name="color_primary_dark">#009688</color>
+    <color name="color_accent">#26AE90</color>
+
     <color name="color_red">#E54D3D</color>
 </resources>

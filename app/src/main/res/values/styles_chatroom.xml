@@ -2,10 +2,11 @@
 <resources>
     <style name="NewMessageEditText">
         <item name="android:imeOptions">actionDone</item>
-        <item name="android:inputType">text</item>
+        <item name="android:inputType">text|textMultiLine</item>
         <item name="android:background">@android:color/transparent</item>
         <item name="android:paddingLeft">@dimen/large_margin</item>
         <item name="android:paddingRight">@dimen/large_margin</item>
+        <item name="android:maxLines">2</item>
     </style>
     <style name="MessageSendButton">
         <item name="android:adjustViewBounds">true</item>

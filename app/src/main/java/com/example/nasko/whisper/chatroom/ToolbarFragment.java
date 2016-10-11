@@ -42,7 +42,7 @@ public class ToolbarFragment extends Fragment implements ToolbarContract.View {
         }
 
         presenter = new ToolbarPresenter(this,
-                WhisperApplication.instance().getServiceBinder(),
+                WhisperApplication.instance().getSocketService(),
                 WhisperApplication.instance().getUserProvider());
     }
 
@@ -78,9 +78,15 @@ public class ToolbarFragment extends Fragment implements ToolbarContract.View {
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        presenter.destroy();
+    }
+
+    @Override
     public void setContactStatus(boolean online) {
         int statusRes = online ? R.drawable.circle_green : R.drawable.circle_gray;
         statusImg.setImageResource(statusRes);
-        tvStatus.setText(online ? getString(R.string.status_online) : getString(R.string.status_offline));
+        tvStatus.setText(online ? getActivity().getString(R.string.status_online) : getActivity().getString(R.string.status_offline));
     }
 }

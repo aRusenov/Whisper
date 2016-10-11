@@ -1,4 +1,4 @@
-package com.example.nasko.whisper.data.socket.service;
+package com.example.nasko.whisper.data.socket;
 
 import com.example.nasko.whisper.models.dto.Chat;
 import com.example.nasko.whisper.models.dto.ContactQueryResponse;
@@ -12,9 +12,9 @@ public interface ContactsService {
 
     Observable<Chat[]> onLoadChats();
 
-    Observable<ContactStateChange> onUserOnline();
+    Observable<ContactStateChange> onContactOnline();
 
-    Observable<ContactStateChange> onUserOffline();
+    Observable<ContactStateChange> onContactOffline();
 
     Observable<ContactQueryResponse> onContactQueryResponse();
 

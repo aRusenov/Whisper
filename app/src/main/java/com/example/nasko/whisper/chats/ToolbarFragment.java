@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -32,9 +33,9 @@ public class ToolbarFragment extends Fragment implements ToolbarContract.View {
         setHasOptionsMenu(true);
         presenter = new ToolbarPresenter(this,
                 getContext(),
+                WhisperApplication.instance().getSocketService(),
                 WhisperApplication.instance().getUserProvider(),
-                WhisperApplication.instance().getNavigator(),
-                WhisperApplication.instance().getServiceBinder());
+                WhisperApplication.instance().getNavigator());
     }
 
     @Nullable
@@ -51,21 +52,21 @@ public class ToolbarFragment extends Fragment implements ToolbarContract.View {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        Log.d("ChatToolbar", "onStart");
+    }
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.bar_actions, menu);
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        presenter.start();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        presenter.stop();
+    public void onDestroy() {
+        super.onDestroy();
+        presenter.destroy();
     }
 
     @Override

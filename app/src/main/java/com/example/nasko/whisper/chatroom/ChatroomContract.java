@@ -20,7 +20,7 @@ public interface ChatroomContract {
 
         void displayTypingStarted(TypingEvent typingEvent);
 
-        void displayTypingStopped(TypingEvent typingEvent);
+        void displayTypingStopped();
 
         void displayNetworkError();
 

@@ -2,15 +2,14 @@ package com.example.nasko.whisper.chats;
 
 import android.util.Log;
 
-import com.example.nasko.whisper.ServiceBoundPresenter;
-import com.example.nasko.whisper.utils.helpers.Mapper;
+import com.example.nasko.whisper.SocketPresenter;
 import com.example.nasko.whisper.data.local.UserProvider;
+import com.example.nasko.whisper.data.socket.SocketService;
 import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.models.dto.Chat;
 import com.example.nasko.whisper.models.dto.Contact;
 import com.example.nasko.whisper.models.view.ContactViewModel;
-import com.example.nasko.whisper.data.socket.consumer.SocketServiceBinder;
-import com.example.nasko.whisper.data.socket.service.SocketService;
+import com.example.nasko.whisper.utils.helpers.Mapper;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -18,9 +17,8 @@ import java.util.concurrent.TimeUnit;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.subjects.PublishSubject;
-import rx.subscriptions.CompositeSubscription;
 
-public class ContactsPresenter extends ServiceBoundPresenter implements ContactsContract.Presenter {
+public class ContactsPresenter extends SocketPresenter implements ContactsContract.Presenter {
 
     private static final String TAG = ContactsPresenter.class.getName();
     private static final long TYPING_EVENT_WAIT_MS = 500;
@@ -28,15 +26,21 @@ public class ContactsPresenter extends ServiceBoundPresenter implements Contacts
     private ContactsContract.View view;
     private PublishSubject<String> searchRequestSubject = PublishSubject.create();
 
-    public ContactsPresenter(ContactsContract.View view, SocketServiceBinder serviceBinder,
+    public ContactsPresenter(ContactsContract.View view, SocketService socketService,
                              UserProvider userProvider) {
-        super(serviceBinder, userProvider);
+        super(socketService, userProvider);
         this.view = view;
+        initListeners();
     }
 
     @Override
-    public void onServiceBind(SocketService service, CompositeSubscription serviceSubscriptions) {
-        Subscription contactsQuerySub = service.contactsService()
+    public void destroy() {
+        super.destroy();
+        view = null;
+    }
+
+    private void initListeners() {
+        Subscription contactsQuerySub = socketService.contactsService()
                 .onContactQueryResponse()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(response -> {
@@ -46,7 +50,7 @@ public class ContactsPresenter extends ServiceBoundPresenter implements Contacts
                     view.hideLoading();
                 });
 
-        Subscription newChatSub = service.contactsService()
+        Subscription newChatSub = socketService.contactsService()
                 .onNewChat()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(chat -> {
@@ -69,16 +73,13 @@ public class ContactsPresenter extends ServiceBoundPresenter implements Contacts
                     }
 
                     view.showLoading();
-                    service.contactsService().searchContacts(query);
+                    socketService.contactsService().searchContacts(query);
                 });
 
-        serviceSubscriptions.add(searchResultSub);
-        serviceSubscriptions.add(contactsQuerySub);
-        serviceSubscriptions.add(newChatSub);
+        subscriptions.add(searchResultSub);
+        subscriptions.add(contactsQuerySub);
+        subscriptions.add(newChatSub);
     }
-
-    @Override
-    public void onServiceUnbind() { }
 
     private void setOtherContact(Chat chat) {
         User currentUser = userProvider.getCurrentUser();
@@ -103,7 +104,7 @@ public class ContactsPresenter extends ServiceBoundPresenter implements Contacts
     public void onContactSendRequestClick(ContactViewModel contact) {
         if (!contact.isFriend() && !contact.getId().equals(userProvider.getCurrentUser().getUId())) {
             Log.d(TAG, "Performing add contact query");
-            service.contactsService().addContact(contact.getId());
+            socketService.contactsService().addContact(contact.getId());
         }
     }
 }

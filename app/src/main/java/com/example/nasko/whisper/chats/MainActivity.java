@@ -54,7 +54,7 @@ public class MainActivity extends BaseActivity implements ViewCoordinator {
             finish();
             return;
         }
-
+        WhisperApplication.instance().getSocketService().start(currentUser.getSessionToken());
         multipane = findViewById(R.id.container_chatroom_fragment) != null;
 
         Bundle extras = getIntent().getExtras();

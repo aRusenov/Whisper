@@ -2,47 +2,47 @@ package com.example.nasko.whisper.chats;
 
 import android.util.Log;
 
-import com.example.nasko.whisper.ServiceBoundPresenter;
-import com.example.nasko.whisper.utils.helpers.Mapper;
+import com.example.nasko.whisper.SocketPresenter;
 import com.example.nasko.whisper.data.local.UserProvider;
+import com.example.nasko.whisper.data.socket.SocketService;
 import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.models.dto.Contact;
 import com.example.nasko.whisper.models.view.ChatViewModel;
-import com.example.nasko.whisper.data.socket.consumer.SocketServiceBinder;
-import com.example.nasko.whisper.data.socket.service.SocketService;
+import com.example.nasko.whisper.utils.helpers.Mapper;
 
 import java.util.List;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.subscriptions.CompositeSubscription;
 
-public class ChatsPresenter extends ServiceBoundPresenter implements ChatsContract.Presenter {
+public class ChatsPresenter extends SocketPresenter implements ChatsContract.Presenter {
 
     private static final String TAG = ChatsPresenter.class.getName();
 
     private ChatsContract.View view;
     private ViewCoordinator viewCoordinator;
+    private User currentUser;
 
     public ChatsPresenter(ChatsContract.View view, ViewCoordinator viewCoordinator,
-                          SocketServiceBinder serviceBinder, UserProvider userProvider) {
-        super(serviceBinder, userProvider);
+                          SocketService socketService, UserProvider userProvider) {
+        super(socketService, userProvider);
         this.view = view;
         this.viewCoordinator = viewCoordinator;
+
+        currentUser = userProvider.getCurrentUser();
+        initListeners();
+        socketService.contactsService().loadContacts();
     }
 
-    @Override
-    public void onServiceBind(SocketService service, CompositeSubscription serviceSubscriptions) {
-        service.contactsService().loadContacts();
-
-        Subscription authSub = service.connectionService()
+    private void initListeners() {
+        Subscription authSub = socketService.connectionService()
                 .onAuthenticated()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(user -> {
-                    service.contactsService().loadContacts();
+                    socketService.contactsService().loadContacts();
                 });
 
-        Subscription loadChatsSub = service.contactsService()
+        Subscription loadChatsSub = socketService.contactsService()
                 .onLoadChats()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(chatsArr -> {
@@ -59,7 +59,7 @@ public class ChatsPresenter extends ServiceBoundPresenter implements ChatsContra
                     view.loadChats(chatViewModels);
                 });
 
-        Subscription newMsgSub = service.messageService()
+        Subscription newMsgSub = socketService.messageService()
                 .onNewMessage()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(message -> {
@@ -68,7 +68,7 @@ public class ChatsPresenter extends ServiceBoundPresenter implements ChatsContra
                             Mapper.toMessageViewModel(message));
                 });
 
-        Subscription messageSentSub = service.messageService()
+        Subscription messageSentSub = socketService.messageService()
                 .onMessageSent()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(messageSentAck -> {
@@ -77,21 +77,22 @@ public class ChatsPresenter extends ServiceBoundPresenter implements ChatsContra
                             Mapper.toMessageViewModel(messageSentAck.getMessage()));
                 });
 
-        Subscription userOnlineSub = service.contactsService()
-                .onUserOnline()
+        Subscription userOnlineSub = socketService.contactsService()
+                .onContactOnline()
+                .filter(stateChange -> ! stateChange.getUsername().equals(currentUser.getUsername()))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(stateChange -> {
                     view.setChatStatus(stateChange.getChatId(), true);
                 });
 
-        Subscription userOfflineSub = service.contactsService()
-                .onUserOffline()
+        Subscription userOfflineSub = socketService.contactsService()
+                .onContactOffline()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(stateChange -> {
                     view.setChatStatus(stateChange.getChatId(), false);
                 });
 
-        Subscription newChatSub = service.contactsService()
+        Subscription newChatSub = socketService.contactsService()
                 .onNewChat()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(chat -> {
@@ -101,17 +102,20 @@ public class ChatsPresenter extends ServiceBoundPresenter implements ChatsContra
                     view.addChat(chatViewModel);
                 });
 
-        serviceSubscriptions.add(authSub);
-        serviceSubscriptions.add(newMsgSub);
-        serviceSubscriptions.add(messageSentSub);
-        serviceSubscriptions.add(newChatSub);
-        serviceSubscriptions.add(loadChatsSub);
-        serviceSubscriptions.add(userOnlineSub);
-        serviceSubscriptions.add(userOfflineSub);
+        subscriptions.add(authSub);
+        subscriptions.add(newMsgSub);
+        subscriptions.add(messageSentSub);
+        subscriptions.add(newChatSub);
+        subscriptions.add(loadChatsSub);
+        subscriptions.add(userOnlineSub);
+        subscriptions.add(userOfflineSub);
     }
 
     @Override
-    public void onServiceUnbind() { }
+    public void destroy() {
+        super.destroy();
+        view = null;
+    }
 
     @Override
     public void onChatClicked(ChatViewModel clickedChat) {

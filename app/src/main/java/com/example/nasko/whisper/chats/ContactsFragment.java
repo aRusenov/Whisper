@@ -41,7 +41,7 @@ public class ContactsFragment extends Fragment implements ContactsContract.View 
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         presenter = new ContactsPresenter(this,
-                WhisperApplication.instance().getServiceBinder(),
+                WhisperApplication.instance().getSocketService(),
                 WhisperApplication.instance().getUserProvider());
     }
 
@@ -87,15 +87,9 @@ public class ContactsFragment extends Fragment implements ContactsContract.View 
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        presenter.start();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        presenter.stop();
+    public void onDestroy() {
+        super.onDestroy();
+        presenter.destroy();
     }
 
     @Override

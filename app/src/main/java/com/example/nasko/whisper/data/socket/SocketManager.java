@@ -1,4 +1,4 @@
-package com.example.nasko.whisper.data.socket.service;
+package com.example.nasko.whisper.data.socket;
 
 import android.support.annotation.NonNull;
 import android.support.v4.util.SimpleArrayMap;
@@ -21,7 +21,7 @@ public class SocketManager {
     private Socket socket;
     private JsonDeserializer deserializer;
 
-    public SocketManager(String endpoint) throws URISyntaxException {
+    SocketManager(String endpoint) throws URISyntaxException {
         socket = IO.socket(endpoint);
         observables = new SimpleArrayMap<>();
         deserializer = new JsonDeserializer();
@@ -35,7 +35,7 @@ public class SocketManager {
         return getObservable(event, null);
     }
 
-    public <R> Observable<R> getObservable(String event, Class<R> responseType) {
+    private <R> Observable<R> getObservable(String event, Class<R> responseType) {
         Observable<?> eventObservable = observables.get(event);
         if (eventObservable == null) {
             eventObservable = createObservable(event, responseType);
@@ -70,7 +70,6 @@ public class SocketManager {
                             subscriber.onNext(result);
                         } catch (IOException e) {
                             e.printStackTrace();
-//                            subscriber.onError(e);
                         }
                     }
                 }

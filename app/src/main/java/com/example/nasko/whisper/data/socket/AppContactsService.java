@@ -1,4 +1,4 @@
-package com.example.nasko.whisper.data.socket.service;
+package com.example.nasko.whisper.data.socket;
 
 import com.example.nasko.whisper.models.dto.Chat;
 import com.example.nasko.whisper.models.dto.ContactQueryResponse;
@@ -40,11 +40,11 @@ public class AppContactsService implements ContactsService {
         return socketManager.on(EVENT_CONTACT_UPDATE, Chat.class);
     }
 
-    public Observable<ContactStateChange> onUserOnline() {
+    public Observable<ContactStateChange> onContactOnline() {
         return socketManager.on("online", ContactStateChange.class);
     }
 
-    public Observable<ContactStateChange> onUserOffline() {
+    public Observable<ContactStateChange> onContactOffline() {
         return socketManager.on("offline", ContactStateChange.class);
     }
 

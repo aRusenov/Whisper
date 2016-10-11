@@ -1,4 +1,4 @@
-package com.example.nasko.whisper.data.socket.consumer;
+package com.example.nasko.whisper.data;
 
 import java.util.concurrent.TimeUnit;
 

@@ -17,12 +17,13 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.example.nasko.whisper.utils.Navigator;
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.chatroom.adapters.MessageAdapter;
+import com.example.nasko.whisper.chatroom.misc.EndlessUpScrollListener;
 import com.example.nasko.whisper.data.local.UserProvider;
 import com.example.nasko.whisper.models.LoadingData;
 import com.example.nasko.whisper.models.MessageSeparator;
@@ -34,7 +35,7 @@ import com.example.nasko.whisper.models.view.ContactViewModel;
 import com.example.nasko.whisper.models.view.MessageViewModel;
 import com.example.nasko.whisper.utils.DateFormatter;
 import com.example.nasko.whisper.utils.MessageSeparatorDateFormatter;
-import com.example.nasko.whisper.chatroom.misc.EndlessUpScrollListener;
+import com.example.nasko.whisper.utils.Navigator;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -62,7 +63,7 @@ public class ChatroomFragment extends Fragment implements ChatroomContract.View 
     private ContactViewModel userContact;
 
     @BindView(R.id.rv_messages) RecyclerView messageList;
-//    @BindView(R.id.progress_loading_bar) ProgressBar loadingBar;
+    @BindView(R.id.progress_loading) ProgressBar loadingBar;
     @BindView(R.id.edit_new_message) EditText messageEdit;
     @BindView(R.id.btn_send_message) ImageButton btnSend;
     @BindView(R.id.tv_error) TextView tvError;
@@ -77,7 +78,7 @@ public class ChatroomFragment extends Fragment implements ChatroomContract.View 
         dateFormatter = new MessageSeparatorDateFormatter();
 
         presenter = new ChatroomPresenter(this, chat,
-                WhisperApplication.instance().getServiceBinder(),
+                WhisperApplication.instance().getSocketService(),
                 WhisperApplication.instance().getNotificationController(),
                 WhisperApplication.instance().getUserProvider());
 
@@ -87,15 +88,9 @@ public class ChatroomFragment extends Fragment implements ChatroomContract.View 
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        presenter.start();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        presenter.stop();
+    public void onDestroy() {
+        super.onDestroy();
+        presenter.destroy();
     }
 
     @Nullable
@@ -104,7 +99,7 @@ public class ChatroomFragment extends Fragment implements ChatroomContract.View 
         View view = inflater.inflate(R.layout.fragment_chatroom, container, false);
         ButterKnife.bind(this, view);
 
-//        loadingBar.setVisibility(BaseView.VISIBLE);
+        loadingBar.setVisibility(View.VISIBLE);
         DisplayMetrics metrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
         int width = metrics.widthPixels;
@@ -171,7 +166,8 @@ public class ChatroomFragment extends Fragment implements ChatroomContract.View 
             for (Object msg : messages) {
                 adapter.add(msg);
             }
-//            loadingBar.setVisibility(BaseView.INVISIBLE);
+
+            loadingBar.setVisibility(View.INVISIBLE);
         }
 
         return view;
@@ -194,7 +190,7 @@ public class ChatroomFragment extends Fragment implements ChatroomContract.View 
     @Override
     public void loadMessages(List<MessageViewModel> messages) {
         // TODO: Remove and use empty view
-//        loadingBar.setVisibility(BaseView.INVISIBLE);
+        loadingBar.setVisibility(View.INVISIBLE);
         if (adapter.size() > 0 && adapter.getItem(0) instanceof LoadingData) {
             adapter.removeAt(0);
         }
@@ -236,7 +232,7 @@ public class ChatroomFragment extends Fragment implements ChatroomContract.View 
     }
 
     @Override
-    public void displayTypingStopped(TypingEvent typingEvent) {
+    public void displayTypingStopped() {
         if (adapter.last() instanceof TypingEvent) {
             boolean scrollToBottom = isLastItemVisible();
             adapter.removeAt(adapter.size() - 1);

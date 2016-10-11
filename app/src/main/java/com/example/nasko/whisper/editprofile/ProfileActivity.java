@@ -73,6 +73,8 @@ public class ProfileActivity extends BaseActivity implements ProfileContract.Vie
     @Override
     protected void onStart() {
         super.onStart();
+        presenter.start();
+
         if (galleryPickedImageUri != null) {
             presenter.onImagePickedFromGallery(galleryPickedImageUri);
             galleryPickedImageUri = null;

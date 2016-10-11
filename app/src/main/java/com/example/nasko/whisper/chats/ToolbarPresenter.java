@@ -3,19 +3,17 @@ package com.example.nasko.whisper.chats;
 import android.content.Context;
 import android.util.Log;
 
-import com.example.nasko.whisper.utils.Navigator;
-import com.example.nasko.whisper.ServiceBoundPresenter;
+import com.example.nasko.whisper.SocketPresenter;
 import com.example.nasko.whisper.data.local.UserProvider;
+import com.example.nasko.whisper.data.socket.SocketService;
 import com.example.nasko.whisper.models.User;
-import com.example.nasko.whisper.data.socket.consumer.SocketServiceBinder;
-import com.example.nasko.whisper.data.socket.service.SocketService;
+import com.example.nasko.whisper.utils.Navigator;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.subscriptions.CompositeSubscription;
 
-public class ToolbarPresenter extends ServiceBoundPresenter implements ToolbarContract.Presenter {
+public class ToolbarPresenter extends SocketPresenter implements ToolbarContract.Presenter {
 
     private static final String TAG = "ToolbarPresenter";
 
@@ -23,10 +21,9 @@ public class ToolbarPresenter extends ServiceBoundPresenter implements ToolbarCo
     private Context context;
     private Navigator navigator;
 
-    public ToolbarPresenter(ToolbarContract.View view, Context context,
-                            UserProvider userProvider, Navigator navigator,
-                            SocketServiceBinder socketServiceBinder) {
-        super(socketServiceBinder, userProvider);
+    public ToolbarPresenter(ToolbarContract.View view, Context context, SocketService socketService,
+                            UserProvider userProvider, Navigator navigator) {
+        super(socketService, userProvider);
         this.view = view;
         this.context = context;
         this.navigator = navigator;
@@ -34,13 +31,12 @@ public class ToolbarPresenter extends ServiceBoundPresenter implements ToolbarCo
         User currentUser = userProvider.getCurrentUser();
         // Subscribe to firebase cloud messaging service
         FirebaseMessaging.getInstance().subscribeToTopic(currentUser.getUId());
-        // Start background socket service
-        serviceBinder.start(currentUser.getSessionToken());
+
+        initListeners();
     }
 
-    @Override
-    public void onServiceBind(SocketService service, CompositeSubscription serviceSubscriptions) {
-        Subscription connectSub = service.connectionService()
+    private void initListeners() {
+        Subscription connectSub = socketService.connectionService()
                 .onConnect()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(res -> {
@@ -48,9 +44,9 @@ public class ToolbarPresenter extends ServiceBoundPresenter implements ToolbarCo
                     view.setNetworkStatus("Authenticating...");
                 });
 
-        serviceSubscriptions.add(connectSub);
+        subscriptions.add(connectSub);
 
-        Subscription authSub = service.connectionService()
+        Subscription authSub = socketService.connectionService()
                 .onAuthenticated()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(res -> {
@@ -58,9 +54,9 @@ public class ToolbarPresenter extends ServiceBoundPresenter implements ToolbarCo
                     view.setNetworkStatus("Whisper");
                 });
 
-        serviceSubscriptions.add(authSub);
+        subscriptions.add(authSub);
 
-        Subscription disconnectSub = service.connectionService()
+        Subscription disconnectSub = socketService.connectionService()
                 .onDisconnect()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe($ -> {
@@ -68,11 +64,8 @@ public class ToolbarPresenter extends ServiceBoundPresenter implements ToolbarCo
                     view.setNetworkStatus("Connecting..");
                 });
 
-        serviceSubscriptions.add(disconnectSub);
+        subscriptions.add(disconnectSub);
     }
-
-    @Override
-    public void onServiceUnbind() {}
 
     @Override
     public void onSettingsClicked() {
@@ -87,8 +80,14 @@ public class ToolbarPresenter extends ServiceBoundPresenter implements ToolbarCo
 
     private void logout() {
         userProvider.logout();
-        serviceBinder.stop(true);
+        socketService.destroy();
         navigator.navigateToLoginScreen(context);
         FirebaseMessaging.getInstance().unsubscribeFromTopic(userProvider.getCurrentUser().getUId());
+    }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        view = null;
     }
 }

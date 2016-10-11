@@ -2,17 +2,17 @@ package com.example.nasko.whisper;
 
 public class AppState {
 
-    private boolean stopped = true;
+    private boolean paused = true;
 
-    public void onActivityStart() {
-        stopped = false;
+    public void onActivityResume() {
+        paused = false;
     }
 
-    public void onActivityStop() {
-        stopped = true;
+    public void onActivityPause() {
+        paused = true;
     }
 
     public boolean inBackground() {
-        return stopped;
+        return paused;
     }
 }

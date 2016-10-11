@@ -1,4 +1,4 @@
-package com.example.nasko.whisper.data.socket.service;
+package com.example.nasko.whisper.data.socket;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

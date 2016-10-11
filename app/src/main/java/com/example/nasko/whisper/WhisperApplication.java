@@ -3,13 +3,16 @@ package com.example.nasko.whisper;
 import android.app.Application;
 
 import com.example.nasko.whisper.data.local.AppUserProvider;
+import com.example.nasko.whisper.data.socket.AppSocketService;
+import com.example.nasko.whisper.data.socket.SocketService;
 import com.example.nasko.whisper.utils.helpers.ConfigLoader;
 import com.example.nasko.whisper.data.local.LocalUserRepository;
-import com.example.nasko.whisper.data.socket.consumer.MessageNotificationController;
+import com.example.nasko.whisper.data.notifications.MessageNotificationController;
 import com.example.nasko.whisper.data.local.UserProvider;
-import com.example.nasko.whisper.data.socket.consumer.SocketServiceBinder;
 import com.example.nasko.whisper.data.rest.UserService;
 import com.example.nasko.whisper.utils.Navigator;
+
+import java.net.URISyntaxException;
 
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
@@ -20,7 +23,7 @@ public class WhisperApplication extends Application {
     private AppState appState;
     private UserProvider userProvider;
     private UserService userService;
-    private SocketServiceBinder serviceBinder;
+    private SocketService socketService;
     private Navigator navigator;
     private MessageNotificationController notificationController;
 
@@ -39,7 +42,12 @@ public class WhisperApplication extends Application {
         navigator = new Navigator();
         LocalUserRepository localUserRepository = new LocalUserRepository(getApplicationContext());
         userProvider = new AppUserProvider(localUserRepository);
-        serviceBinder = new SocketServiceBinder(getApplicationContext());
+        try {
+            socketService = new AppSocketService(getApplicationContext());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException();
+        }
+
         notificationController = new MessageNotificationController(userProvider, getApplicationContext());
 
         String apiUrl = ConfigLoader.getConfigValue(getApplicationContext(), "api_url");
@@ -64,8 +72,8 @@ public class WhisperApplication extends Application {
         return userService;
     }
 
-    public SocketServiceBinder getServiceBinder() {
-        return serviceBinder;
+    public SocketService getSocketService() {
+        return socketService;
     }
 
     public MessageNotificationController getNotificationController() {

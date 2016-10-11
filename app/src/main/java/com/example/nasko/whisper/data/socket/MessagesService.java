@@ -1,4 +1,4 @@
-package com.example.nasko.whisper.data.socket.service;
+package com.example.nasko.whisper.data.socket;
 
 import com.example.nasko.whisper.models.dto.Message;
 import com.example.nasko.whisper.models.dto.MessageSentAck;

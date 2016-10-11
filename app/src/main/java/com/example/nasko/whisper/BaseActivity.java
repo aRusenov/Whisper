@@ -15,14 +15,14 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        appState.onActivityStart();
+    protected void onResume() {
+        super.onResume();
+        appState.onActivityResume();
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-        appState.onActivityStop();
+    protected void onPause() {
+        super.onPause();
+        appState.onActivityPause();
     }
 }

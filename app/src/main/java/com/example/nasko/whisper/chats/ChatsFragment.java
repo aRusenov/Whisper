@@ -42,7 +42,7 @@ public class ChatsFragment extends Fragment implements ChatsContract.View {
         }
 
         presenter = new ChatsPresenter(this, viewCoordinator,
-                WhisperApplication.instance().getServiceBinder(),
+                WhisperApplication.instance().getSocketService(),
                 WhisperApplication.instance().getUserProvider());
     }
 
@@ -73,15 +73,9 @@ public class ChatsFragment extends Fragment implements ChatsContract.View {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        presenter.start();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        presenter.stop();
+    public void onDestroy() {
+        super.onDestroy();
+        presenter.destroy();
     }
 
     @Override
