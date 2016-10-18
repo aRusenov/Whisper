@@ -25,6 +25,7 @@ import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.chatroom.adapters.MessageAdapter;
 import com.example.nasko.whisper.chatroom.misc.EndlessUpScrollListener;
 import com.example.nasko.whisper.data.local.UserProvider;
+import com.example.nasko.whisper.chatroom.di.modules.ChatroomPresenterModule;
 import com.example.nasko.whisper.models.LoadingData;
 import com.example.nasko.whisper.models.MessageSeparator;
 import com.example.nasko.whisper.models.MessageStatus;
@@ -35,22 +36,24 @@ import com.example.nasko.whisper.models.view.ContactViewModel;
 import com.example.nasko.whisper.models.view.MessageViewModel;
 import com.example.nasko.whisper.utils.DateFormatter;
 import com.example.nasko.whisper.utils.MessageSeparatorDateFormatter;
-import com.example.nasko.whisper.utils.Navigator;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class ChatroomFragment extends Fragment implements ChatroomContract.View {
 
+    public static final String EXTRA_CHAT = "chat";
     private static final String KEY_LAST_LOADED_MESSAGE_ID = "lastLoadedMessageId";
     private static final String KEY_MESSAGES = "messages";
 
-    private ChatroomContract.Presenter presenter;
-    private UserProvider userProvider;
+    @Inject ChatroomContract.Presenter presenter;
+    @Inject UserProvider userProvider;
     private DateFormatter dateFormatter;
 
     private LinearLayoutManager layoutManager;
@@ -71,16 +74,15 @@ public class ChatroomFragment extends Fragment implements ChatroomContract.View 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        userProvider = WhisperApplication.instance().getUserProvider();
+
+        chat = getArguments().getParcelable(EXTRA_CHAT);
+        WhisperApplication.userComponent()
+                .plus(new ChatroomPresenterModule(this, chat, savedInstanceState != null))
+                .inject(this);
+
         User user = userProvider.getCurrentUser();
-        chat = getArguments().getParcelable(Navigator.EXTRA_CHAT);
         userContact = new ContactViewModel(user.getUId(), user.getUsername(), user.getName(), user.getImage(), false);
         dateFormatter = new MessageSeparatorDateFormatter();
-
-        presenter = new ChatroomPresenter(this, chat,
-                WhisperApplication.instance().getSocketService(),
-                WhisperApplication.instance().getNotificationController(),
-                WhisperApplication.instance().getUserProvider());
 
         if (savedInstanceState != null) {
             presenter.setLastLoadedMessageId(savedInstanceState.getInt(KEY_LAST_LOADED_MESSAGE_ID));
@@ -258,7 +260,7 @@ public class ChatroomFragment extends Fragment implements ChatroomContract.View 
             return;
         }
 
-        MessageViewModel msg = new MessageViewModel(text, new Date(), userContact);
+        MessageViewModel msg = new MessageViewModel(chat.getId(), text, new Date(), userContact);
         msg.setStatus(MessageStatus.PENDING);
         msg.setUId(System.nanoTime());
         addMessage(msg);

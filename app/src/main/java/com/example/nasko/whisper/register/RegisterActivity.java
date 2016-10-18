@@ -1,6 +1,7 @@
 package com.example.nasko.whisper.register;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.method.PasswordTransformationMethod;
@@ -9,17 +10,21 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.example.nasko.whisper.BaseActivity;
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.WhisperApplication;
-import com.example.nasko.whisper.BaseActivity;
+import com.example.nasko.whisper.chats.MainActivity;
+import com.example.nasko.whisper.register.di.RegisterPresenterModule;
 import com.example.nasko.whisper.models.RegisterModel;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class RegisterActivity extends BaseActivity implements RegisterContract.View {
 
-    private RegisterContract.Presenter presenter;
+    @Inject RegisterContract.Presenter presenter;
     private ProgressDialog dialog;
 
     @BindView(R.id.tv_error_msg) TextView tvErrorMsg;
@@ -51,11 +56,9 @@ public class RegisterActivity extends BaseActivity implements RegisterContract.V
             }
         });
 
-        presenter = new RegisterPresenter(this,
-                this,
-                WhisperApplication.instance().getUserService(),
-                WhisperApplication.instance().getNavigator(),
-                WhisperApplication.instance().getUserProvider());
+        WhisperApplication.restComponent()
+                .plus(new RegisterPresenterModule(this))
+                .inject(this);
     }
 
     private RegisterModel validateFields() {
@@ -95,6 +98,13 @@ public class RegisterActivity extends BaseActivity implements RegisterContract.V
         tvErrorMsg.setVisibility(View.VISIBLE);
         tvErrorMsg.setText(message);
         btnRegister.setEnabled(true);
+    }
+
+    @Override
+    public void navigateToUserChats() {
+        Intent intent = MainActivity.prepareIntent(this, null);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
     }
 
     @Override

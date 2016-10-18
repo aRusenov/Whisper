@@ -2,85 +2,50 @@ package com.example.nasko.whisper;
 
 import android.app.Application;
 
-import com.example.nasko.whisper.data.local.AppUserProvider;
-import com.example.nasko.whisper.data.socket.AppSocketService;
-import com.example.nasko.whisper.data.socket.SocketService;
+import com.example.nasko.whisper.dagger.base.ApplicationModule;
+import com.example.nasko.whisper.dagger.base.BaseComponent;
+import com.example.nasko.whisper.dagger.base.DaggerBaseComponent;
+import com.example.nasko.whisper.dagger.rest.RestComponent;
+import com.example.nasko.whisper.dagger.rest.RestModule;
+import com.example.nasko.whisper.dagger.user.SocketModule;
+import com.example.nasko.whisper.dagger.user.UserComponent;
 import com.example.nasko.whisper.utils.helpers.ConfigLoader;
-import com.example.nasko.whisper.data.local.LocalUserRepository;
-import com.example.nasko.whisper.data.notifications.MessageNotificationController;
-import com.example.nasko.whisper.data.local.UserProvider;
-import com.example.nasko.whisper.data.rest.UserService;
-import com.example.nasko.whisper.utils.Navigator;
-
-import java.net.URISyntaxException;
-
-import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
-import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public class WhisperApplication extends Application {
 
-    private AppState appState;
-    private UserProvider userProvider;
-    private UserService userService;
-    private SocketService socketService;
-    private Navigator navigator;
-    private MessageNotificationController notificationController;
-
-    private static WhisperApplication instance;
-
-    public static synchronized WhisperApplication instance() {
-        return instance;
-    }
+    private static String apiUrl;
+    private static BaseComponent baseComponent;
+    private static RestComponent restComponent;
+    private static UserComponent userComponent;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        instance = this;
-
-        appState = new AppState();
-        navigator = new Navigator();
-        LocalUserRepository localUserRepository = new LocalUserRepository(getApplicationContext());
-        userProvider = new AppUserProvider(localUserRepository);
-        try {
-            socketService = new AppSocketService(getApplicationContext());
-        } catch (URISyntaxException e) {
-            throw new RuntimeException();
-        }
-
-        notificationController = new MessageNotificationController(userProvider, getApplicationContext());
-
-        String apiUrl = ConfigLoader.getConfigValue(getApplicationContext(), "api_url");
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(apiUrl)
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-                .addConverterFactory(JacksonConverterFactory.create())
+        baseComponent = DaggerBaseComponent.builder()
+                .applicationModule(new ApplicationModule(this))
                 .build();
 
-        userService = retrofit.create(UserService.class);
+        apiUrl = ConfigLoader.getConfigValue(getApplicationContext(), "api_url");
+        restComponent = baseComponent.plus(new RestModule(apiUrl));
     }
 
-    public UserProvider getUserProvider() {
-        return userProvider;
+    public static BaseComponent baseComponent() {
+        return baseComponent;
     }
 
-    public Navigator getNavigator() {
-        return navigator;
+    public static RestComponent restComponent() {
+        return restComponent;
     }
 
-    public UserService getUserService() {
-        return userService;
+    public static UserComponent userComponent() {
+        if (userComponent == null) {
+            userComponent = baseComponent.plus(new SocketModule(apiUrl));
+        }
+
+        return userComponent;
     }
 
-    public SocketService getSocketService() {
-        return socketService;
-    }
-
-    public MessageNotificationController getNotificationController() {
-        return notificationController;
-    }
-
-    public AppState getAppState() {
-        return appState;
+    public static void releaseUserComponent() {
+        userComponent = null;
     }
 }

@@ -1,7 +1,9 @@
 package com.example.nasko.whisper.chats;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
@@ -10,16 +12,14 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
 import com.example.nasko.whisper.BaseActivity;
-import com.example.nasko.whisper.utils.Navigator;
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.WhisperApplication;
+import com.example.nasko.whisper.chatroom.ChatroomActivity;
 import com.example.nasko.whisper.chatroom.ChatroomFragment;
 import com.example.nasko.whisper.chatroom.ToolbarFragment;
 import com.example.nasko.whisper.chats.adapters.MenuFragmentPageAdapter;
-import com.example.nasko.whisper.utils.helpers.FragmentHelperUtil;
-import com.example.nasko.whisper.data.local.UserProvider;
-import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.models.view.ChatViewModel;
+import com.example.nasko.whisper.utils.helpers.FragmentHelperUtil;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -29,8 +29,8 @@ public class MainActivity extends BaseActivity implements ViewCoordinator {
     private static final int[] TAB_DRAWABLES = new int[] { R.drawable.home, R.drawable.search };
     private static final String FRAGMENT_CHATROOM_TAG = "fragment_chatroom";
     private static final String FRAGMENT_TOOLBAR_TAG = "fragment_toolbar";
+    private static final String EXTRA_CHAT = "chat";
 
-    private Navigator navigator;
     private boolean multipane;
 
     @BindView(R.id.pager) ViewPager viewPager;
@@ -38,29 +38,25 @@ public class MainActivity extends BaseActivity implements ViewCoordinator {
     // Available only in multi-pane layout
     @Nullable @BindView(R.id.tv_empty_chatroom) TextView tvEmptyChatroom;
 
+    public static Intent prepareIntent(@NonNull Context context, @Nullable ChatViewModel chat) {
+        Intent intent = new Intent(context, MainActivity.class);
+        intent.putExtra(EXTRA_CHAT, chat);
+        return intent;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        UserProvider userProvider = WhisperApplication.instance().getUserProvider();
-        navigator = WhisperApplication.instance().getNavigator();
-
-        // Check if user is logged in
-        User currentUser = userProvider.getCurrentUser();
-        if (currentUser == null || currentUser.getSessionToken() == null) {
-            navigator.navigateToLoginScreen(this);
-            finish();
-            return;
-        }
-        WhisperApplication.instance().getSocketService().start(currentUser.getSessionToken());
+        WhisperApplication.baseComponent().inject(this);
         multipane = findViewById(R.id.container_chatroom_fragment) != null;
 
         Bundle extras = getIntent().getExtras();
         ChatViewModel chat;
         // Check if user has navigated from notification
-        if (extras != null && (chat = extras.getParcelable("chat")) != null) {
+        if (extras != null && (chat = extras.getParcelable(EXTRA_CHAT)) != null) {
             handleChatNavigation(chat);
         }
 
@@ -115,7 +111,7 @@ public class MainActivity extends BaseActivity implements ViewCoordinator {
 
     private void handleChatNavigation(ChatViewModel chat) {
         Bundle args = new Bundle();
-        args.putParcelable(Navigator.EXTRA_CHAT, chat);
+        args.putParcelable(EXTRA_CHAT, chat);
         if (multipane) {
             if (tvEmptyChatroom != null && tvEmptyChatroom.getVisibility() != View.GONE) {
                 tvEmptyChatroom.setVisibility(View.GONE);
@@ -133,8 +129,9 @@ public class MainActivity extends BaseActivity implements ViewCoordinator {
                     args,
                     FRAGMENT_TOOLBAR_TAG);
         } else {
-            // Not multipane -> simply navigate to chatroom activtiy
-            navigator.navigateToChatroom(this, chat);
+            // Not multipane -> simply navigate to ChatroomActivtiy
+            Intent intent = ChatroomActivity.prepareIntent(this, chat);
+            startActivity(intent);
         }
     }
 }

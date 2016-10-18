@@ -1,30 +1,29 @@
 package com.example.nasko.whisper.data.notifications;
 
-import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.AppState;
+import com.example.nasko.whisper.WhisperApplication;
+import com.example.nasko.whisper.data.JsonDeserializer;
 import com.example.nasko.whisper.data.local.UserProvider;
 import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.models.dto.Message;
-import com.example.nasko.whisper.data.JsonDeserializer;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
 import java.io.IOException;
 
+import javax.inject.Inject;
+
 public class FcmListenerService extends FirebaseMessagingService {
 
-    private MessageNotificationController notificationController;
-    private JsonDeserializer deserializer;
-    private UserProvider userProvider;
-    private AppState appState;
+    @Inject MessageNotificationController notificationController;
+    @Inject JsonDeserializer deserializer;
+    @Inject UserProvider userProvider;
+    @Inject AppState appState;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        notificationController = WhisperApplication.instance().getNotificationController();
-        userProvider = WhisperApplication.instance().getUserProvider();
-        appState = WhisperApplication.instance().getAppState();
-        deserializer = new JsonDeserializer();
+        WhisperApplication.baseComponent().inject(this);
     }
 
     @Override

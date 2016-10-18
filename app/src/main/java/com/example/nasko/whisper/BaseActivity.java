@@ -2,17 +2,11 @@ package com.example.nasko.whisper;
 
 import android.support.v7.app.AppCompatActivity;
 
+import javax.inject.Inject;
+
 public class BaseActivity extends AppCompatActivity {
 
-    private AppState appState;
-
-    public BaseActivity() {
-        this(WhisperApplication.instance().getAppState());
-    }
-
-    public BaseActivity(AppState appState) {
-        this.appState = appState;
-    }
+    @Inject AppState appState;
 
     @Override
     protected void onResume() {

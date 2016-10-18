@@ -20,7 +20,7 @@ import rx.subjects.PublishSubject;
 
 public class ContactsPresenter extends SocketPresenter implements ContactsContract.Presenter {
 
-    private static final String TAG = ContactsPresenter.class.getName();
+    private static final String TAG = "ContactsPresenter";
     private static final long TYPING_EVENT_WAIT_MS = 500;
 
     private ContactsContract.View view;

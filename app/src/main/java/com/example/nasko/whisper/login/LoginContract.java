@@ -12,6 +12,10 @@ public interface LoginContract {
         void hideLoadingDialog();
 
         void displayError(String message);
+
+        void navigateToRegisterScreen();
+
+        void navigateToUserChatsScreen();
     }
 
     interface Presenter extends BasePresenter {

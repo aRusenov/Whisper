@@ -7,7 +7,6 @@ import com.example.nasko.whisper.SocketPresenter;
 import com.example.nasko.whisper.data.local.UserProvider;
 import com.example.nasko.whisper.data.socket.SocketService;
 import com.example.nasko.whisper.models.User;
-import com.example.nasko.whisper.utils.Navigator;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import rx.Subscription;
@@ -19,14 +18,12 @@ public class ToolbarPresenter extends SocketPresenter implements ToolbarContract
 
     private ToolbarContract.View view;
     private Context context;
-    private Navigator navigator;
 
-    public ToolbarPresenter(ToolbarContract.View view, Context context, SocketService socketService,
-                            UserProvider userProvider, Navigator navigator) {
+    public ToolbarPresenter(ToolbarContract.View view, Context context,
+                            SocketService socketService, UserProvider userProvider) {
         super(socketService, userProvider);
         this.view = view;
         this.context = context;
-        this.navigator = navigator;
 
         User currentUser = userProvider.getCurrentUser();
         // Subscribe to firebase cloud messaging service
@@ -56,33 +53,30 @@ public class ToolbarPresenter extends SocketPresenter implements ToolbarContract
 
         subscriptions.add(authSub);
 
-        Subscription disconnectSub = socketService.connectionService()
-                .onDisconnect()
+        Subscription connectingSub = socketService.connectionService().onConnecting()
+                .mergeWith(socketService.connectionService().onConnect())
+                .mergeWith(socketService.connectionService().onDisconnect())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe($ -> {
-                    Log.d(TAG, "Disconnect");
                     view.setNetworkStatus("Connecting..");
                 });
 
-        subscriptions.add(disconnectSub);
+        subscriptions.add(connectingSub);
     }
 
     @Override
     public void onSettingsClicked() {
         User currentUser = userProvider.getCurrentUser();
-        navigator.navigateToProfileScreen(context, currentUser);
+        view.navigateToSettings(currentUser);
     }
 
     @Override
     public void onLogoutClicked() {
-        logout();
-    }
-
-    private void logout() {
         userProvider.logout();
         socketService.destroy();
-        navigator.navigateToLoginScreen(context);
         FirebaseMessaging.getInstance().unsubscribeFromTopic(userProvider.getCurrentUser().getUId());
+
+        view.navigateToLoginScreen();
     }
 
     @Override

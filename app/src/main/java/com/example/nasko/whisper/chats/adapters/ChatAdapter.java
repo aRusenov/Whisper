@@ -8,8 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.nasko.whisper.R;
-import com.example.nasko.whisper.WhisperApplication;
-import com.example.nasko.whisper.data.local.UserProvider;
+import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.models.view.ChatViewModel;
 import com.example.nasko.whisper.models.view.ContactViewModel;
 import com.example.nasko.whisper.models.view.MessageViewModel;
@@ -47,16 +46,12 @@ public class ChatAdapter extends ArrayRecyclerViewAdapter<ChatViewModel, ChatAda
     }
 
     private DateFormatter dateFormatter;
-    private UserProvider userProvider;
+    private User currentUser;
 
-    public ChatAdapter(Context context, DateFormatter dateFormatter, UserProvider userProvider) {
+    public ChatAdapter(Context context, DateFormatter dateFormatter, User currentUser) {
         super(context);
         this.dateFormatter = dateFormatter;
-        this.userProvider = userProvider;
-    }
-
-    public ChatAdapter(Context context, DateFormatter dateFormatter) {
-        this(context, dateFormatter, WhisperApplication.instance().getUserProvider());
+        this.currentUser = currentUser;
     }
 
     @Override
@@ -92,14 +87,7 @@ public class ChatAdapter extends ArrayRecyclerViewAdapter<ChatViewModel, ChatAda
     }
 
     private boolean isMessageAuthor(MessageViewModel message) {
-        if (userProvider != null && userProvider.getCurrentUser() != null) {
-            String userId = userProvider.getCurrentUser().getUId();
-            if (message.getAuthor().getId().equals(userId)) {
-                return true;
-            }
-        }
-
-        return false;
+        return currentUser != null && currentUser.getUId().equals(message.getAuthor().getId());
     }
 
     public int findIndexById(String id) {

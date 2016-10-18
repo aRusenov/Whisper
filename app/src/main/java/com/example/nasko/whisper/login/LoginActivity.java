@@ -1,6 +1,7 @@
 package com.example.nasko.whisper.login;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.PersistableBundle;
@@ -11,16 +12,21 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.example.nasko.whisper.BaseActivity;
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.WhisperApplication;
-import com.example.nasko.whisper.BaseActivity;
+import com.example.nasko.whisper.chats.MainActivity;
+import com.example.nasko.whisper.login.di.LoginPresenterModule;
+import com.example.nasko.whisper.register.RegisterActivity;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class LoginActivity extends BaseActivity implements LoginContract.View {
 
-    private LoginContract.Presenter presenter;
+    @Inject LoginContract.Presenter presenter;
     private ProgressDialog dialog;
 
     @BindView(R.id.btn_login) Button btnLogin;
@@ -56,11 +62,9 @@ public class LoginActivity extends BaseActivity implements LoginContract.View {
             displayLoadingDialog();
         }
 
-        presenter = new LoginPresenter(this,
-                this,
-                WhisperApplication.instance().getUserService(),
-                WhisperApplication.instance().getNavigator(),
-                WhisperApplication.instance().getUserProvider());
+        WhisperApplication.restComponent()
+                .plus(new LoginPresenterModule(this))
+                .inject(this);
     }
 
     @Override
@@ -86,6 +90,19 @@ public class LoginActivity extends BaseActivity implements LoginContract.View {
         tvErrorMsg.setVisibility(View.VISIBLE);
         tvErrorMsg.setText(message);
         btnLogin.setEnabled(true);
+    }
+
+    @Override
+    public void navigateToRegisterScreen() {
+        Intent intent = new Intent(this, RegisterActivity.class);
+        startActivity(intent);
+    }
+
+    @Override
+    public void navigateToUserChatsScreen() {
+        Intent intent = MainActivity.prepareIntent(this, null);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
     }
 
     @Override

@@ -9,6 +9,8 @@ public interface RegisterContract {
     interface View extends BaseView<Presenter> {
 
         void displayError(String message);
+
+        void navigateToUserChats();
     }
 
     interface Presenter extends BasePresenter {

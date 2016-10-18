@@ -3,11 +3,6 @@ package com.example.nasko.whisper.data.socket;
 import android.content.Context;
 import android.util.Log;
 
-import com.example.nasko.whisper.utils.helpers.ConfigLoader;
-
-import java.net.URISyntaxException;
-
-import io.socket.client.Socket;
 import rx.Subscription;
 import rx.subscriptions.CompositeSubscription;
 
@@ -17,25 +12,21 @@ public class AppSocketService implements SocketService {
 
     private NetworkStateReceiver networkStateReceiver;
     private CompositeSubscription subscriptions;
-    private SocketManager socketManager;
     private String token;
 
+    private SocketManager socketManager;
     private ConnectionService connectionService;
     private MessagesService messagesService;
     private ContactsService contactsService;
 
-    public AppSocketService(Context context) throws URISyntaxException {
-        String endpoint = ConfigLoader.getConfigValue(context, "api_url");
-        try {
-            socketManager = new SocketManager(endpoint);
-        } catch (URISyntaxException e) {
-            Log.wtf(TAG, "Invalid socket endpoint :(");
-            throw e;
-        }
+    private boolean authenticated;
 
-        connectionService = new AppConnectionService(socketManager);
-        contactsService = new AppContactsService(socketManager);
-        messagesService = new AppMessagesService(socketManager);
+    public AppSocketService(SocketManager socketManager, ConnectionService connectionService,
+                            ContactsService contactsService, MessagesService messagesService, Context context) {
+        this.socketManager = socketManager;
+        this.connectionService = connectionService;
+        this.contactsService = contactsService;
+        this.messagesService = messagesService;
         setOwnSocketListeners();
 
         networkStateReceiver = new NetworkStateReceiver(context.getApplicationContext()) {
@@ -57,7 +48,7 @@ public class AppSocketService implements SocketService {
 
     private void setOwnSocketListeners() {
         subscriptions = new CompositeSubscription();
-        Subscription connectSub = socketManager.on(Socket.EVENT_CONNECT)
+        Subscription connectSub = connectionService().onConnect()
                 .subscribe($ -> {
                     Log.d(TAG, "Connected");
                     if (token != null) {
@@ -65,15 +56,23 @@ public class AppSocketService implements SocketService {
                     }
                 });
 
-        Subscription disconnectSub = socketManager.on(Socket.EVENT_DISCONNECT)
+        Subscription authSub = connectionService().onAuthenticated()
+                .subscribe(user -> {
+                    Log.d(TAG, "Authenticated");
+                    authenticated = true;
+                });
+
+        Subscription disconnectSub = connectionService().onDisconnect()
                 .subscribe($ -> {
                     Log.d(TAG, "Disconnected");
+                    authenticated = false;
                     if (networkStateReceiver.isConnected()) {
-                        socketManager.connect();
+
                     }
                 });
 
         subscriptions.add(connectSub);
+        subscriptions.add(authSub);
         subscriptions.add(disconnectSub);
     }
 
@@ -108,7 +107,11 @@ public class AppSocketService implements SocketService {
         return messagesService;
     }
 
-    public void reconnect() {
+    public boolean authenticated() {
+        return authenticated;
+    }
+
+    private void reconnect() {
         socketManager.connect();
     }
 }

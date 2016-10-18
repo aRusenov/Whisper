@@ -13,7 +13,8 @@ import java.util.List;
 public class Mapper {
 
     public static MessageViewModel toMessageViewModel(Message message) {
-        return new MessageViewModel(message.getText(),
+        return new MessageViewModel(message.getChatId(),
+                message.getText(),
                 message.getCreatedAt(),
                 toContactViewModel(message.getAuthor()));
     }

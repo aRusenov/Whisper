@@ -10,17 +10,19 @@ import java.util.Date;
 public class MessageViewModel implements Parcelable {
 
     private long uId;
+    private String chatId;
     private MessageStatus status;
     private String text;
     private Date createdAt;
     private ContactViewModel author;
 
-    public MessageViewModel(String text, Date createdAt, ContactViewModel author) {
-        this(text, createdAt, author, 0, MessageStatus.SENT);
+    public MessageViewModel(String chatId, String text, Date createdAt, ContactViewModel author) {
+        this(chatId, text, createdAt, author, 0, MessageStatus.SENT);
     }
 
-    public MessageViewModel(String text, Date createdAt, ContactViewModel author, long uId, MessageStatus status) {
+    public MessageViewModel(String chatId, String text, Date createdAt, ContactViewModel author, long uId, MessageStatus status) {
         this.uId = uId;
+        this.chatId = chatId;
         this.status = status;
         this.text = text;
         this.createdAt = createdAt;
@@ -29,8 +31,23 @@ public class MessageViewModel implements Parcelable {
 
     // FIXME: How is date not put here but gets restored afterwards?
     protected MessageViewModel(Parcel in) {
+        uId = in.readLong();
+        chatId = in.readString();
         text = in.readString();
         author = in.readParcelable(ContactViewModel.class.getClassLoader());
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(uId);
+        dest.writeString(chatId);
+        dest.writeString(text);
+        dest.writeParcelable(author, flags);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     public static final Creator<MessageViewModel> CREATOR = new Creator<MessageViewModel>() {
@@ -85,14 +102,11 @@ public class MessageViewModel implements Parcelable {
         this.uId = uId;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    public String getChatId() {
+        return chatId;
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(text);
-        dest.writeParcelable(author, flags);
+    public void setChatId(String chatId) {
+        this.chatId = chatId;
     }
 }

@@ -6,9 +6,11 @@ import rx.Observable;
 
 public interface ConnectionService {
 
-    Observable onConnect();
+    Observable<Void> onConnect();
 
-    Observable onDisconnect();
+    Observable<Void> onConnecting();
+
+    Observable<Void> onDisconnect();
 
     Observable<User> onAuthenticated();
 

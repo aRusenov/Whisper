@@ -1,12 +1,12 @@
 package com.example.nasko.whisper.chats;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -16,13 +16,19 @@ import android.view.ViewGroup;
 
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.WhisperApplication;
+import com.example.nasko.whisper.chats.di.modules.ChatsToolbarPresenterModule;
+import com.example.nasko.whisper.editprofile.ProfileActivity;
+import com.example.nasko.whisper.login.LoginActivity;
+import com.example.nasko.whisper.models.User;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class ToolbarFragment extends Fragment implements ToolbarContract.View {
 
-    private ToolbarContract.Presenter presenter;
+    @Inject ToolbarContract.Presenter presenter;
     private ActionBar actionBar;
 
     @BindView(R.id.toolbar) Toolbar toolbar;
@@ -31,11 +37,10 @@ public class ToolbarFragment extends Fragment implements ToolbarContract.View {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        presenter = new ToolbarPresenter(this,
-                getContext(),
-                WhisperApplication.instance().getSocketService(),
-                WhisperApplication.instance().getUserProvider(),
-                WhisperApplication.instance().getNavigator());
+
+        WhisperApplication.userComponent()
+                .plus(new ChatsToolbarPresenterModule(this))
+                .inject(this);
     }
 
     @Nullable
@@ -49,12 +54,6 @@ public class ToolbarFragment extends Fragment implements ToolbarContract.View {
         actionBar = host.getSupportActionBar();
 
         return view;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        Log.d("ChatToolbar", "onStart");
     }
 
     @Override
@@ -86,5 +85,20 @@ public class ToolbarFragment extends Fragment implements ToolbarContract.View {
     @Override
     public void setNetworkStatus(String status) {
         actionBar.setTitle(status);
+    }
+
+    @Override
+    public void navigateToSettings(User user) {
+        Intent intent = ProfileActivity.prepareIntent(getActivity());
+        startActivity(intent);
+    }
+
+    @Override
+    public void navigateToLoginScreen() {
+        WhisperApplication.releaseUserComponent();
+
+        Intent launchIntent = new Intent(getActivity(), LoginActivity.class);
+        launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(launchIntent);
     }
 }

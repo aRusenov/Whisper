@@ -6,7 +6,6 @@ import com.example.nasko.whisper.data.local.UserProvider;
 import com.example.nasko.whisper.models.RegisterModel;
 import com.example.nasko.whisper.data.RetrofitErrorMapper;
 import com.example.nasko.whisper.data.rest.UserService;
-import com.example.nasko.whisper.utils.Navigator;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -20,16 +19,13 @@ public class RegisterPresenter implements RegisterContract.Presenter {
 
     private CompositeSubscription subscriptions;
     private UserService userService;
-    private Navigator navigator;
     private UserProvider userProvider;
 
     public RegisterPresenter(RegisterContract.View view, Context context,
-                             UserService userService, Navigator navigator,
-                             UserProvider userProvider) {
+                             UserService userService, UserProvider userProvider) {
         this.view = view;
         this.context = context.getApplicationContext();
         this.userService = userService;
-        this.navigator = navigator;
         this.userProvider = userProvider;
         subscriptions = new CompositeSubscription();
     }
@@ -53,7 +49,7 @@ public class RegisterPresenter implements RegisterContract.Presenter {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(user -> {
                     userProvider.setCurrentUser(user);
-                    navigator.navigateToChatsScreen(context, user);
+                    view.navigateToUserChats();
                 }, error -> {
                     if (view != null) {
                         view.displayError(error.getMessage());

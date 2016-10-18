@@ -9,7 +9,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-public abstract class ArrayRecyclerViewAdapter<E, VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> implements Iterable<E> {
+public abstract class ArrayRecyclerViewAdapter<E, VH extends RecyclerView.ViewHolder>
+        extends RecyclerView.Adapter<VH> implements Iterable<E> {
 
     private Context context;
     private LayoutInflater inflater;
@@ -72,7 +73,7 @@ public abstract class ArrayRecyclerViewAdapter<E, VH extends RecyclerView.ViewHo
 
     public void addAllAt(int position, Collection<E> elements) {
         this.items.addAll(position, elements);
-        this.notifyItemRangeInserted(position   , elements.size());
+        this.notifyItemRangeInserted(position, elements.size());
     }
 
     public void removeAt(int position) {

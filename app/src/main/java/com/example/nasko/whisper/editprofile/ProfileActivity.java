@@ -1,5 +1,6 @@
 package com.example.nasko.whisper.editprofile;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -13,8 +14,11 @@ import android.widget.TextView;
 import com.example.nasko.whisper.BaseActivity;
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.WhisperApplication;
+import com.example.nasko.whisper.editprofile.di.EditProfilePresenterModule;
 import com.example.nasko.whisper.models.User;
 import com.squareup.picasso.Picasso;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -27,7 +31,7 @@ public class ProfileActivity extends BaseActivity implements ProfileContract.Vie
     private static final String INTENT_TYPE_IMAGE = "image/*";
     private static final String TITLE_SELECT_PROFILE_IMAGE = "Select Profile Image";
 
-    private ProfileContract.Presenter presenter;
+    @Inject ProfileContract.Presenter presenter;
     private Uri galleryPickedImageUri;
 
     @BindView(R.id.profile_image) CircleImageView profileImage;
@@ -37,11 +41,14 @@ public class ProfileActivity extends BaseActivity implements ProfileContract.Vie
     @BindView(R.id.fab_pick_image) FloatingActionButton galleryFab;
     @BindView(R.id.toolbar) Toolbar toolbar;
 
+    public static Intent prepareIntent(Context context) {
+        return new Intent(context, ProfileActivity.class);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
-
         ButterKnife.bind(this);
 
         setSupportActionBar(toolbar);
@@ -57,9 +64,9 @@ public class ProfileActivity extends BaseActivity implements ProfileContract.Vie
                     GALLERY_PICK_IMAGE);
         });
 
-        presenter = new ProfilePresenter(this, this,
-                WhisperApplication.instance().getUserService(),
-                WhisperApplication.instance().getUserProvider());
+        WhisperApplication.restComponent()
+                .plus(new EditProfilePresenterModule(this))
+                .inject(this);
     }
 
     @Override

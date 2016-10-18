@@ -2,11 +2,10 @@ package com.example.nasko.whisper.login;
 
 import android.content.Context;
 
-import com.example.nasko.whisper.data.local.UserProvider;
-import com.example.nasko.whisper.models.LoginModel;
 import com.example.nasko.whisper.data.RetrofitErrorMapper;
+import com.example.nasko.whisper.data.local.UserProvider;
 import com.example.nasko.whisper.data.rest.UserService;
-import com.example.nasko.whisper.utils.Navigator;
+import com.example.nasko.whisper.models.LoginModel;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -16,21 +15,19 @@ import rx.subscriptions.CompositeSubscription;
 public class LoginPresenter implements LoginContract.Presenter {
 
     private LoginContract.View view;
-    private Context context;
     private CompositeSubscription subscriptions;
 
     private UserService userService;
-    private Navigator navigator;
+    private Context context;
     private UserProvider userProvider;
 
     public LoginPresenter(LoginContract.View view, Context context,
-                          UserService userService, Navigator navigator,
-                          UserProvider userProvider) {
+                          UserService userService, UserProvider userProvider) {
         this.view = view;
-        this.context = context.getApplicationContext();
+        this.context = context;
         this.userService = userService;
-        this.navigator = navigator;
         this.userProvider = userProvider;
+
         subscriptions = new CompositeSubscription();
     }
 
@@ -53,7 +50,7 @@ public class LoginPresenter implements LoginContract.Presenter {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(user -> {
                     userProvider.setCurrentUser(user);
-                    navigator.navigateToChatsScreen(context, user);
+                    view.navigateToUserChatsScreen();
                 }, error -> {
                     view.hideLoadingDialog();
                     view.displayError(error.getMessage());
@@ -65,6 +62,6 @@ public class LoginPresenter implements LoginContract.Presenter {
 
     @Override
     public void onRegisterClicked() {
-        navigator.navigateToRegisterScreen(context);
+        view.navigateToRegisterScreen();
     }
 }

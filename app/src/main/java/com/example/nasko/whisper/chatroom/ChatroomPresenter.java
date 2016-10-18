@@ -27,14 +27,19 @@ public class ChatroomPresenter extends SocketPresenter implements ChatroomContra
     private ChatroomContract.View view;
     private MessageNotificationController notificationController;
 
-    public ChatroomPresenter(ChatroomContract.View view, ChatViewModel chat, SocketService socketService,
-                             MessageNotificationController notificationController, UserProvider userProvider) {
+    public ChatroomPresenter(ChatroomContract.View view, ChatViewModel chat, boolean restoredState,
+                             SocketService socketService, MessageNotificationController notificationController,
+                             UserProvider userProvider) {
         super(socketService, userProvider);
         this.view = view;
         this.chat = chat;
         this.notificationController = notificationController;
 
-        notificationController.removeNotification(chat.getDisplayContact().getId()); // TODO: Use chatId instead
+        notificationController.removeNotification(chat.getId());
+        if (!restoredState && lastLoadedMessageSeq == DEFAULT_MESSAGE_SEQ && socketService.authenticated()) {
+            loadMesages();
+        }
+
         initListeners();
     }
 
@@ -45,10 +50,6 @@ public class ChatroomPresenter extends SocketPresenter implements ChatroomContra
     }
 
     private void initListeners() {
-        if (lastLoadedMessageSeq == DEFAULT_MESSAGE_SEQ) {
-            loadMesages();
-        }
-
         Subscription authSub = socketService.connectionService()
                 .onAuthenticated()
                 .observeOn(AndroidSchedulers.mainThread())
@@ -78,11 +79,9 @@ public class ChatroomPresenter extends SocketPresenter implements ChatroomContra
                     loadingMessages = false;
 
                     List<Message> messages = response.getMessages();
-                    if (messages.size() > 0) {
-                        lastLoadedMessageSeq = messages.get(0).getSeq();
-                        List<MessageViewModel> viewModelList = Mapper.toMessageViewModelList(messages);
-                        view.loadMessages(viewModelList);
-                    }
+                    lastLoadedMessageSeq = messages.get(0).getSeq();
+                    List<MessageViewModel> viewModelList = Mapper.toMessageViewModelList(messages);
+                    view.loadMessages(viewModelList);
                 });
 
         subscriptions.add(loadMessagesSub);

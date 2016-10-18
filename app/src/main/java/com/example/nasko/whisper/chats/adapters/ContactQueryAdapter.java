@@ -8,8 +8,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.nasko.whisper.R;
-import com.example.nasko.whisper.WhisperApplication;
-import com.example.nasko.whisper.data.local.UserProvider;
 import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.models.view.ContactViewModel;
 import com.example.nasko.whisper.utils.ArrayRecyclerViewAdapter;
@@ -42,18 +40,14 @@ public class ContactQueryAdapter extends ArrayRecyclerViewAdapter<ContactViewMod
     }
 
     private OnItemClickListener invitationIconClickListener;
-    private UserProvider userProvider;
+    private User currentUser;
 
-    public ContactQueryAdapter(Context context, UserProvider userProvider) {
+    public ContactQueryAdapter(Context context, User user) {
         super(context);
-        this.userProvider = userProvider;
+        this.currentUser = user;
     }
 
-    public ContactQueryAdapter(Context context) {
-        this(context, WhisperApplication.instance().getUserProvider());
-    }
-
-    public OnItemClickListener getInvitationIconClickListener() {
+    OnItemClickListener getInvitationIconClickListener() {
         return invitationIconClickListener;
     }
 
@@ -70,8 +64,7 @@ public class ContactQueryAdapter extends ArrayRecyclerViewAdapter<ContactViewMod
     @Override
     public void onBindViewHolder(ContactViewHolder holder, int position) {
         ContactViewModel contact = this.getItem(position);
-        User user = userProvider.getCurrentUser();
-        boolean isContactUser = user.getUId().equals(contact.getId());
+        boolean isContactUser = currentUser.getUId().equals(contact.getId());
 
         holder.name.setText(contact.getUsername());
         if (isContactUser) {

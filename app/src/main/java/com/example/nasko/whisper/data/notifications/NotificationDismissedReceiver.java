@@ -8,17 +8,15 @@ import android.content.IntentFilter;
 public class NotificationDismissedReceiver  {
 
     public static final String ACTION_DISMISSED = NotificationDismissedReceiver.class.getPackage().getName() + "ACTION_DISMISSED";
-    public static final String EXTRA_CONTACT_ID = "contactId";
+    public static final String EXTRA_CHAT_ID = "chatId";
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String contactId = intent.getStringExtra(EXTRA_CONTACT_ID);
-            if (contactId == null) {
-                return;
+            String chatId = intent.getStringExtra(EXTRA_CHAT_ID);
+            if (chatId != null) {
+                listener.onNotificationDismissed(chatId);
             }
-
-            listener.onNotificationDismissed(contactId);
         }
     };
 

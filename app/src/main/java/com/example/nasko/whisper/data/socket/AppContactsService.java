@@ -11,16 +11,15 @@ import rx.Observable;
 
 public class AppContactsService implements ContactsService {
 
-    public static final String EVENT_NEW_CONTACT = "new contact";
-    public static final String EVENT_SHOW_CHATS = "show chats";
-    public static final String EVENT_CONTACT_UPDATE = "contact update";
-    public static final String EVENT_QUERY_CONTACTS = "query contacts";
+    private static final String EVENT_NEW_CONTACT = "new contact";
+    private static final String EVENT_SHOW_CHATS = "show chats";
+    private static final String EVENT_QUERY_CONTACTS = "query contacts";
+    private static final String EVENT_CONTACT_ONLINE = "online";
+    private static final String EVENT_CONTACT_OFFLINE = "offline";
 
-    public static final String EMIT_SHOW_CHATS = "show chats";
-    public static final String EMIT_QUERY_CONTACTS = "query contacts";
-    public static final String EMIT_ADD_CONTACT = "add contact";
-
-    private static final String TAG = AppContactsService.class.getName();
+    private static final String EMIT_SHOW_CHATS = "show chats";
+    private static final String EMIT_QUERY_CONTACTS = "query contacts";
+    private static final String EMIT_ADD_CONTACT = "add contact";
 
     private SocketManager socketManager;
 
@@ -36,16 +35,12 @@ public class AppContactsService implements ContactsService {
         return socketManager.on(EVENT_SHOW_CHATS, Chat[].class);
     }
 
-    public Observable<Chat> onChatUpdate() {
-        return socketManager.on(EVENT_CONTACT_UPDATE, Chat.class);
-    }
-
     public Observable<ContactStateChange> onContactOnline() {
-        return socketManager.on("online", ContactStateChange.class);
+        return socketManager.on(EVENT_CONTACT_ONLINE, ContactStateChange.class);
     }
 
     public Observable<ContactStateChange> onContactOffline() {
-        return socketManager.on("offline", ContactStateChange.class);
+        return socketManager.on(EVENT_CONTACT_OFFLINE, ContactStateChange.class);
     }
 
     public Observable<ContactQueryResponse> onContactQueryResponse() {

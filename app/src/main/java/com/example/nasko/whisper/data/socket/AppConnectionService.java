@@ -11,15 +11,10 @@ import rx.Observable;
 public class AppConnectionService implements ConnectionService {
 
     public static final String EVENT_CONNECT = Socket.EVENT_CONNECT;
-    public static final String EVENT_CONNECT_TIMEOUT = Socket.EVENT_CONNECT_TIMEOUT;
-    public static final String EVENT_CONNECT_ERROR = Socket.EVENT_CONNECT_ERROR;
     public static final String EVENT_DISCONNECT = Socket.EVENT_DISCONNECT;
-    public static final String EVENT_UNAUTHORIZED = "unauthorized";
     public static final String EVENT_AUTHENTICATED = "authenticated";
 
     public static final String EMIT_AUTHENTICATE = "authentication";
-
-    private static final String TAG = AppConnectionService.class.getName();
 
     private SocketManager socketManager;
 
@@ -27,24 +22,20 @@ public class AppConnectionService implements ConnectionService {
         this.socketManager = socketManager;
     }
 
-    public Observable onConnect() {
+    public Observable<Void> onConnect() {
         return socketManager.on(EVENT_CONNECT);
     }
 
-    public Observable onError() {
-        return socketManager.on(EVENT_CONNECT_ERROR);
-    }
-
-    public Observable onDisconnect() {
-        return socketManager.on(EVENT_DISCONNECT);
+    public Observable<Void> onConnecting() {
+        return socketManager.on(Socket.EVENT_CONNECTING);
     }
 
     public Observable<User> onAuthenticated() {
         return socketManager.on(EVENT_AUTHENTICATED, User.class);
     }
 
-    public Observable<String> onUnauthorized() {
-        return socketManager.on(EVENT_UNAUTHORIZED, String.class);
+    public Observable<Void> onDisconnect() {
+        return socketManager.on(EVENT_DISCONNECT);
     }
 
     public void authenticate(String token) {

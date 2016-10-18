@@ -17,10 +17,14 @@ import android.widget.TextView;
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.chats.adapters.ContactQueryAdapter;
+import com.example.nasko.whisper.data.local.UserProvider;
+import com.example.nasko.whisper.chats.di.modules.ContactsPresenterModule;
 import com.example.nasko.whisper.models.view.ContactViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -29,7 +33,8 @@ public class ContactsFragment extends Fragment implements ContactsContract.View 
 
     private static final String EXTRA_CONTACTS = "contacts";
 
-    private ContactsContract.Presenter presenter;
+    @Inject UserProvider userProvider;
+    @Inject ContactsContract.Presenter presenter;
     private ContactQueryAdapter contactQueryAdapter;
 
     @BindView(R.id.edit_query) EditText editSearch;
@@ -40,9 +45,11 @@ public class ContactsFragment extends Fragment implements ContactsContract.View 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        presenter = new ContactsPresenter(this,
-                WhisperApplication.instance().getSocketService(),
-                WhisperApplication.instance().getUserProvider());
+
+//        WhisperApplication.baseComponent().inject(this);
+        WhisperApplication.userComponent()
+                .plus(new ContactsPresenterModule(this))
+                .inject(this);
     }
 
     @Nullable
@@ -51,7 +58,7 @@ public class ContactsFragment extends Fragment implements ContactsContract.View 
         View view = inflater.inflate(R.layout.fragment_search_contacts, container, false);
         ButterKnife.bind(this, view);
 
-        contactQueryAdapter = new ContactQueryAdapter(getContext());
+        contactQueryAdapter = new ContactQueryAdapter(getContext(), userProvider.getCurrentUser());
         contactQueryAdapter.setInvitationIconClickListener(position -> {
             ContactViewModel contact = contactQueryAdapter.getItem(position);
             presenter.onContactSendRequestClick(contact);

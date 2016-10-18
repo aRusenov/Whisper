@@ -11,12 +11,14 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.example.nasko.whisper.utils.Navigator;
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.WhisperApplication;
+import com.example.nasko.whisper.chatroom.di.modules.ChatroomToolbarPresenterModule;
 import com.example.nasko.whisper.models.view.ChatViewModel;
 import com.example.nasko.whisper.models.view.ContactViewModel;
 import com.squareup.picasso.Picasso;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -24,7 +26,9 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ToolbarFragment extends Fragment implements ToolbarContract.View {
 
-    private ToolbarContract.Presenter presenter;
+    public static final String EXTRA_CHAT = "chat";
+
+    @Inject ToolbarContract.Presenter presenter;
     private ContactViewModel displayContact;
 
     @BindView(R.id.toolbar_container) LinearLayout toolbarContainer;
@@ -36,14 +40,14 @@ public class ToolbarFragment extends Fragment implements ToolbarContract.View {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ChatViewModel chat = getArguments().getParcelable(Navigator.EXTRA_CHAT);
+        ChatViewModel chat = getArguments().getParcelable(EXTRA_CHAT);
         if (chat != null) {
             displayContact = chat.getDisplayContact();
         }
 
-        presenter = new ToolbarPresenter(this,
-                WhisperApplication.instance().getSocketService(),
-                WhisperApplication.instance().getUserProvider());
+        WhisperApplication.userComponent()
+                .plus(new ChatroomToolbarPresenterModule(this))
+                .inject(this);
     }
 
     @Nullable

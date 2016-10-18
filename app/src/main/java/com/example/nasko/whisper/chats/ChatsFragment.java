@@ -13,18 +13,24 @@ import android.widget.ProgressBar;
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.chats.adapters.ChatAdapter;
+import com.example.nasko.whisper.data.local.UserProvider;
+import com.example.nasko.whisper.chats.di.modules.ChatsPresenterModule;
 import com.example.nasko.whisper.models.view.ChatViewModel;
 import com.example.nasko.whisper.models.view.MessageViewModel;
 import com.example.nasko.whisper.utils.LastMessageDateFormatter;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class ChatsFragment extends Fragment implements ChatsContract.View {
 
-    private ChatsContract.Presenter presenter;
+    @Inject ChatsContract.Presenter presenter;
+    @Inject UserProvider userProvider;
+
     private ChatAdapter chatsAdapter;
     private LinearLayoutManager chatsLayoutManager;
 
@@ -41,9 +47,9 @@ public class ChatsFragment extends Fragment implements ChatsContract.View {
             throw new IllegalArgumentException("Activity must implement " + ViewCoordinator.class.getSimpleName());
         }
 
-        presenter = new ChatsPresenter(this, viewCoordinator,
-                WhisperApplication.instance().getSocketService(),
-                WhisperApplication.instance().getUserProvider());
+        WhisperApplication.userComponent()
+                .plus(new ChatsPresenterModule(this, viewCoordinator))
+                .inject(this);
     }
 
     @Nullable
@@ -53,7 +59,7 @@ public class ChatsFragment extends Fragment implements ChatsContract.View {
         ButterKnife.bind(this, view);
 
         chatsLayoutManager = new LinearLayoutManager(getActivity());
-        chatsAdapter = new ChatAdapter(getContext(), new LastMessageDateFormatter());
+        chatsAdapter = new ChatAdapter(getContext(), new LastMessageDateFormatter(), userProvider.getCurrentUser());
         chatsAdapter.setItemClickListener(position -> {
             ChatViewModel selectedChat = chatsAdapter.getItem(position);
             presenter.onChatClicked(selectedChat);
