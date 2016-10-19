@@ -22,13 +22,6 @@ public class AppConnectionService implements ConnectionService {
         this.socketManager = socketManager;
     }
 
-//    public Observable<String> onSocketStateChange() {
-//        return Observable.merge(socketManager.on(EVENT_CONNECT),
-//                socketManager.on(EVENT_AUTHENTICATED),
-//                socketManager.on(Socket.EVENT_CONNECTING),
-//                socketManager.on(Socket.EVENT_CONNECT_ERROR));
-//    }
-
     public Observable<String> onConnect() {
         return socketManager.on(EVENT_CONNECT);
     }

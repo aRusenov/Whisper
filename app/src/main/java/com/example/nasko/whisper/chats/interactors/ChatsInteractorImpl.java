@@ -26,7 +26,7 @@ public class ChatsInteractorImpl implements ChatsInteractor {
     }
 
     @Override
-    public void start() {
+    public void init() {
         authSub = socketService.connectionService()
                 .onAuthenticated()
                 .observeOn(AndroidSchedulers.mainThread())

@@ -62,7 +62,7 @@ public class ContactsPresenter implements ContactsContract.Presenter {
         subscriptions.add(newContactSub);
         subscriptions.add(searchResultSub);
 
-        contactsSearchInteractor.start();
+        contactsSearchInteractor.init();
     }
 
     @Override
@@ -73,6 +73,7 @@ public class ContactsPresenter implements ContactsContract.Presenter {
 
     @Override
     public void destroy() {
+        subscriptions.clear();
         contactsSearchInteractor.destroy();
         view = null;
     }

@@ -72,8 +72,8 @@ public class ChatsPresenter implements ChatsContract.Presenter {
 
         subscriptions.add(userOfflineSub);
 
-        chatsInteractor.start();
-        contactsStateInteractor.start();
+        chatsInteractor.init();
+        contactsStateInteractor.init();
     }
 
     @Override

@@ -35,7 +35,7 @@ public class ContactsStateInteractorImpl implements ContactsStateInteractor {
     }
 
     @Override
-    public void start() { }
+    public void init() { }
 
     @Override
     public void destroy() { }

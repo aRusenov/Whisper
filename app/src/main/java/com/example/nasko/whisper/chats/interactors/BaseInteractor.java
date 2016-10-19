@@ -2,7 +2,7 @@ package com.example.nasko.whisper.chats.interactors;
 
 public interface BaseInteractor {
 
-    void start();
+    void init();
 
     void destroy();
 }

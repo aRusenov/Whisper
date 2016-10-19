@@ -1,10 +1,9 @@
 package com.example.nasko.whisper.data.socket;
 
+import com.example.nasko.whisper.models.TypingEvent;
 import com.example.nasko.whisper.models.dto.Message;
 import com.example.nasko.whisper.models.dto.MessageSentAck;
 import com.example.nasko.whisper.models.dto.MessagesQueryResponse;
-import com.example.nasko.whisper.models.TypingEvent;
-import com.example.nasko.whisper.data.JsonDeserializer;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,16 +12,13 @@ import rx.Observable;
 
 public class AppMessagesService implements MessagesService {
 
-    public static final String EVENT_SHOW_MESSAGES = "show messages";
-    public static final String EVENT_NEW_MESSAGE = "new message";
+    private static final String EVENT_SHOW_MESSAGES = "show messages";
+    private static final String EVENT_NEW_MESSAGE = "new message";
 
-    public static final String EMIT_SHOW_MESSAGES = "show messages";
-    public static final String EMIT_SEND_MESSAGE = "send message";
-
-    private static final String TAG = AppContactsService.class.getName();
+    private static final String EMIT_SHOW_MESSAGES = "show messages";
+    private static final String EMIT_SEND_MESSAGE = "send message";
 
     private SocketManager socketManager;
-    private JsonDeserializer deserializer = new JsonDeserializer();
 
     public AppMessagesService(SocketManager socketManager) {
         this.socketManager = socketManager;
@@ -98,20 +94,5 @@ public class AppMessagesService implements MessagesService {
         }
 
         socketManager.emit(EMIT_SEND_MESSAGE, messageData);
-//        return Observable.create(subscriber -> {
-//            socketManager.emit(EMIT_SEND_MESSAGE, new Object[]{messageData}, args -> {
-//                if (subscriber.isUnsubscribed()) { // Necessary?
-//                    return;
-//                }
-//
-//                try {
-//                    MessageSentAck ack = deserializer.deserialize(args[0].toString(), MessageSentAck.class);
-//                    subscriber.onNext(ack);
-//                    subscriber.onCompleted();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            });
-//        });
     }
 }

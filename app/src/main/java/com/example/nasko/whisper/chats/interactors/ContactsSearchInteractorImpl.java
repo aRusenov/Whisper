@@ -24,7 +24,7 @@ public class ContactsSearchInteractorImpl implements ContactsSearchInteractor {
     }
 
     @Override
-    public void start() { }
+    public void init() { }
 
     @Override
     public void destroy() { }
