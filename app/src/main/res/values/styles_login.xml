@@ -15,7 +15,7 @@
     <style name="LoginButton">
         <item name="android:gravity">center</item>
         <item name="android:textSize">@dimen/font_large</item>
-        <item name="android:textColor">@color/color_light_turquoise</item>
+        <item name="android:textColor">@color/color_primary</item>
         <item name="android:background">@color/color_dark_white</item>
         <item name="android:layout_marginLeft">@dimen/xlarge_margin</item>
         <item name="android:layout_marginRight">@dimen/xlarge_margin</item>

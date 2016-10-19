@@ -75,7 +75,7 @@
         android:textSize="@dimen/font_normal"
         android:paddingTop="@dimen/small_margin"
         android:paddingBottom="@dimen/small_margin"
-        android:background="#ef5350"
+        android:background="@color/color_material_red"
         android:gravity="center"
         android:ellipsize="end"
         android:maxLines="1"
