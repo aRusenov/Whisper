@@ -39,6 +39,9 @@ public class ProfilePresenter implements ProfileContract.Presenter {
     }
 
     @Override
+    public void init() { }
+
+    @Override
     public void start() {
         User currentUser = userProvider.getCurrentUser();
         view.setUserData(currentUser);

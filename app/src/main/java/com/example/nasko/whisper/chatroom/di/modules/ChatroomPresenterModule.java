@@ -16,18 +16,18 @@ public class ChatroomPresenterModule {
 
     private ChatroomContract.View view;
     private ChatViewModel chat;
-    private boolean restoredState;
+    private int lastLoadedMessageSeq;
 
-    public ChatroomPresenterModule(ChatroomContract.View view, ChatViewModel chat, boolean restoredState) {
+    public ChatroomPresenterModule(ChatroomContract.View view, ChatViewModel chat, int lastLoadedMessageSeq) {
         this.view = view;
         this.chat = chat;
-        this.restoredState = restoredState;
+        this.lastLoadedMessageSeq = lastLoadedMessageSeq;
     }
 
     @Provides @ActivityScope
     ChatroomContract.Presenter providePresenter(SocketService socketService,
                                                 MessageNotificationController notificationController,
                                                 UserProvider userProvider) {
-        return new ChatroomPresenter(view, chat, restoredState, socketService, notificationController, userProvider);
+        return new ChatroomPresenter(view, chat, lastLoadedMessageSeq, socketService, notificationController, userProvider);
     }
 }

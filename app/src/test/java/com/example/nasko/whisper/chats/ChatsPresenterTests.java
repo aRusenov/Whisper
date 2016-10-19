@@ -2,9 +2,7 @@ package com.example.nasko.whisper.chats;
 
 import com.example.nasko.whisper.RxSchedulersOverrideRule;
 import com.example.nasko.whisper.chats.interactors.ChatsInteractor;
-import com.example.nasko.whisper.chats.interactors.ConnectionInteractor;
-import com.example.nasko.whisper.chats.interactors.ContactsInteractor;
-import com.example.nasko.whisper.chats.interactors.MessagesInteractor;
+import com.example.nasko.whisper.chats.interactors.ContactsStateInteractor;
 import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.models.view.ChatViewModel;
 
@@ -30,26 +28,23 @@ public class ChatsPresenterTests {
     @Mock ChatsContract.View view;
     @Mock ViewCoordinator viewCoordinator;
     @Mock ChatsInteractor chatsInteractor;
-    @Mock ConnectionInteractor connectionInteractor;
-    @Mock MessagesInteractor messagesInteractor;
-    @Mock ContactsInteractor contactsInteractor;
+    @Mock ContactsStateInteractor connectionInteractor;
 
     private ChatsContract.Presenter presenter;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        when(connectionInteractor.onAuthenticated()).thenReturn(Observable.never());
+
         when(chatsInteractor.onChatsLoaded()).thenReturn(Observable.never());
         when(chatsInteractor.onNewChat()).thenReturn(Observable.never());
-        when(messagesInteractor.onNewMessage()).thenReturn(Observable.never());
-        when(messagesInteractor.onMessageSent()).thenReturn(Observable.never());
-        when(contactsInteractor.onUserOnline()).thenReturn(Observable.never());
-        when(contactsInteractor.onUserOffline()).thenReturn(Observable.never());
+        when(chatsInteractor.onChatNewMessage()).thenReturn(Observable.never());
+
+        when(connectionInteractor.onUserOnline()).thenReturn(Observable.never());
+        when(connectionInteractor.onUserOffline()).thenReturn(Observable.never());
 
         presenter = new ChatsPresenter(view, viewCoordinator,
-                chatsInteractor, connectionInteractor,
-                messagesInteractor, contactsInteractor);
+                chatsInteractor, connectionInteractor);
     }
 
     @Test

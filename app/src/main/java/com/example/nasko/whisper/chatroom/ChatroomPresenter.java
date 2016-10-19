@@ -18,44 +18,38 @@ import rx.android.schedulers.AndroidSchedulers;
 public class ChatroomPresenter extends SocketPresenter implements ChatroomContract.Presenter {
 
     private static final int PAGE_SIZE = 10;
-    private static final int DEFAULT_MESSAGE_SEQ = -1;
+
 
     private ChatViewModel chat;
-    private int lastLoadedMessageSeq = DEFAULT_MESSAGE_SEQ;
+    private int lastLoadedMessageSeq;
     private boolean loadingMessages;
 
     private ChatroomContract.View view;
     private MessageNotificationController notificationController;
 
-    public ChatroomPresenter(ChatroomContract.View view, ChatViewModel chat, boolean restoredState,
+    public ChatroomPresenter(ChatroomContract.View view, ChatViewModel chat, int lastLoadedMessageSeq,
                              SocketService socketService, MessageNotificationController notificationController,
                              UserProvider userProvider) {
         super(socketService, userProvider);
         this.view = view;
         this.chat = chat;
+        this.lastLoadedMessageSeq = lastLoadedMessageSeq;
         this.notificationController = notificationController;
-
-        notificationController.removeNotification(chat.getId());
-        if (!restoredState && lastLoadedMessageSeq == DEFAULT_MESSAGE_SEQ && socketService.authenticated()) {
-            loadMesages();
-        }
-
-        initListeners();
     }
 
     @Override
-    public void destroy() {
-        super.destroy();
-        view = null;
-    }
+    public void init() {
+        notificationController.removeNotification(chat.getId());
+        if (lastLoadedMessageSeq == -1 && socketService.authenticated()) {
+            loadMesages();
+        }
 
-    private void initListeners() {
         Subscription authSub = socketService.connectionService()
                 .onAuthenticated()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(user -> {
                     view.hideNetworkError();
-                    if (lastLoadedMessageSeq == DEFAULT_MESSAGE_SEQ) {
+                    if (lastLoadedMessageSeq == -1) {
                         loadMesages();
                     }
                 });
@@ -125,6 +119,12 @@ public class ChatroomPresenter extends SocketPresenter implements ChatroomContra
                 });
 
         subscriptions.add(stopTypingSub);
+    }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        view = null;
     }
 
     @Override

@@ -50,6 +50,8 @@ public class ChatsFragment extends Fragment implements ChatsContract.View {
         WhisperApplication.userComponent()
                 .plus(new ChatsPresenterModule(this, viewCoordinator))
                 .inject(this);
+
+        presenter.init();
     }
 
     @Nullable
@@ -73,9 +75,21 @@ public class ChatsFragment extends Fragment implements ChatsContract.View {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        presenter.start();
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         contactsView.scrollToPosition(0);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        presenter.stop();
     }
 
     @Override

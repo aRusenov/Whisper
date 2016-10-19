@@ -39,8 +39,8 @@ public class LoginActivity extends BaseActivity implements LoginContract.View {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
         ButterKnife.bind(this);
+
         this.getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
@@ -65,6 +65,8 @@ public class LoginActivity extends BaseActivity implements LoginContract.View {
         WhisperApplication.restComponent()
                 .plus(new LoginPresenterModule(this))
                 .inject(this);
+
+        presenter.init();
     }
 
     @Override
@@ -101,8 +103,8 @@ public class LoginActivity extends BaseActivity implements LoginContract.View {
     @Override
     public void navigateToUserChatsScreen() {
         Intent intent = MainActivity.prepareIntent(this, null);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
+        finish();
     }
 
     @Override

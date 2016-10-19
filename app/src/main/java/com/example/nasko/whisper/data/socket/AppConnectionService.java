@@ -10,11 +10,11 @@ import rx.Observable;
 
 public class AppConnectionService implements ConnectionService {
 
-    public static final String EVENT_CONNECT = Socket.EVENT_CONNECT;
-    public static final String EVENT_DISCONNECT = Socket.EVENT_DISCONNECT;
-    public static final String EVENT_AUTHENTICATED = "authenticated";
+    private static final String EVENT_CONNECT = Socket.EVENT_CONNECT;
+    private static final String EVENT_DISCONNECT = Socket.EVENT_DISCONNECT;
+    private static final String EVENT_AUTHENTICATED = "authenticated";
 
-    public static final String EMIT_AUTHENTICATE = "authentication";
+    private static final String EMIT_AUTHENTICATE = "authentication";
 
     private SocketManager socketManager;
 
@@ -22,11 +22,18 @@ public class AppConnectionService implements ConnectionService {
         this.socketManager = socketManager;
     }
 
-    public Observable<Void> onConnect() {
+//    public Observable<String> onSocketStateChange() {
+//        return Observable.merge(socketManager.on(EVENT_CONNECT),
+//                socketManager.on(EVENT_AUTHENTICATED),
+//                socketManager.on(Socket.EVENT_CONNECTING),
+//                socketManager.on(Socket.EVENT_CONNECT_ERROR));
+//    }
+
+    public Observable<String> onConnect() {
         return socketManager.on(EVENT_CONNECT);
     }
 
-    public Observable<Void> onConnecting() {
+    public Observable<String> onConnecting() {
         return socketManager.on(Socket.EVENT_CONNECTING);
     }
 
@@ -34,7 +41,7 @@ public class AppConnectionService implements ConnectionService {
         return socketManager.on(EVENT_AUTHENTICATED, User.class);
     }
 
-    public Observable<Void> onDisconnect() {
+    public Observable<String> onDisconnect() {
         return socketManager.on(EVENT_DISCONNECT);
     }
 

@@ -59,6 +59,8 @@ public class RegisterActivity extends BaseActivity implements RegisterContract.V
         WhisperApplication.restComponent()
                 .plus(new RegisterPresenterModule(this))
                 .inject(this);
+
+        presenter.init();
     }
 
     private RegisterModel validateFields() {
@@ -103,8 +105,8 @@ public class RegisterActivity extends BaseActivity implements RegisterContract.V
     @Override
     public void navigateToUserChats() {
         Intent intent = MainActivity.prepareIntent(this, null);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
+        finish();
     }
 
     @Override

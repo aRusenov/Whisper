@@ -1,12 +1,10 @@
 package com.example.nasko.whisper.chats;
 
-import android.content.Context;
 import android.util.Log;
 
 import com.example.nasko.whisper.SocketPresenter;
 import com.example.nasko.whisper.data.local.UserProvider;
 import com.example.nasko.whisper.data.socket.SocketService;
-import com.example.nasko.whisper.models.User;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import rx.Subscription;
@@ -17,22 +15,18 @@ public class ToolbarPresenter extends SocketPresenter implements ToolbarContract
     private static final String TAG = "ToolbarPresenter";
 
     private ToolbarContract.View view;
-    private Context context;
 
-    public ToolbarPresenter(ToolbarContract.View view, Context context,
+    public ToolbarPresenter(ToolbarContract.View view,
                             SocketService socketService, UserProvider userProvider) {
         super(socketService, userProvider);
         this.view = view;
-        this.context = context;
-
-        User currentUser = userProvider.getCurrentUser();
-        // Subscribe to firebase cloud messaging service
-        FirebaseMessaging.getInstance().subscribeToTopic(currentUser.getUId());
-
-        initListeners();
     }
 
-    private void initListeners() {
+    @Override
+    public void init() {
+        // Subscribe to FCM <user-id> topic
+        FirebaseMessaging.getInstance().subscribeToTopic(userProvider.getCurrentUser().getUId());
+
         Subscription connectSub = socketService.connectionService()
                 .onConnect()
                 .observeOn(AndroidSchedulers.mainThread())
@@ -65,23 +59,23 @@ public class ToolbarPresenter extends SocketPresenter implements ToolbarContract
     }
 
     @Override
+    public void destroy() {
+        super.destroy();
+        view = null;
+    }
+
+    @Override
     public void onSettingsClicked() {
-        User currentUser = userProvider.getCurrentUser();
-        view.navigateToSettings(currentUser);
+        view.navigateToSettings(userProvider.getCurrentUser());
     }
 
     @Override
     public void onLogoutClicked() {
         userProvider.logout();
         socketService.destroy();
+        // Unsubscribe from FCM topic
         FirebaseMessaging.getInstance().unsubscribeFromTopic(userProvider.getCurrentUser().getUId());
 
         view.navigateToLoginScreen();
-    }
-
-    @Override
-    public void destroy() {
-        super.destroy();
-        view = null;
     }
 }

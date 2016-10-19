@@ -46,10 +46,11 @@ public class ContactsFragment extends Fragment implements ContactsContract.View 
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-//        WhisperApplication.baseComponent().inject(this);
         WhisperApplication.userComponent()
                 .plus(new ContactsPresenterModule(this))
                 .inject(this);
+
+        presenter.init();
     }
 
     @Nullable

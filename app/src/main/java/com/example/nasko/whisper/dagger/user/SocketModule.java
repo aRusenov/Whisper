@@ -2,16 +2,7 @@ package com.example.nasko.whisper.dagger.user;
 
 import android.content.Context;
 
-import com.example.nasko.whisper.chats.interactors.ChatsInteractor;
-import com.example.nasko.whisper.chats.interactors.ChatsInteractorImpl;
-import com.example.nasko.whisper.chats.interactors.ConnectionInteractor;
-import com.example.nasko.whisper.chats.interactors.ConnectionInteractorImpl;
-import com.example.nasko.whisper.chats.interactors.ContactsInteractor;
-import com.example.nasko.whisper.chats.interactors.ContactsInteractorImpl;
-import com.example.nasko.whisper.chats.interactors.MessagesInteractor;
-import com.example.nasko.whisper.chats.interactors.MessagesInteractorImpl;
 import com.example.nasko.whisper.data.JsonDeserializer;
-import com.example.nasko.whisper.data.local.UserProvider;
 import com.example.nasko.whisper.data.socket.AppConnectionService;
 import com.example.nasko.whisper.data.socket.AppContactsService;
 import com.example.nasko.whisper.data.socket.AppMessagesService;
@@ -63,25 +54,5 @@ public class SocketModule {
                                                             MessagesService messagesService,
                                                             Context context) {
         return new AppSocketService(socketManager, connectionService, contactsService, messagesService, context);
-    }
-
-    @Provides @UserScope
-    ChatsInteractor provideChatsInteractor(SocketService socketService, UserProvider userProvider) {
-        return new ChatsInteractorImpl(socketService, userProvider);
-    }
-
-    @Provides @UserScope
-    ConnectionInteractor provideConnectionInteractor(SocketService socketService, UserProvider userProvider) {
-        return new ConnectionInteractorImpl(socketService, userProvider);
-    }
-
-    @Provides @UserScope
-    MessagesInteractor provideMessagesInteractor(SocketService socketService) {
-        return new MessagesInteractorImpl(socketService);
-    }
-
-    @Provides @UserScope
-    ContactsInteractor provideContactsInteractor(SocketService socketService, UserProvider userProvider) {
-        return new ContactsInteractorImpl(socketService, userProvider);
     }
 }

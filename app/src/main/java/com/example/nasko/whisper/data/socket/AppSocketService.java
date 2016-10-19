@@ -67,7 +67,7 @@ public class AppSocketService implements SocketService {
                     Log.d(TAG, "Disconnected");
                     authenticated = false;
                     if (networkStateReceiver.isConnected()) {
-
+                        reconnect();
                     }
                 });
 

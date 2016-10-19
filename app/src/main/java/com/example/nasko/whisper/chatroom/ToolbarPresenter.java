@@ -14,10 +14,10 @@ public class ToolbarPresenter extends SocketPresenter implements ToolbarContract
     public ToolbarPresenter(ToolbarContract.View view, SocketService socketService, UserProvider userProvider) {
         super(socketService, userProvider);
         this.view = view;
-        initListeners();
     }
 
-    private void initListeners() {
+    @Override
+    public void init() {
         Subscription userOnlineSub = socketService.contactsService()
                 .onContactOnline()
                 .observeOn(AndroidSchedulers.mainThread())

@@ -35,15 +35,15 @@ public class SocketManager {
         subjects = new SimpleArrayMap<>();
     }
 
-    public <R> Observable<R> on(String event, Class<R> responseType) {
+    <R> Observable<R> on(String event, Class<R> responseType) {
         return getObservable(event, responseType);
     }
 
-    public Observable<Void> on(String event) {
-        return getObservable(event, Void.class);
+    Observable<String> on(String event) {
+        return getObservable(event, String.class);
     }
 
-    private <R> Observable<R> getObservable(String event, Class<R> responseType) {
+    <R> Observable<R> getObservable(String event, Class<R> responseType) {
         PublishSubject<?> eventSubject = subjects.get(event);
         if (eventSubject == null) {
             eventSubject = createSubject(event, responseType);
@@ -54,7 +54,7 @@ public class SocketManager {
     }
 
     @NonNull
-    private <R> PublishSubject<R> createSubject(final String event, final Class<R> responseType) {
+    <R> PublishSubject<R> createSubject(final String event, final Class<R> responseType) {
         PublishSubject<R> eventSubject = PublishSubject.create();
         Emitter.Listener listener = args -> {
             if (! eventSubject.hasObservers()) {
@@ -63,10 +63,10 @@ public class SocketManager {
 
             // TODO: Research backpressure and fix MissingBackpressureException
             // when user is overwhelmed with notifications
-            if (responseType == Void.class) {
+            if (responseType == String.class) {
                 // Nothing to deserialize
                 Log.d("OnNext", event);
-                eventSubject.onNext(null);
+                eventSubject.onNext((R) event);
                 return;
             }
 
@@ -86,19 +86,19 @@ public class SocketManager {
         return eventSubject;
     }
 
-    public void emit(String event, Object... args) {
+    void emit(String event, Object... args) {
         socket.emit(event, args);
     }
 
-    public boolean connected() {
+    boolean connected() {
         return socket.connected();
     }
 
-    public void connect() {
+    void connect() {
         socket.connect();
     }
 
-    public void dispose() {
+    void dispose() {
         socket.disconnect();
         subjects.clear();
     }

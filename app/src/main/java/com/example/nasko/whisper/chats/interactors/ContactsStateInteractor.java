@@ -4,7 +4,7 @@ import com.example.nasko.whisper.models.dto.ContactStateChange;
 
 import rx.Observable;
 
-public interface ContactsInteractor {
+public interface ContactsStateInteractor extends BaseInteractor {
 
     Observable<ContactStateChange> onUserOnline();
 

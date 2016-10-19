@@ -7,14 +7,17 @@ import com.example.nasko.whisper.models.dto.ContactStateChange;
 
 import rx.Observable;
 
-public class ContactsInteractorImpl implements ContactsInteractor {
+public class ContactsStateInteractorImpl implements ContactsStateInteractor {
 
-    private User currentUser;
     private SocketService socketService;
+    private User currentUser;
 
-    public ContactsInteractorImpl(SocketService socketService, UserProvider userProvider) {
+    public ContactsStateInteractorImpl(SocketService socketService, UserProvider userProvider) {
         this.socketService = socketService;
         currentUser = userProvider.getCurrentUser();
+        if (currentUser != null && currentUser.getSessionToken() != null) {
+            socketService.start(currentUser.getSessionToken());
+        }
     }
 
     @Override
@@ -30,4 +33,10 @@ public class ContactsInteractorImpl implements ContactsInteractor {
                 .onContactOffline()
                 .filter(stateChange -> ! stateChange.getUsername().equals(currentUser.getUsername()));
     }
+
+    @Override
+    public void start() { }
+
+    @Override
+    public void destroy() { }
 }

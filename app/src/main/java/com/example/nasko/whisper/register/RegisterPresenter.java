@@ -31,6 +31,9 @@ public class RegisterPresenter implements RegisterContract.Presenter {
     }
 
     @Override
+    public void init() { }
+
+    @Override
     public void start() { }
 
     @Override
@@ -38,6 +41,7 @@ public class RegisterPresenter implements RegisterContract.Presenter {
 
     @Override
     public void destroy() {
+        subscriptions.clear();
         view = null;
     }
 

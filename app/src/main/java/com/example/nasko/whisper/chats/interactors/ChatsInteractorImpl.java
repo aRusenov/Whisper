@@ -5,20 +5,39 @@ import com.example.nasko.whisper.data.socket.SocketService;
 import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.models.dto.Contact;
 import com.example.nasko.whisper.models.view.ChatViewModel;
+import com.example.nasko.whisper.models.view.MessageViewModel;
 import com.example.nasko.whisper.utils.helpers.Mapper;
 
 import java.util.List;
 
 import rx.Observable;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
 
 public class ChatsInteractorImpl implements ChatsInteractor {
 
+    private Subscription authSub;
     private SocketService socketService;
-    private UserProvider userProvider;
+    private User currentUser;
 
     public ChatsInteractorImpl(SocketService socketService, UserProvider userProvider) {
         this.socketService = socketService;
-        this.userProvider = userProvider;
+        this.currentUser = userProvider.getCurrentUser();
+    }
+
+    @Override
+    public void start() {
+        authSub = socketService.connectionService()
+                .onAuthenticated()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe($ -> {
+                    loadChatsIfAuthenticated();
+                });
+    }
+
+    @Override
+    public void destroy() {
+        authSub.unsubscribe();
     }
 
     @Override
@@ -50,14 +69,21 @@ public class ChatsInteractorImpl implements ChatsInteractor {
     }
 
     @Override
-    public void loadChats() {
+    public Observable<MessageViewModel> onChatNewMessage() {
+        return Observable.merge(
+                socketService.messageService().onNewMessage().map(Mapper::toMessageViewModel),
+                socketService.messageService().onMessageSent().map(messageSentAck -> Mapper.toMessageViewModel(messageSentAck.getMessage()))
+        );
+    }
+
+    @Override
+    public void loadChatsIfAuthenticated() {
         if (socketService.authenticated()) {
             socketService.contactsService().loadContacts();
         }
     }
 
     private void setDisplayContact(ChatViewModel chat, List<Contact> participants) {
-        User currentUser = userProvider.getCurrentUser();
         int i;
         for (i = 0; i < participants.size(); i++) {
             String participantId = participants.get(i).getId();

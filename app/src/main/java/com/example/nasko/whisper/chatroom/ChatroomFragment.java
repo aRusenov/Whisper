@@ -51,6 +51,7 @@ public class ChatroomFragment extends Fragment implements ChatroomContract.View 
     public static final String EXTRA_CHAT = "chat";
     private static final String KEY_LAST_LOADED_MESSAGE_ID = "lastLoadedMessageId";
     private static final String KEY_MESSAGES = "messages";
+    private static final int DEFAULT_MESSAGE_SEQ = -1;
 
     @Inject ChatroomContract.Presenter presenter;
     @Inject UserProvider userProvider;
@@ -60,9 +61,8 @@ public class ChatroomFragment extends Fragment implements ChatroomContract.View 
     private EndlessUpScrollListener endlessScrollListener;
     private MessageAdapter adapter;
 
-    private ChatViewModel chat;
-
     private boolean typing;
+    private ChatViewModel chat;
     private ContactViewModel userContact;
 
     @BindView(R.id.rv_messages) RecyclerView messageList;
@@ -76,17 +76,19 @@ public class ChatroomFragment extends Fragment implements ChatroomContract.View 
         super.onCreate(savedInstanceState);
 
         chat = getArguments().getParcelable(EXTRA_CHAT);
+        int lastLoadedMessageSeq = savedInstanceState != null ?
+                savedInstanceState.getInt(KEY_LAST_LOADED_MESSAGE_ID, DEFAULT_MESSAGE_SEQ) :
+                DEFAULT_MESSAGE_SEQ;
+
         WhisperApplication.userComponent()
-                .plus(new ChatroomPresenterModule(this, chat, savedInstanceState != null))
+                .plus(new ChatroomPresenterModule(this, chat, lastLoadedMessageSeq))
                 .inject(this);
 
         User user = userProvider.getCurrentUser();
         userContact = new ContactViewModel(user.getUId(), user.getUsername(), user.getName(), user.getImage(), false);
         dateFormatter = new MessageSeparatorDateFormatter();
 
-        if (savedInstanceState != null) {
-            presenter.setLastLoadedMessageId(savedInstanceState.getInt(KEY_LAST_LOADED_MESSAGE_ID));
-        }
+        presenter.init();
     }
 
     @Override
