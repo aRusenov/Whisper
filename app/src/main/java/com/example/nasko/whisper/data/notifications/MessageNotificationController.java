@@ -84,8 +84,8 @@ public class MessageNotificationController implements NotificationDismissedListe
     }
 
     @Override
-    public void onNotificationDismissed(String contactId) {
-        removeNotification(contactId);
+    public void onNotificationDismissed(String chatId) {
+        removeNotification(chatId);
     }
 
     public void removeNotification(String chatId) {
