@@ -25,10 +25,10 @@ import butterknife.ButterKnife;
 
 public class MessageAdapter extends ArrayRecyclerViewAdapter<Object, RecyclerView.ViewHolder> {
 
-    public static final int TYPE_MESSAGE = 0;
-    public static final int TYPE_SEPARATOR = 1;
-    public static final int TYPE_LOADING = 2;
-    public static final int TYPE_TYPING = 3;
+    private static final int TYPE_MESSAGE = 0;
+    private static final int TYPE_SEPARATOR = 1;
+    private static final int TYPE_LOADING = 2;
+    private static final int TYPE_TYPING = 3;
 
     class MessageViewHolder extends RecyclerView.ViewHolder {
 
@@ -71,14 +71,12 @@ public class MessageAdapter extends ArrayRecyclerViewAdapter<Object, RecyclerVie
     }
 
     private ContactViewModel currentUser;
-    private String currentChatId;
-    private int messageMaxWidth;
+    private int hostWidth;
 
-    public MessageAdapter(Context context, ContactViewModel currentUser, String currentChatId, int messageMaxWidth) {
+    public MessageAdapter(Context context, ContactViewModel currentUser, int hostWidth) {
         super(context);
         this.currentUser = currentUser;
-        this.currentChatId = currentChatId;
-        this.messageMaxWidth = messageMaxWidth;
+        this.hostWidth = hostWidth;
     }
 
     @Override
@@ -100,21 +98,21 @@ public class MessageAdapter extends ArrayRecyclerViewAdapter<Object, RecyclerVie
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         switch (viewType) {
-            case 0: {
+            case TYPE_MESSAGE: {
                 View view = this.getInflater().inflate(R.layout.item_message, parent, false);
                 MessageViewHolder holder = new MessageViewHolder(view);
-                holder.tvText.setMaxWidth((messageMaxWidth * 4) / 5);
+                holder.tvText.setMaxWidth((hostWidth * 3) / 5);
                 return holder;
             }
-            case 1: {
+            case TYPE_SEPARATOR: {
                 View view = this.getInflater().inflate(R.layout.item_message_timestamp_separator, parent, false);
                 return new TimeLabelViewHolder(view);
             }
-            case 2: {
+            case TYPE_LOADING: {
                 View view = this.getInflater().inflate(R.layout.item_message_loading, parent, false);
                 return new LoadingViewHolder(view);
             }
-            case 3: {
+            case TYPE_TYPING: {
                 View view = this.getInflater().inflate(R.layout.item_message_typing, parent, false);
                 return new TypingViewHolder(view);
             }
@@ -126,7 +124,7 @@ public class MessageAdapter extends ArrayRecyclerViewAdapter<Object, RecyclerVie
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder absHolder, int position) {
         switch (absHolder.getItemViewType()) {
-            case 0: {
+            case TYPE_MESSAGE: {
                 MessageViewModel message = (MessageViewModel) getItem(position);
                 MessageViewHolder holder = (MessageViewHolder) absHolder;
 
@@ -168,18 +166,18 @@ public class MessageAdapter extends ArrayRecyclerViewAdapter<Object, RecyclerVie
 
                 break;
             }
-            case 1: {
+            case TYPE_SEPARATOR: {
                 MessageSeparator separator = (MessageSeparator) getItem(position);
                 TimeLabelViewHolder holder = (TimeLabelViewHolder) absHolder;
 
                 holder.tvTimestamp.setText(separator.getTimestamp());
                 break;
             }
-            case 2: {
+            case TYPE_LOADING: {
                 // Nothing
                 break;
             }
-            case 3: {
+            case TYPE_TYPING: {
                 TypingEvent typingEvent = (TypingEvent) getItem(position);
                 TypingViewHolder holder = (TypingViewHolder) absHolder;
 

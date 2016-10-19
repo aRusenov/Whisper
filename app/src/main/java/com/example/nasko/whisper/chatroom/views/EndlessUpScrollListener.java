@@ -1,4 +1,4 @@
-package com.example.nasko.whisper.chatroom.misc;
+package com.example.nasko.whisper.chatroom.views;
 
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -13,12 +13,12 @@ public abstract class EndlessUpScrollListener extends RecyclerView.OnScrollListe
     private LinearLayoutManager linearLayoutManager;
     private int loadThreshold;
 
-    public EndlessUpScrollListener(LinearLayoutManager linearLayoutManager, int loadThreshold) {
+    private EndlessUpScrollListener(LinearLayoutManager linearLayoutManager, int loadThreshold) {
         this.linearLayoutManager = linearLayoutManager;
         this.loadThreshold = loadThreshold;
     }
 
-    public EndlessUpScrollListener(LinearLayoutManager linearLayoutManager) {
+    protected EndlessUpScrollListener(LinearLayoutManager linearLayoutManager) {
         this(linearLayoutManager, LOAD_THRESHOLD);
     }
 

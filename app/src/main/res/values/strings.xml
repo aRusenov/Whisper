@@ -49,5 +49,6 @@
     <string name="message_no_results">No results</string>
     <string name="prefix_contact_item_user">" (You)"</string>
     <string name="error_search_too_short">Search must be at least 2 characters</string>
+    <string name="error_connection">Connection error</string>
 
 </resources>

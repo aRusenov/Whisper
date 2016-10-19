@@ -11,7 +11,7 @@
         android:focusableInTouchMode="true"
         android:background="#D2DBE2">
 
-        <android.support.v7.widget.RecyclerView
+        <com.example.nasko.whisper.chatroom.views.MessagesRecyclerView
             android:id="@+id/rv_messages"
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -23,8 +23,16 @@
         <Space
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="#bdbdbd"
-            android:layout_marginTop="@dimen/normal_margin"/>
+            android:background="#bdbdbd"/>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_emojis"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="horizontal"
+            android:scrollbarSize="3dp"
+            android:visibility="gone"
+            android:background="@color/color_white"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -32,6 +40,13 @@
             android:orientation="horizontal"
             android:layout_gravity="center_vertical"
             android:background="#fff">
+
+            <ImageButton
+                android:id="@+id/btn_toggle_emojis"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/emojis"
+                style="@style/EmojisToggleButton"/>
 
             <EditText
                 android:id="@+id/edit_new_message"
@@ -66,7 +81,7 @@
         android:maxLines="1"
         android:visibility="invisible"
         android:textColor="@color/color_white"
-        android:text="Connection error" />
+        android:text="@string/error_connection" />
 
     <ProgressBar
         android:id="@+id/progress_loading"

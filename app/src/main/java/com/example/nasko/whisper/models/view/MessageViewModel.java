@@ -9,7 +9,7 @@ import java.util.Date;
 
 public class MessageViewModel implements Parcelable {
 
-    private long uId;
+    private long identifier;
     private String chatId;
     private MessageStatus status;
     private String text;
@@ -20,8 +20,8 @@ public class MessageViewModel implements Parcelable {
         this(chatId, text, createdAt, author, 0, MessageStatus.SENT);
     }
 
-    public MessageViewModel(String chatId, String text, Date createdAt, ContactViewModel author, long uId, MessageStatus status) {
-        this.uId = uId;
+    public MessageViewModel(String chatId, String text, Date createdAt, ContactViewModel author, long identifier, MessageStatus status) {
+        this.identifier = identifier;
         this.chatId = chatId;
         this.status = status;
         this.text = text;
@@ -31,7 +31,7 @@ public class MessageViewModel implements Parcelable {
 
     // FIXME: How is date not put here but gets restored afterwards?
     protected MessageViewModel(Parcel in) {
-        uId = in.readLong();
+        identifier = in.readLong();
         chatId = in.readString();
         text = in.readString();
         author = in.readParcelable(ContactViewModel.class.getClassLoader());
@@ -39,7 +39,7 @@ public class MessageViewModel implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeLong(uId);
+        dest.writeLong(identifier);
         dest.writeString(chatId);
         dest.writeString(text);
         dest.writeParcelable(author, flags);
@@ -94,12 +94,12 @@ public class MessageViewModel implements Parcelable {
         this.author = author;
     }
 
-    public long getUId() {
-        return uId;
+    public long getIdentifier() {
+        return identifier;
     }
 
     public void setUId(long uId) {
-        this.uId = uId;
+        this.identifier = uId;
     }
 
     public String getChatId() {

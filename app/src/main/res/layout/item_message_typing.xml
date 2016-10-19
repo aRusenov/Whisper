@@ -11,6 +11,7 @@
         android:layout_height="wrap_content"
         android:textSize="@dimen/font_normal"
         android:gravity="center_horizontal"
+        android:layout_marginBottom="@dimen/normal_margin"
         tools:text="Gero is typing..." />
 
 </LinearLayout>

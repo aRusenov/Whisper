@@ -7,9 +7,11 @@ import com.example.nasko.whisper.data.socket.SocketService;
 import com.example.nasko.whisper.models.MessageStatus;
 import com.example.nasko.whisper.models.dto.Message;
 import com.example.nasko.whisper.models.view.ChatViewModel;
+import com.example.nasko.whisper.models.view.ContactViewModel;
 import com.example.nasko.whisper.models.view.MessageViewModel;
 import com.example.nasko.whisper.utils.helpers.Mapper;
 
+import java.util.Date;
 import java.util.List;
 
 import rx.Subscription;
@@ -128,8 +130,13 @@ public class ChatroomPresenter extends SocketPresenter implements ChatroomContra
     }
 
     @Override
-    public void onMessageSend(String text, long msgIdentifier) {
-        socketService.messageService().sendMessage(chat.getId(), text.trim(), msgIdentifier);
+    public MessageViewModel onMessageSend(String text, ContactViewModel userContact) {
+        MessageViewModel newMessage = new MessageViewModel(chat.getId(), text, new Date(), userContact);
+        newMessage.setStatus(MessageStatus.PENDING);
+        newMessage.setUId(System.nanoTime());
+
+        socketService.messageService().sendMessage(chat.getId(), text.trim(), newMessage.getIdentifier());
+        return newMessage;
     }
 
     @Override

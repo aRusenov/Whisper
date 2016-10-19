@@ -5,6 +5,9 @@ import android.app.Application;
 import com.example.nasko.whisper.dagger.base.ApplicationModule;
 import com.example.nasko.whisper.dagger.base.BaseComponent;
 import com.example.nasko.whisper.dagger.base.DaggerBaseComponent;
+import com.example.nasko.whisper.dagger.base.DaggerEmojiComponent;
+import com.example.nasko.whisper.dagger.base.EmojiComponent;
+import com.example.nasko.whisper.dagger.base.EmojiModule;
 import com.example.nasko.whisper.dagger.rest.RestComponent;
 import com.example.nasko.whisper.dagger.rest.RestModule;
 import com.example.nasko.whisper.dagger.user.SocketModule;
@@ -15,6 +18,7 @@ public class WhisperApplication extends Application {
 
     private static String apiUrl;
     private static BaseComponent baseComponent;
+    private static EmojiComponent emojiComponent;
     private static RestComponent restComponent;
     private static UserComponent userComponent;
 
@@ -25,12 +29,20 @@ public class WhisperApplication extends Application {
                 .applicationModule(new ApplicationModule(this))
                 .build();
 
+        emojiComponent = DaggerEmojiComponent.builder()
+                .emojiModule(new EmojiModule())
+                .build();
+
         apiUrl = ConfigLoader.getConfigValue(getApplicationContext(), "api_url");
         restComponent = baseComponent.plus(new RestModule(apiUrl));
     }
 
     public static BaseComponent baseComponent() {
         return baseComponent;
+    }
+
+    public static EmojiComponent getEmojiComponent() {
+        return emojiComponent;
     }
 
     public static RestComponent restComponent() {
