@@ -20,7 +20,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".chats.MainActivity">
+        <activity android:name=".chats.MainActivity"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="YOUR_ACTION" />
                 <category android:name="android.intent.category.DEFAULT" />

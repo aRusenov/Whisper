@@ -25,7 +25,7 @@
     <string name="title_activity_profile">ProfileActivity</string>
 
     <!--Chats-->
-    <string name="status_online">Online</string>
+    <string name="status_online">Active Now</string>
     <string name="status_offline">Offline</string>
 
     <!--Chatroom-->

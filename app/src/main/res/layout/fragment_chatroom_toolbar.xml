@@ -1,63 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/toolbar_container"
+    android:id="@+id/toolbar"
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize"
-    android:background="@drawable/shadow"
-    android:orientation="horizontal"
-    android:gravity="center_vertical">
+    android:background="@color/color_primary"
+    app:contentInsetLeft="0dp"
+    app:contentInsetRight="0dp"
+    app:contentInsetStartWithNavigation="0dp"
+    app:theme="@style/ToolbarColoredBackButton">
 
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/image_contact"
-        tools:src="@drawable/profile"
-        style="@style/ContactCircularImageView" />
-
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:layout_marginTop="@dimen/small_margin"
-        android:layout_marginBottom="@dimen/small_margin">
+        android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/tv_contact_name"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:textSize="@dimen/font_normal"
-            tools:text="Gosho"
-            android:textStyle="bold"
-            android:textColor="@color/color_white"
-            android:maxLines="1"
-            android:ellipsize="end" />
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/image_contact"
+            style="@style/ContactCircularImageView"
+            tools:src="@drawable/profile" />
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:orientation="horizontal">
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@id/image_contact"
+            android:orientation="vertical">
 
-            <ImageView
-                android:id="@+id/status_image"
-                android:layout_width="8dp"
-                android:layout_height="8dp"
-                android:src="@drawable/circle_green"
-                android:layout_gravity="center_vertical"/>
+            <TextView
+                android:id="@+id/tv_contact_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@color/color_white"
+                android:textSize="@dimen/font_normal"
+                android:textStyle="bold"
+                tools:text="Gosho" />
 
             <TextView
                 android:id="@+id/tv_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:textSize="@dimen/font_small"
                 android:textColor="@color/color_white"
-                tools:text="Online"
-                android:layout_marginLeft="@dimen/small_margin"
-                android:layout_marginStart="@dimen/small_margin"/>
+                android:textSize="@dimen/font_small"
+                tools:text="Online" />
 
         </LinearLayout>
 
-    </LinearLayout>
+    </RelativeLayout>
 
-</LinearLayout>
+</android.support.v7.widget.Toolbar>

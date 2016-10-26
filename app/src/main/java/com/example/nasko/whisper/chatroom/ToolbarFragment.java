@@ -3,12 +3,12 @@ package com.example.nasko.whisper.chatroom;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.nasko.whisper.R;
@@ -31,11 +31,10 @@ public class ToolbarFragment extends Fragment implements ToolbarContract.View {
     @Inject ToolbarContract.Presenter presenter;
     private ContactViewModel displayContact;
 
-    @BindView(R.id.toolbar_container) LinearLayout toolbarContainer;
+    @BindView(R.id.toolbar) Toolbar toolbar;
     @BindView(R.id.image_contact) CircleImageView imageContact;
     @BindView(R.id.tv_contact_name) TextView tvName;
     @BindView(R.id.tv_status) TextView tvStatus;
-    @BindView(R.id.status_image) ImageView statusImg;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -57,8 +56,16 @@ public class ToolbarFragment extends Fragment implements ToolbarContract.View {
         ButterKnife.bind(this, view);
 
         if (displayContact == null) {
-            toolbarContainer.setVisibility(View.GONE);
+            toolbar.setVisibility(View.GONE);
         } else {
+            AppCompatActivity host = (AppCompatActivity) getActivity();
+            host.setSupportActionBar(toolbar);
+            host.getSupportActionBar().setDisplayShowHomeEnabled(true);
+            host.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            host.getSupportActionBar().setDisplayShowTitleEnabled(false);
+//            ImageView imgHome = (ImageView) toolbar.findViewById(android.R.id.home);
+//            imgHome.setPadding(10, 0, 0, 0);
+
             TypedValue tv = new TypedValue();
             if (getActivity().getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true))
             {
@@ -89,8 +96,6 @@ public class ToolbarFragment extends Fragment implements ToolbarContract.View {
 
     @Override
     public void setContactStatus(boolean online) {
-        int statusRes = online ? R.drawable.circle_green : R.drawable.circle_gray;
-        statusImg.setImageResource(statusRes);
         tvStatus.setText(online ? getActivity().getString(R.string.status_online) : getActivity().getString(R.string.status_offline));
     }
 }

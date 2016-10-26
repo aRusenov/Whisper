@@ -16,7 +16,6 @@ import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.chatroom.ChatroomActivity;
 import com.example.nasko.whisper.chatroom.ChatroomFragment;
-import com.example.nasko.whisper.chatroom.ToolbarFragment;
 import com.example.nasko.whisper.chats.adapters.MenuFragmentPageAdapter;
 import com.example.nasko.whisper.models.view.ChatViewModel;
 import com.example.nasko.whisper.utils.helpers.FragmentHelperUtil;
@@ -122,12 +121,6 @@ public class MainActivity extends BaseActivity implements ViewCoordinator {
                     R.id.container_chatroom_fragment,
                     args,
                     FRAGMENT_CHATROOM_TAG);
-
-            FragmentHelperUtil.addOrReplaceFragment(this,
-                    new ToolbarFragment(),
-                    R.id.container_toolbar_fragment,
-                    args,
-                    FRAGMENT_TOOLBAR_TAG);
         } else {
             // Not multipane -> simply navigate to ChatroomActivtiy
             Intent intent = ChatroomActivity.prepareIntent(this, chat);

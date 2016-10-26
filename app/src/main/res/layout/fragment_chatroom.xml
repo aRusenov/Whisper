@@ -91,4 +91,9 @@
         android:layout_gravity="center"
         style="?android:attr/progressBarStyleLarge" />
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:background="@drawable/shadow"/>
+
 </FrameLayout>
