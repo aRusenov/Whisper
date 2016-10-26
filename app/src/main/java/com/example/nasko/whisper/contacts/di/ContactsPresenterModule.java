@@ -1,7 +1,7 @@
-package com.example.nasko.whisper.chats.di.modules;
+package com.example.nasko.whisper.contacts.di;
 
-import com.example.nasko.whisper.chats.ContactsContract;
-import com.example.nasko.whisper.chats.ContactsPresenter;
+import com.example.nasko.whisper.contacts.ContactsContract;
+import com.example.nasko.whisper.contacts.ContactsPresenter;
 import com.example.nasko.whisper.chats.interactors.ContactsSearchInteractor;
 import com.example.nasko.whisper.chats.interactors.ContactsSearchInteractorImpl;
 import com.example.nasko.whisper.data.local.UserProvider;

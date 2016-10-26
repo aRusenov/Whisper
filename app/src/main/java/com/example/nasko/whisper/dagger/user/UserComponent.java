@@ -8,8 +8,8 @@ import com.example.nasko.whisper.chats.di.modules.ChatsPresenterModule;
 import com.example.nasko.whisper.chats.di.modules.ChatsToolbarPresenterModule;
 import com.example.nasko.whisper.chats.di.components.ChatsToolbarViewComponent;
 import com.example.nasko.whisper.chats.di.components.ChatsViewComponent;
-import com.example.nasko.whisper.chats.di.modules.ContactsPresenterModule;
-import com.example.nasko.whisper.chats.di.components.ContactsViewComponent;
+import com.example.nasko.whisper.contacts.di.ContactsPresenterModule;
+import com.example.nasko.whisper.contacts.di.ContactsViewComponent;
 
 import dagger.Subcomponent;
 

@@ -1,4 +1,4 @@
-package com.example.nasko.whisper.chats;
+package com.example.nasko.whisper.contacts;
 
 import android.util.Log;
 

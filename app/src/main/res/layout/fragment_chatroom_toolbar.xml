@@ -7,8 +7,7 @@
     android:layout_height="?attr/actionBarSize"
     android:background="@color/color_primary"
     app:contentInsetLeft="0dp"
-    app:contentInsetRight="0dp"
-    app:contentInsetStartWithNavigation="0dp"
+    app:contentInsetStart="0dp"
     app:theme="@style/ToolbarColoredBackButton">
 
     <RelativeLayout
@@ -18,12 +17,15 @@
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/image_contact"
             style="@style/ContactCircularImageView"
+            android:layout_margin="0dp"
+            android:layout_centerVertical="true"
             tools:src="@drawable/profile" />
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/normal_margin"
             android:layout_toRightOf="@id/image_contact"
             android:orientation="vertical">
 

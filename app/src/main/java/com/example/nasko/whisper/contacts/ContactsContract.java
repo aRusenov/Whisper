@@ -1,4 +1,4 @@
-package com.example.nasko.whisper.chats;
+package com.example.nasko.whisper.contacts;
 
 import com.example.nasko.whisper.BasePresenter;
 import com.example.nasko.whisper.models.view.ContactViewModel;

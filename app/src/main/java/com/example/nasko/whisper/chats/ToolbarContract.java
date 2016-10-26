@@ -10,12 +10,16 @@ public interface ToolbarContract {
 
         void setNetworkStatus(String status);
 
+        void navigateToContacts();
+
         void navigateToSettings(User user);
 
         void navigateToLoginScreen();
     }
 
     interface Presenter extends BasePresenter {
+
+        void onContactsClicked();
 
         void onSettingsClicked();
 

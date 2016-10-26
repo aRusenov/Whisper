@@ -3,6 +3,7 @@ package com.example.nasko.whisper.dagger.base;
 import com.example.nasko.whisper.SplashActivity;
 import com.example.nasko.whisper.chatroom.ChatroomActivity;
 import com.example.nasko.whisper.chats.MainActivity;
+import com.example.nasko.whisper.contacts.ContactsActivity;
 import com.example.nasko.whisper.data.notifications.FcmListenerService;
 import com.example.nasko.whisper.dagger.rest.RestComponent;
 import com.example.nasko.whisper.dagger.rest.RestModule;
@@ -26,6 +27,8 @@ public interface BaseComponent {
     void inject(MainActivity activity);
 
     void inject(ChatroomActivity activity);
+
+    void inject(ContactsActivity activity);
 
     void inject(FcmListenerService service);
 }

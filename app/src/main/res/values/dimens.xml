@@ -13,4 +13,5 @@
     <dimen name="normal_margin">10dp</dimen>
     <dimen name="large_margin">20dp</dimen>
     <dimen name="xlarge_margin">40dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
 </resources>

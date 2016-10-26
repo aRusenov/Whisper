@@ -1,7 +1,6 @@
-package com.example.nasko.whisper.chats.di.components;
+package com.example.nasko.whisper.contacts.di;
 
-import com.example.nasko.whisper.chats.ContactsFragment;
-import com.example.nasko.whisper.chats.di.modules.ContactsPresenterModule;
+import com.example.nasko.whisper.contacts.ContactsFragment;
 import com.example.nasko.whisper.dagger.ActivityScope;
 
 import dagger.Subcomponent;

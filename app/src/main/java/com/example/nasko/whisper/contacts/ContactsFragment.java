@@ -1,24 +1,20 @@
-package com.example.nasko.whisper.chats;
+package com.example.nasko.whisper.contacts;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.chats.adapters.ContactQueryAdapter;
+import com.example.nasko.whisper.contacts.di.ContactsPresenterModule;
 import com.example.nasko.whisper.data.local.UserProvider;
-import com.example.nasko.whisper.chats.di.modules.ContactsPresenterModule;
 import com.example.nasko.whisper.models.view.ContactViewModel;
 
 import java.util.ArrayList;
@@ -29,7 +25,7 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class ContactsFragment extends Fragment implements ContactsContract.View {
+public class ContactsFragment extends Fragment implements ContactsContract.View, SearchViewListener {
 
     private static final String EXTRA_CONTACTS = "contacts";
 
@@ -37,10 +33,8 @@ public class ContactsFragment extends Fragment implements ContactsContract.View 
     @Inject ContactsContract.Presenter presenter;
     private ContactQueryAdapter contactQueryAdapter;
 
-    @BindView(R.id.edit_query) EditText editSearch;
     @BindView(R.id.rv_new_contacts) RecyclerView rvContacts;
     @BindView(R.id.tv_query_message) TextView tvQueryMessage;
-    @BindView(R.id.progress_loading) ProgressBar progressLoading;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -77,20 +71,6 @@ public class ContactsFragment extends Fragment implements ContactsContract.View 
         rvContacts.setAdapter(contactQueryAdapter);
         rvContacts.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        editSearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                String query = s.toString();
-                presenter.onQueryEntered(query);
-            }
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-
-            @Override
-            public void afterTextChanged(Editable s) { }
-        });
-
         return view;
     }
 
@@ -102,7 +82,6 @@ public class ContactsFragment extends Fragment implements ContactsContract.View 
 
     @Override
     public void showQueryResults(List<ContactViewModel> contacts) {
-        editSearch.setError(null);
         if (contacts.size() == 0) {
             tvQueryMessage.setVisibility(View.VISIBLE);
             tvQueryMessage.setText(R.string.message_no_results);
@@ -121,17 +100,17 @@ public class ContactsFragment extends Fragment implements ContactsContract.View 
 
     @Override
     public void showLoading() {
-        progressLoading.setVisibility(View.VISIBLE);
+//        progressLoading.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void hideLoading() {
-        progressLoading.setVisibility(View.INVISIBLE);
+//        progressLoading.setVisibility(View.INVISIBLE);
     }
 
     @Override
     public void displayQueryTooShortError() {
-        editSearch.setError(getContext().getString(R.string.error_search_too_short));
+//        editSearch.setError(getContext().getString(R.string.error_search_too_short));
     }
 
     @Override
@@ -143,5 +122,10 @@ public class ContactsFragment extends Fragment implements ContactsContract.View 
         }
 
         outState.putParcelableArrayList(EXTRA_CONTACTS, savedContacts);
+    }
+
+    @Override
+    public void onSearchQueryChanged(String query) {
+        presenter.onQueryEntered(query);
     }
 }

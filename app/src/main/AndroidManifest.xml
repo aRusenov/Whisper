@@ -17,13 +17,16 @@
         <activity android:name=".SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".chats.MainActivity"
+        <activity
+            android:name=".chats.MainActivity"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="YOUR_ACTION" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -35,7 +38,7 @@
                 android:value=".chats.MainActivity" />
         </activity>
         <activity android:name=".login.LoginActivity" />
-        <activity android:name=".register.RegisterActivity"/>
+        <activity android:name=".register.RegisterActivity" />
         <activity
             android:name=".editprofile.ProfileActivity"
             android:label="@string/title_activity_profile" />
@@ -49,6 +52,8 @@
             </intent-filter>
         </service>
 
+        <activity android:name=".contacts.ContactsActivity"
+            android:parentActivityName=".chats.MainActivity" />
     </application>
 
 </manifest>

@@ -13,6 +13,9 @@
 
     <style name="ToolbarColoredBackButton" parent="AppTheme">
         <item name="android:textColorSecondary">@color/color_white</item>
+        <item name="android:editTextColor">@color/color_white</item>
+        <item name="android:textColorHint">@color/color_white</item>
+        <item name="colorControlActivated">@color/color_light_grey</item>
     </style>
 
     <style name="AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />

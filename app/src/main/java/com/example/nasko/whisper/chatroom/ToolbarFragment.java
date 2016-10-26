@@ -3,6 +3,7 @@ package com.example.nasko.whisper.chatroom;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
@@ -60,11 +61,7 @@ public class ToolbarFragment extends Fragment implements ToolbarContract.View {
         } else {
             AppCompatActivity host = (AppCompatActivity) getActivity();
             host.setSupportActionBar(toolbar);
-            host.getSupportActionBar().setDisplayShowHomeEnabled(true);
-            host.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            host.getSupportActionBar().setDisplayShowTitleEnabled(false);
-//            ImageView imgHome = (ImageView) toolbar.findViewById(android.R.id.home);
-//            imgHome.setPadding(10, 0, 0, 0);
+            host.getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_HOME_AS_UP | ActionBar.DISPLAY_SHOW_HOME);
 
             TypedValue tv = new TypedValue();
             if (getActivity().getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true))

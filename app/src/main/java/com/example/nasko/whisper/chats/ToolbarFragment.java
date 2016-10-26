@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.chats.di.modules.ChatsToolbarPresenterModule;
+import com.example.nasko.whisper.contacts.ContactsActivity;
 import com.example.nasko.whisper.editprofile.ProfileActivity;
 import com.example.nasko.whisper.login.LoginActivity;
 import com.example.nasko.whisper.models.User;
@@ -41,6 +42,7 @@ public class ToolbarFragment extends Fragment implements ToolbarContract.View {
         WhisperApplication.userComponent()
                 .plus(new ChatsToolbarPresenterModule(this))
                 .inject(this);
+        presenter.init();
     }
 
     @Nullable
@@ -57,20 +59,23 @@ public class ToolbarFragment extends Fragment implements ToolbarContract.View {
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.bar_actions, menu);
-    }
-
-    @Override
     public void onDestroy() {
         super.onDestroy();
         presenter.destroy();
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.actions_chats_bar, menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.action_contacts:
+                presenter.onContactsClicked();
+                return true;
             case R.id.action_settings:
                 presenter.onSettingsClicked();
                 return true;
@@ -85,6 +90,12 @@ public class ToolbarFragment extends Fragment implements ToolbarContract.View {
     @Override
     public void setNetworkStatus(String status) {
         actionBar.setTitle(status);
+    }
+
+    @Override
+    public void navigateToContacts() {
+        Intent intent = ContactsActivity.prepareIntent(getActivity());
+        startActivity(intent);
     }
 
     @Override

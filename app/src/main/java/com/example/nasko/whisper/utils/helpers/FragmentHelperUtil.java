@@ -14,7 +14,7 @@ public class FragmentHelperUtil {
         if (fm.findFragmentByTag(tag) == null) {
             fm.beginTransaction()
                     .add(containerId, fragment, tag)
-                    .commit();
+                    .commitNow();
         }
     }
 

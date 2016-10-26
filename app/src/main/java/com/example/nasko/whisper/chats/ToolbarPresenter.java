@@ -65,6 +65,11 @@ public class ToolbarPresenter extends SocketPresenter implements ToolbarContract
     }
 
     @Override
+    public void onContactsClicked() {
+        view.navigateToContacts();
+    }
+
+    @Override
     public void onSettingsClicked() {
         view.navigateToSettings(userProvider.getCurrentUser());
     }

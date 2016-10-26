@@ -1,53 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <FrameLayout
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_new_contacts"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <TextView
+        android:id="@+id/tv_query_message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/normal_margin"
-        android:layout_marginLeft="@dimen/xlarge_margin"
-        android:layout_marginRight="@dimen/xlarge_margin">
+        android:gravity="center"
+        android:textSize="@dimen/font_xxlarge"/>
 
-        <EditText
-            android:id="@+id/edit_query"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/contacts_search"
-            android:drawableStart="@drawable/contacts_search"
-            android:hint="@string/search_contact"
-            android:textSize="@dimen/font_large"
-            android:inputType="textFilter"
-            android:drawablePadding="@dimen/large_margin"
-            android:layout_gravity="center_horizontal"/>
-
-        <ProgressBar
-            android:id="@+id/progress_loading"
-            android:visibility="invisible"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:layout_gravity="center_vertical|end"/>
-
-    </FrameLayout>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/rv_new_contacts"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-        <TextView
-            android:id="@+id/tv_query_message"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textSize="@dimen/font_xxlarge"/>
-
-    </RelativeLayout>
-
-</LinearLayout>
+</FrameLayout>

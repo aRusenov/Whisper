@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--Theme colors-->
-    <color name="color_primary">#26AE90</color>
-    <color name="color_primary_dark">#009688</color>
+    <color name="color_primary">#23B389</color>
+    <color name="color_primary_dark">#0C8667</color>
     <color name="color_accent">#26AE90</color>
 
     <!--Material-->
