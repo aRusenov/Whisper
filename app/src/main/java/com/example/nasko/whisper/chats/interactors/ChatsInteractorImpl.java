@@ -12,7 +12,6 @@ import java.util.List;
 
 import rx.Observable;
 import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
 
 public class ChatsInteractorImpl implements ChatsInteractor {
 
@@ -27,12 +26,10 @@ public class ChatsInteractorImpl implements ChatsInteractor {
 
     @Override
     public void init() {
+        loadChatsIfAuthenticated();
         authSub = socketService.connectionService()
                 .onAuthenticated()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe($ -> {
-                    loadChatsIfAuthenticated();
-                });
+                .subscribe($ -> loadChatsIfAuthenticated());
     }
 
     @Override
@@ -71,13 +68,14 @@ public class ChatsInteractorImpl implements ChatsInteractor {
     @Override
     public Observable<MessageViewModel> onChatNewMessage() {
         return Observable.merge(
-                socketService.messageService().onNewMessage().map(Mapper::toMessageViewModel),
-                socketService.messageService().onMessageSent().map(messageSentAck -> Mapper.toMessageViewModel(messageSentAck.getMessage()))
+                socketService.messageService().onNewMessage()
+                        .map(Mapper::toMessageViewModel),
+                socketService.messageService().onMessageSent()
+                        .map(messageSentAck -> Mapper.toMessageViewModel(messageSentAck.getMessage()))
         );
     }
 
-    @Override
-    public void loadChatsIfAuthenticated() {
+    private void loadChatsIfAuthenticated() {
         if (socketService.authenticated()) {
             socketService.contactsService().loadContacts();
         }

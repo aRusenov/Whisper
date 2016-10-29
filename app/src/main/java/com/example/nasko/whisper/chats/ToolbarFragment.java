@@ -20,7 +20,6 @@ import com.example.nasko.whisper.chats.di.modules.ChatsToolbarPresenterModule;
 import com.example.nasko.whisper.contacts.ContactsActivity;
 import com.example.nasko.whisper.editprofile.ProfileActivity;
 import com.example.nasko.whisper.login.LoginActivity;
-import com.example.nasko.whisper.models.User;
 
 import javax.inject.Inject;
 
@@ -88,8 +87,21 @@ public class ToolbarFragment extends Fragment implements ToolbarContract.View {
     }
 
     @Override
-    public void setNetworkStatus(String status) {
-        actionBar.setTitle(status);
+    public void setNetworkStatus(int status) {
+        String title;
+        switch (status) {
+            case NetworkStatus.CONNECTING:
+                title = getString(R.string.label_status_connecting);
+                break;
+            case NetworkStatus.CONNECTED:
+                title = getString(R.string.label_status_authenticating);
+                break;
+            default:
+                title = getString(R.string.label_app_name);
+
+        }
+
+        actionBar.setTitle(title);
     }
 
     @Override
@@ -99,7 +111,7 @@ public class ToolbarFragment extends Fragment implements ToolbarContract.View {
     }
 
     @Override
-    public void navigateToSettings(User user) {
+    public void navigateToSettings() {
         Intent intent = ProfileActivity.prepareIntent(getActivity());
         startActivity(intent);
     }

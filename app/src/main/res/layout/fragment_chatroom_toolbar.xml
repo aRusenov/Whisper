@@ -10,46 +10,32 @@
     app:contentInsetStart="0dp"
     app:theme="@style/ToolbarColoredBackButton">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/normal_margin"
+        android:orientation="vertical">
 
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/image_contact"
-            style="@style/ContactCircularImageView"
-            android:layout_margin="0dp"
-            android:layout_centerVertical="true"
-            tools:src="@drawable/profile" />
-
-        <LinearLayout
+        <TextView
+            android:id="@+id/tv_contact_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="@dimen/normal_margin"
-            android:layout_toRightOf="@id/image_contact"
-            android:orientation="vertical">
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/color_white"
+            android:textSize="@dimen/font_normal"
+            android:textStyle="bold"
+            tools:text="Gosho" />
 
-            <TextView
-                android:id="@+id/tv_contact_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:textColor="@color/color_white"
-                android:textSize="@dimen/font_normal"
-                android:textStyle="bold"
-                tools:text="Gosho" />
+        <TextView
+            android:id="@+id/tv_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/color_white"
+            android:textSize="@dimen/font_small"
+            tools:text="Online" />
 
-            <TextView
-                android:id="@+id/tv_status"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/color_white"
-                android:textSize="@dimen/font_small"
-                tools:text="Online" />
-
-        </LinearLayout>
-
-    </RelativeLayout>
+    </LinearLayout>
 
 </android.support.v7.widget.Toolbar>

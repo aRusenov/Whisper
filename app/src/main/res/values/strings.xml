@@ -13,6 +13,9 @@
     <string name="placeholder_name">Name</string>
 
     <!--Toolbar actions-->
+    <string name="label_status_connecting">Connecting…</string>
+    <string name="label_status_authenticating">Authenticating…</string>
+    <string name="label_app_name">Whisper</string>
     <string name="action_search">Search</string>
     <string name="action_contacts">Contacts</string>
     <string name="action_settings">Settings</string>

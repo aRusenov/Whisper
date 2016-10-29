@@ -4,7 +4,6 @@ import com.example.nasko.whisper.chats.interactors.ChatsInteractor;
 import com.example.nasko.whisper.chats.interactors.ContactsStateInteractor;
 import com.example.nasko.whisper.models.view.ChatViewModel;
 
-import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.subscriptions.CompositeSubscription;
 
@@ -29,48 +28,36 @@ public class ChatsPresenter implements ChatsContract.Presenter {
 
     @Override
     public void init() {
-        chatsInteractor.loadChatsIfAuthenticated();
-
-        Subscription loadChatsSub = chatsInteractor.onChatsLoaded()
+        subscriptions.add(chatsInteractor.onChatsLoaded()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(chats -> {
                     view.clearChats();
                     view.loadChats(chats);
-                });
+                }));
 
-        subscriptions.add(loadChatsSub);
-
-        Subscription newChatSub = chatsInteractor.onNewChat()
+        subscriptions.add(chatsInteractor.onNewChat()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(chat -> {
                     view.addChat(chat);
-                });
+                }));
 
-        subscriptions.add(newChatSub);
-
-        Subscription newMessageSub = chatsInteractor.onChatNewMessage()
+        subscriptions.add(chatsInteractor.onChatNewMessage()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(message -> {
                     view.updateChatLastMessage(message.getChatId(), message);
-                });
+                }));
 
-        subscriptions.add(newMessageSub);
-
-        Subscription userOnlineSub = contactsStateInteractor.onUserOnline()
+        subscriptions.add(contactsStateInteractor.onUserOnline()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(stateChange -> {
                     view.setChatStatus(stateChange.getChatId(), true);
-                });
+                }));
 
-        subscriptions.add(userOnlineSub);
-
-        Subscription userOfflineSub = contactsStateInteractor.onUserOffline()
+        subscriptions.add(contactsStateInteractor.onUserOffline()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(stateChange -> {
                     view.setChatStatus(stateChange.getChatId(), false);
-                });
-
-        subscriptions.add(userOfflineSub);
+                }));
 
         chatsInteractor.init();
         contactsStateInteractor.init();
@@ -84,9 +71,9 @@ public class ChatsPresenter implements ChatsContract.Presenter {
 
     @Override
     public void destroy() {
+        subscriptions.clear();
         chatsInteractor.destroy();
         contactsStateInteractor.destroy();
-        subscriptions.clear();
         view = null;
     }
 

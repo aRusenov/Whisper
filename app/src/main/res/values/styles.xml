@@ -7,8 +7,11 @@
         <item name="colorPrimaryDark">@color/color_primary_dark</item>
         <item name="colorAccent">@color/color_accent</item>
         <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
         <item name="android:textColorPrimary">@color/color_black</item>
+    </style>
+
+    <style name="ToolbarStyle">
+        <item name="android:textColorPrimary">@color/color_white</item>
     </style>
 
     <style name="ToolbarColoredBackButton" parent="AppTheme">
@@ -21,9 +24,5 @@
     <style name="AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
-
-    <style name="ToolbarStyle">
-        <item name="android:textColorSecondary">#fff</item>
-    </style>
 
 </resources>

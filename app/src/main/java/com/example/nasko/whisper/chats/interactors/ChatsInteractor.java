@@ -14,6 +14,4 @@ public interface ChatsInteractor extends BaseInteractor {
     Observable<ChatViewModel> onNewChat();
 
     Observable<MessageViewModel> onChatNewMessage();
-
-    void loadChatsIfAuthenticated();
 }

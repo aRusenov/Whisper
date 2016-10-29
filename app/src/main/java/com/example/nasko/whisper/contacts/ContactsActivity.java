@@ -22,8 +22,7 @@ public class ContactsActivity extends AppCompatActivity {
 
     private SearchViewListener searchViewListener;
 
-    @BindView(R.id.toolbar)
-    Toolbar toolbar;
+    @BindView(R.id.toolbar) Toolbar toolbar;
 
     public static Intent prepareIntent(Context context) {
         return new Intent(context, ContactsActivity.class);

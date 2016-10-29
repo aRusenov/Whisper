@@ -17,13 +17,11 @@ import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.chatroom.di.modules.ChatroomToolbarPresenterModule;
 import com.example.nasko.whisper.models.view.ChatViewModel;
 import com.example.nasko.whisper.models.view.ContactViewModel;
-import com.squareup.picasso.Picasso;
 
 import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ToolbarFragment extends Fragment implements ToolbarContract.View {
 
@@ -33,7 +31,6 @@ public class ToolbarFragment extends Fragment implements ToolbarContract.View {
     private ContactViewModel displayContact;
 
     @BindView(R.id.toolbar) Toolbar toolbar;
-    @BindView(R.id.image_contact) CircleImageView imageContact;
     @BindView(R.id.tv_contact_name) TextView tvName;
     @BindView(R.id.tv_status) TextView tvStatus;
 
@@ -67,13 +64,6 @@ public class ToolbarFragment extends Fragment implements ToolbarContract.View {
             if (getActivity().getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true))
             {
                 int actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data,getResources().getDisplayMetrics());
-
-                imageContact.getLayoutParams().width = (actionBarHeight * 3) / 4;
-                imageContact.getLayoutParams().height = (actionBarHeight * 3) / 4;
-                Picasso.with(getContext())
-                        .load(displayContact.getImage().getUrl())
-                        .placeholder(R.drawable.profile)
-                        .into(imageContact);
 
                 tvName.setText(displayContact.getUsername());
                 tvName.setTextSize(TypedValue.COMPLEX_UNIT_PX, actionBarHeight / 3);

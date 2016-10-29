@@ -2,65 +2,67 @@ package com.example.nasko.whisper.chats;
 
 import android.util.Log;
 
-import com.example.nasko.whisper.SocketPresenter;
-import com.example.nasko.whisper.data.local.UserProvider;
-import com.example.nasko.whisper.data.socket.SocketService;
-import com.google.firebase.messaging.FirebaseMessaging;
+import com.example.nasko.whisper.chats.interactors.ConnectionInteractor;
+import com.example.nasko.whisper.chats.interactors.SessionInteractor;
 
-import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.subscriptions.CompositeSubscription;
 
-public class ToolbarPresenter extends SocketPresenter implements ToolbarContract.Presenter {
+public class ToolbarPresenter implements ToolbarContract.Presenter {
 
     private static final String TAG = "ToolbarPresenter";
 
     private ToolbarContract.View view;
+    private SessionInteractor sessionInteractor;
+    private ConnectionInteractor connectionInteractor;
+    private CompositeSubscription subscriptions;
 
     public ToolbarPresenter(ToolbarContract.View view,
-                            SocketService socketService, UserProvider userProvider) {
-        super(socketService, userProvider);
+                            ConnectionInteractor connectionInteractor,
+                            SessionInteractor sessionInteractor) {
         this.view = view;
+        this.connectionInteractor = connectionInteractor;
+        this.sessionInteractor = sessionInteractor;
+        subscriptions = new CompositeSubscription();
     }
 
     @Override
     public void init() {
-        // Subscribe to FCM <user-id> topic
-        FirebaseMessaging.getInstance().subscribeToTopic(userProvider.getCurrentUser().getUId());
+        sessionInteractor.init();
+        connectionInteractor.init();
 
-        Subscription connectSub = socketService.connectionService()
-                .onConnect()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(res -> {
-                    Log.d(TAG, "Connected");
-                    view.setNetworkStatus("Authenticating...");
-                });
-
-        subscriptions.add(connectSub);
-
-        Subscription authSub = socketService.connectionService()
-                .onAuthenticated()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(res -> {
-                    Log.d(TAG, "Authenticated");
-                    view.setNetworkStatus("Whisper");
-                });
-
-        subscriptions.add(authSub);
-
-        Subscription connectingSub = socketService.connectionService().onConnecting()
-                .mergeWith(socketService.connectionService().onConnect())
-                .mergeWith(socketService.connectionService().onDisconnect())
+        subscriptions.add(connectionInteractor.onConnected()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe($ -> {
-                    view.setNetworkStatus("Connecting..");
-                });
+                    Log.d(TAG, "Connected");
+                    view.setNetworkStatus(NetworkStatus.CONNECTED);
+                }));
 
-        subscriptions.add(connectingSub);
+        subscriptions.add(connectionInteractor.onAuthenticated()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe($ -> {
+                    Log.d(TAG, "Authenticated");
+                    view.setNetworkStatus(NetworkStatus.AUTHENTICATED);
+                }));
+
+        subscriptions.add(connectionInteractor.onConnectionProblem()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe($ -> {
+                    view.setNetworkStatus(NetworkStatus.CONNECTING);
+                }));
     }
 
     @Override
+    public void start() { }
+
+    @Override
+    public void stop() { }
+
+    @Override
     public void destroy() {
-        super.destroy();
+        subscriptions.clear();
+        connectionInteractor.destroy();
+        sessionInteractor.destroy();
         view = null;
     }
 
@@ -71,16 +73,12 @@ public class ToolbarPresenter extends SocketPresenter implements ToolbarContract
 
     @Override
     public void onSettingsClicked() {
-        view.navigateToSettings(userProvider.getCurrentUser());
+        view.navigateToSettings();
     }
 
     @Override
     public void onLogoutClicked() {
-        userProvider.logout();
-        socketService.destroy();
-        // Unsubscribe from FCM topic
-        FirebaseMessaging.getInstance().unsubscribeFromTopic(userProvider.getCurrentUser().getUId());
-
+        sessionInteractor.logoutUser();
         view.navigateToLoginScreen();
     }
 }
