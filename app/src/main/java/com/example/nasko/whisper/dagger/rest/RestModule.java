@@ -1,6 +1,10 @@
 package com.example.nasko.whisper.dagger.rest;
 
+import android.content.Context;
+
+import com.example.nasko.whisper.data.RetrofitErrorMapper;
 import com.example.nasko.whisper.data.rest.UserService;
+import com.example.nasko.whisper.models.User;
 
 import dagger.Module;
 import dagger.Provides;
@@ -23,6 +27,10 @@ public class RestModule {
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build();
+    }
+
+    @Provides RetrofitErrorMapper<User> provideErrorMapper(Context context) {
+        return new RetrofitErrorMapper<>(context);
     }
 
     @Provides @RestScope UserService provideUserService(Retrofit retrofit) {

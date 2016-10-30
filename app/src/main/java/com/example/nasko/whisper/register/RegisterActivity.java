@@ -66,8 +66,8 @@ public class RegisterActivity extends BaseActivity implements RegisterContract.V
     private RegisterModel validateFields() {
         boolean valid = true;
         String username = editUsername.getText().toString().trim();
-        String password = editUsername.getText().toString().trim();
-        String name = editUsername.getText().toString().trim();
+        String password = editPassword.getText().toString().trim();
+        String name = editName.getText().toString().trim();
 
         if (username.length() < 5) {
             editUsername.setError("at least 5 characters");

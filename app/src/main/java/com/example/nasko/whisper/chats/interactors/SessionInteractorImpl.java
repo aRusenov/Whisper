@@ -16,7 +16,6 @@ public class SessionInteractorImpl implements SessionInteractor {
 
     @Override
     public void init() {
-        // Subscribe to FCM <user-id> topic
         FirebaseMessaging.getInstance().subscribeToTopic(userProvider.getCurrentUser().getUId());
     }
 
@@ -27,8 +26,6 @@ public class SessionInteractorImpl implements SessionInteractor {
     public void logoutUser() {
         userProvider.logout();
         socketService.destroy();
-
-        // Unsubscribe from FCM topic
         FirebaseMessaging.getInstance().unsubscribeFromTopic(userProvider.getCurrentUser().getUId());
     }
 }

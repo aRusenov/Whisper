@@ -1,4 +1,4 @@
-package com.example.nasko.whisper.chats.interactors;
+package com.example.nasko.whisper;
 
 public interface BaseInteractor {
 

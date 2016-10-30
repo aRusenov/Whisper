@@ -1,5 +1,6 @@
 package com.example.nasko.whisper.chats.interactors;
 
+import com.example.nasko.whisper.BaseInteractor;
 import com.example.nasko.whisper.models.view.ChatViewModel;
 import com.example.nasko.whisper.models.view.MessageViewModel;
 
