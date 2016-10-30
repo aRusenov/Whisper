@@ -28,18 +28,18 @@ public interface ChatroomContract {
         void hideNetworkError();
     }
 
-    interface Presenter extends BasePresenter {
+    interface Presenter extends BasePresenter<View> {
 
         MessageViewModel onMessageSend(String text, ContactViewModel userContact);
-
-        void setLastLoadedMessageId(int lastLoadedMessageId);
-
-        int getLastLoadedMessageId();
 
         boolean onScrollToTop();
 
         void onStartTyping();
 
         void onStopTyping();
+
+        void setLastLoadedMessageId(int lastLoadedMessageId);
+
+        int getLastLoadedMessageId();
     }
 }

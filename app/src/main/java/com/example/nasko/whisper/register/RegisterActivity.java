@@ -15,7 +15,7 @@ import com.example.nasko.whisper.R;
 import com.example.nasko.whisper.WhisperApplication;
 import com.example.nasko.whisper.chats.MainActivity;
 import com.example.nasko.whisper.register.di.RegisterPresenterModule;
-import com.example.nasko.whisper.models.RegisterModel;
+import com.example.nasko.whisper.data.rest.RegisterModel;
 
 import javax.inject.Inject;
 

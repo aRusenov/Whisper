@@ -30,20 +30,16 @@ public class ChatroomActivity extends BaseActivity {
         if (savedInstanceState == null) {
             ChatViewModel chat = getIntent().getParcelableExtra(EXTRA_CHAT);
 
-            Bundle toolbarArgs = new Bundle();
-            toolbarArgs.putParcelable(ToolbarFragment.EXTRA_CHAT, chat);
             FragmentHelperUtil.addFragment(this,
                     new ToolbarFragment(),
                     R.id.container_toolbar_fragment,
-                    toolbarArgs,
+                    ToolbarFragment.prepareBundle(chat),
                     null);
 
-            Bundle chatroomArgs = new Bundle();
-            chatroomArgs.putParcelable(ChatroomFragment.EXTRA_CHAT, chat);
             FragmentHelperUtil.addFragment(this,
                     new ChatroomFragment(),
                     R.id.container_chatroom_fragment,
-                    chatroomArgs,
+                    ChatroomFragment.prepareBundle(chat),
                     null);
         }
     }

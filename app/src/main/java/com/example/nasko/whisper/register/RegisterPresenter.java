@@ -1,41 +1,18 @@
 package com.example.nasko.whisper.register;
 
-import com.example.nasko.whisper.models.RegisterModel;
+import com.example.nasko.whisper.AbstractPresenter;
+import com.example.nasko.whisper.data.rest.RegisterModel;
 import com.example.nasko.whisper.register.interactors.RegisterInteractor;
 
 import rx.android.schedulers.AndroidSchedulers;
-import rx.subscriptions.CompositeSubscription;
 
-public class RegisterPresenter implements RegisterContract.Presenter {
+public class RegisterPresenter extends AbstractPresenter<RegisterContract.View> implements RegisterContract.Presenter {
 
-    private RegisterContract.View view;
     private RegisterInteractor registerInteractor;
-    private CompositeSubscription subscriptions;
-
 
     public RegisterPresenter(RegisterContract.View view, RegisterInteractor registerInteractor) {
-        this.view = view;
+        super(view);
         this.registerInteractor = registerInteractor;
-
-        subscriptions = new CompositeSubscription();
-    }
-
-    @Override
-    public void init() {
-    }
-
-    @Override
-    public void start() {
-    }
-
-    @Override
-    public void stop() {
-    }
-
-    @Override
-    public void destroy() {
-        subscriptions.clear();
-        view = null;
     }
 
     @Override

@@ -3,7 +3,7 @@ package com.example.nasko.whisper.register.interactors;
 import com.example.nasko.whisper.data.RetrofitErrorMapper;
 import com.example.nasko.whisper.data.local.UserProvider;
 import com.example.nasko.whisper.data.rest.UserService;
-import com.example.nasko.whisper.models.RegisterModel;
+import com.example.nasko.whisper.data.rest.RegisterModel;
 import com.example.nasko.whisper.models.User;
 
 import rx.Completable;

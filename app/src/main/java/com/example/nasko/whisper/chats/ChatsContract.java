@@ -22,7 +22,7 @@ public interface ChatsContract {
         void setChatStatus(String chatId, boolean online);
     }
 
-    interface Presenter extends BasePresenter {
+    interface Presenter extends BasePresenter<View> {
 
         void onChatClicked(ChatViewModel clickedChat);
     }

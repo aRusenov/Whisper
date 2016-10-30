@@ -1,141 +1,124 @@
 package com.example.nasko.whisper.chatroom;
 
-import com.example.nasko.whisper.SocketPresenter;
-import com.example.nasko.whisper.data.local.UserProvider;
-import com.example.nasko.whisper.data.notifications.MessageNotificationController;
-import com.example.nasko.whisper.data.socket.SocketService;
+import com.example.nasko.whisper.AbstractPresenter;
+import com.example.nasko.whisper.chatroom.interactors.MessageSendInteractor;
+import com.example.nasko.whisper.chatroom.interactors.MessagesLoadInteractor;
+import com.example.nasko.whisper.chatroom.interactors.NotificationDismissInteractor;
+import com.example.nasko.whisper.chatroom.interactors.TypingInteractor;
+import com.example.nasko.whisper.chats.interactors.ConnectionInteractor;
 import com.example.nasko.whisper.models.MessageStatus;
-import com.example.nasko.whisper.models.dto.Message;
-import com.example.nasko.whisper.models.view.ChatViewModel;
 import com.example.nasko.whisper.models.view.ContactViewModel;
 import com.example.nasko.whisper.models.view.MessageViewModel;
-import com.example.nasko.whisper.utils.helpers.Mapper;
 
-import java.util.Date;
-import java.util.List;
-
-import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 
-public class ChatroomPresenter extends SocketPresenter implements ChatroomContract.Presenter {
+public class ChatroomPresenter extends AbstractPresenter<ChatroomContract.View> implements ChatroomContract.Presenter {
 
     private static final int PAGE_SIZE = 10;
 
-
-    private ChatViewModel chat;
     private int lastLoadedMessageSeq;
-    private boolean loadingMessages;
 
-    private ChatroomContract.View view;
-    private MessageNotificationController notificationController;
+    private NotificationDismissInteractor notificationDismissInteractor;
+    private ConnectionInteractor connectionInteractor;
+    private MessagesLoadInteractor messagesLoadInteractor;
+    private MessageSendInteractor messageSendInteractor;
+    private TypingInteractor typingInteractor;
 
-    public ChatroomPresenter(ChatroomContract.View view, ChatViewModel chat, int lastLoadedMessageSeq,
-                             SocketService socketService, MessageNotificationController notificationController,
-                             UserProvider userProvider) {
-        super(socketService, userProvider);
-        this.view = view;
-        this.chat = chat;
+    public ChatroomPresenter(ChatroomContract.View view, NotificationDismissInteractor notificationDismissInteractor,
+                             ConnectionInteractor connectionInteractor, MessagesLoadInteractor messagesLoadInteractor,
+                             MessageSendInteractor messageSendInteractor, TypingInteractor typingInteractor,
+                             int lastLoadedMessageSeq) {
+        super(view);
+        this.notificationDismissInteractor = notificationDismissInteractor;
+        this.connectionInteractor = connectionInteractor;
+        this.messagesLoadInteractor = messagesLoadInteractor;
+        this.messageSendInteractor = messageSendInteractor;
+        this.typingInteractor = typingInteractor;
         this.lastLoadedMessageSeq = lastLoadedMessageSeq;
-        this.notificationController = notificationController;
     }
 
     @Override
     public void init() {
-        notificationController.removeNotification(chat.getId());
-        if (lastLoadedMessageSeq == -1 && socketService.authenticated()) {
-            loadMesages();
-        }
-
-        Subscription authSub = socketService.connectionService()
-                .onAuthenticated()
+        subscriptions.add(connectionInteractor.onAuthenticated()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(user -> {
                     view.hideNetworkError();
                     if (lastLoadedMessageSeq == -1) {
-                        loadMesages();
+                        messagesLoadInteractor.loadMessages(lastLoadedMessageSeq, PAGE_SIZE);
                     }
-                });
+                }));
 
-        subscriptions.add(authSub);
-
-        Subscription disconnectSub = socketService.connectionService()
-                .onDisconnect()
+        subscriptions.add(connectionInteractor.onConnectionProblem()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe($ -> {
                     view.displayNetworkError();
-                });
+                }));
 
-        subscriptions.add(disconnectSub);
-
-        Subscription loadMessagesSub = socketService.messageService()
-                .onLoadMessages()
-                .filter(response -> response.getChatId().equals(chat.getId()))
+        subscriptions.add(messagesLoadInteractor.onMessagesLoaded()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(response -> {
-                    loadingMessages = false;
+                .subscribe(messages -> {
+                    if (messages.size() > 0) {
+                        lastLoadedMessageSeq = messages.get(0).getSequentialId();
+                    }
 
-                    List<Message> messages = response.getMessages();
-                    lastLoadedMessageSeq = messages.get(0).getSeq();
-                    List<MessageViewModel> viewModelList = Mapper.toMessageViewModelList(messages);
-                    view.loadMessages(viewModelList);
-                });
+                    view.loadMessages(messages);
+                }));
 
-        subscriptions.add(loadMessagesSub);
-
-        Subscription newMsgSub = socketService.messageService()
-                .onNewMessage()
-                .filter(message -> message.getChatId().equals(chat.getId()))
+        subscriptions.add(messageSendInteractor.onNewMessage()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(message -> {
-                    MessageViewModel msg = Mapper.toMessageViewModel(message);
-                    view.addMessage(msg);
-                });
+                    view.addMessage(message);
+                }));
 
-        subscriptions.add(newMsgSub);
-
-        Subscription messageSentSub = socketService.messageService()
-                .onMessageSent()
+        subscriptions.add(messageSendInteractor.onMessageSent()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(messageSentAck -> {
-                    view.updateMessageStatus(messageSentAck.getMessageIdentifier(), MessageStatus.SENT);
-                });
+                .subscribe(msgSentAck -> {
+                    view.updateMessageStatus(msgSentAck.getMessageIdentifier(), MessageStatus.SENT);
+                }));
 
-        subscriptions.add(messageSentSub);
+        subscriptions.add(messageSendInteractor.onMessageSent()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(msgSentAck -> {
+                    view.updateMessageStatus(msgSentAck.getMessageIdentifier(), MessageStatus.SENT);
+                }));
 
-        Subscription startTypingSub = socketService.messageService()
-                .onStartTyping()
-                .filter(typingEvent -> typingEvent.getChatId().equals(chat.getId()))
+        subscriptions.add(typingInteractor.onTypingStart()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(typingEvent -> {
                     view.displayTypingStarted(typingEvent);
-                });
+                }));
 
-        subscriptions.add(startTypingSub);
-
-        Subscription stopTypingSub = socketService.messageService()
-                .onStopTyping()
-                .filter(typingEvent -> typingEvent.getChatId().equals(chat.getId()))
+        subscriptions.add(typingInteractor.onTypingEnd()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(typingEvent -> {
                     view.displayTypingStopped();
-                });
+                }));
 
-        subscriptions.add(stopTypingSub);
+        connectionInteractor.init();
+        messagesLoadInteractor.init();
+        messageSendInteractor.init();
+        typingInteractor.init();
+        notificationDismissInteractor.init();
+
+        if (lastLoadedMessageSeq == -1) {
+            messagesLoadInteractor.loadMessages(-1, PAGE_SIZE * 2);
+        }
     }
 
     @Override
     public void destroy() {
         super.destroy();
-        view = null;
+        connectionInteractor.destroy();
+        messagesLoadInteractor.destroy();
+        messageSendInteractor.destroy();
+        typingInteractor.destroy();
+        notificationDismissInteractor.destroy();
     }
 
     @Override
     public MessageViewModel onMessageSend(String text, ContactViewModel userContact) {
-        MessageViewModel newMessage = new MessageViewModel(chat.getId(), text, new Date(), userContact);
-        newMessage.setStatus(MessageStatus.PENDING);
-        newMessage.setUId(System.nanoTime());
-
-        socketService.messageService().sendMessage(chat.getId(), text.trim(), newMessage.getIdentifier());
+        MessageViewModel newMessage = messageSendInteractor.prepareMessage(text);
+        messageSendInteractor.sendMessage(newMessage);
         return newMessage;
     }
 
@@ -145,8 +128,8 @@ public class ChatroomPresenter extends SocketPresenter implements ChatroomContra
             return false;
         }
 
-        if (!loadingMessages) {
-            loadMesages();
+        if (! messagesLoadInteractor.isLoading()) {
+            messagesLoadInteractor.loadMessages(lastLoadedMessageSeq, PAGE_SIZE);
             return true;
         }
 
@@ -155,12 +138,12 @@ public class ChatroomPresenter extends SocketPresenter implements ChatroomContra
 
     @Override
     public void onStartTyping() {
-        socketService.messageService().startTyping(chat.getId(), userProvider.getCurrentUser().getUsername());
+        typingInteractor.startTyping();
     }
 
     @Override
     public void onStopTyping() {
-        socketService.messageService().stopTyping(chat.getId(), userProvider.getCurrentUser().getUsername());
+        typingInteractor.endTyping();
     }
 
     @Override
@@ -171,10 +154,5 @@ public class ChatroomPresenter extends SocketPresenter implements ChatroomContra
     @Override
     public int getLastLoadedMessageId() {
         return lastLoadedMessageSeq;
-    }
-
-    private void loadMesages() {
-        socketService.messageService().loadMessages(chat.getId(), lastLoadedMessageSeq, PAGE_SIZE * 2);
-        loadingMessages = true;
     }
 }

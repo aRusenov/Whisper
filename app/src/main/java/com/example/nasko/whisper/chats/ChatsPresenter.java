@@ -1,29 +1,24 @@
 package com.example.nasko.whisper.chats;
 
+import com.example.nasko.whisper.AbstractPresenter;
 import com.example.nasko.whisper.chats.interactors.ChatsInteractor;
 import com.example.nasko.whisper.chats.interactors.ContactsStateInteractor;
 import com.example.nasko.whisper.models.view.ChatViewModel;
 
 import rx.android.schedulers.AndroidSchedulers;
-import rx.subscriptions.CompositeSubscription;
 
-public class ChatsPresenter implements ChatsContract.Presenter {
+public class ChatsPresenter extends AbstractPresenter<ChatsContract.View> implements ChatsContract.Presenter {
 
-    private ChatsContract.View view;
     private ViewCoordinator viewCoordinator;
-    private CompositeSubscription subscriptions;
-
     private ChatsInteractor chatsInteractor;
     private ContactsStateInteractor contactsStateInteractor;
 
     public ChatsPresenter(ChatsContract.View view, ViewCoordinator viewCoordinator,
                           ChatsInteractor chatsInteractor, ContactsStateInteractor contactsStateInteractor) {
-        this.view = view;
+        super(view);
         this.viewCoordinator = viewCoordinator;
         this.chatsInteractor = chatsInteractor;
         this.contactsStateInteractor = contactsStateInteractor;
-
-        subscriptions = new CompositeSubscription();
     }
 
     @Override
@@ -64,17 +59,10 @@ public class ChatsPresenter implements ChatsContract.Presenter {
     }
 
     @Override
-    public void start() { }
-
-    @Override
-    public void stop() { }
-
-    @Override
     public void destroy() {
-        subscriptions.clear();
+        super.destroy();
         chatsInteractor.destroy();
         contactsStateInteractor.destroy();
-        view = null;
     }
 
     @Override

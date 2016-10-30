@@ -14,13 +14,15 @@ public class MessageViewModel implements Parcelable {
     private MessageStatus status;
     private String text;
     private Date createdAt;
+    private int sequentialId;
     private ContactViewModel author;
 
     public MessageViewModel(String chatId, String text, Date createdAt, ContactViewModel author) {
         this(chatId, text, createdAt, author, 0, MessageStatus.SENT);
     }
 
-    public MessageViewModel(String chatId, String text, Date createdAt, ContactViewModel author, long identifier, MessageStatus status) {
+    public MessageViewModel(String chatId, String text, Date createdAt,
+                            ContactViewModel author, long identifier, MessageStatus status) {
         this.identifier = identifier;
         this.chatId = chatId;
         this.status = status;
@@ -108,5 +110,13 @@ public class MessageViewModel implements Parcelable {
 
     public void setChatId(String chatId) {
         this.chatId = chatId;
+    }
+
+    public int getSequentialId() {
+        return sequentialId;
+    }
+
+    public void setSequentialId(int sequentialId) {
+        this.sequentialId = sequentialId;
     }
 }

@@ -10,5 +10,5 @@ public interface ToolbarContract {
         void setContactStatus(boolean online);
     }
 
-    interface Presenter extends BasePresenter { }
+    interface Presenter extends BasePresenter<View> { }
 }

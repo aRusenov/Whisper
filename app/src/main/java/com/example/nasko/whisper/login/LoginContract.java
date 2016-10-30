@@ -5,7 +5,7 @@ import com.example.nasko.whisper.BaseView;
 
 public interface LoginContract {
 
-    interface View extends BaseView<LoginPresenter> {
+    interface View extends BaseView<Presenter> {
 
         void displayLoadingDialog();
 
@@ -18,7 +18,7 @@ public interface LoginContract {
         void navigateToUserChatsScreen();
     }
 
-    interface Presenter extends BasePresenter {
+    interface Presenter extends BasePresenter<View> {
 
         void onLoginClicked(String username, String password);
 

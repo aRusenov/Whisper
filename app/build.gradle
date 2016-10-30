@@ -3,10 +3,6 @@ apply plugin: 'android-apt'
 apply plugin: 'com.neenbedankt.android-apt'
 
 android {
-    signingConfigs {
-        config {
-        }
-    }
     compileSdkVersion 24
     buildToolsVersion "23.0.3"
     defaultConfig {
@@ -51,41 +47,39 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:24.1.1'
     compile 'com.android.support:design:24.1.1'
-    // Websocket and networking
+
     compile('io.socket:socket.io-client:0.7.0') {
-        // excluding org.json which is provided by Android
         exclude group: 'org.json', module: 'json'
     }
+
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.squareup.retrofit2:adapter-rxjava:2.0.2'
     compile 'com.squareup.retrofit2:converter-jackson:2.1.0'
-    // Image processing
+
     compile 'de.hdodenhof:circleimageview:2.0.0'
     compile 'com.squareup.picasso:picasso:2.5.2'
-    // JSON deserializer
+
     compile 'com.fasterxml.jackson.core:jackson-core:2.7.2'
     compile 'com.fasterxml.jackson.core:jackson-annotations:2.7.2'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.7.2'
-    // Basic View binder
+
     compile 'com.jakewharton:butterknife:8.2.1'
     apt 'com.jakewharton:butterknife-compiler:8.2.1'
-    // RxJava
+
     compile 'io.reactivex:rxandroid:1.2.1'
     compile 'io.reactivex:rxjava:1.2.1'
-    // DI container
+
     apt 'com.google.dagger:dagger-compiler:2.7'
     compile 'com.google.dagger:dagger:2.7'
     provided 'javax.annotation:jsr250-api:1.0'
-    // Firebase cloud messaging
+
     compile 'com.google.firebase:firebase-core:9.4.0'
     compile 'com.google.firebase:firebase-messaging:9.4.0'
-    // Unit testing
+
     testCompile 'org.mockito:mockito-all:1.10.19'
-    // UI tests
     androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.2'
     androidTestCompile 'com.android.support.test:testing-support-lib:0.1'
 }
 
-apply plugin: 'com.android.application' //or apply plugin: 'java'
 apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'com.google.gms.google-services'

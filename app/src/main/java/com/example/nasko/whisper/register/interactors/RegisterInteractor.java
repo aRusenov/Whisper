@@ -1,7 +1,7 @@
 package com.example.nasko.whisper.register.interactors;
 
 import com.example.nasko.whisper.BaseInteractor;
-import com.example.nasko.whisper.models.RegisterModel;
+import com.example.nasko.whisper.data.rest.RegisterModel;
 
 import rx.Completable;
 

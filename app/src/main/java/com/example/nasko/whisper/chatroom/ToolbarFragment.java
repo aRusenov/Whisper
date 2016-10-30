@@ -25,7 +25,7 @@ import butterknife.ButterKnife;
 
 public class ToolbarFragment extends Fragment implements ToolbarContract.View {
 
-    public static final String EXTRA_CHAT = "chat";
+    private static final String EXTRA_CHAT = "chat";
 
     @Inject ToolbarContract.Presenter presenter;
     private ContactViewModel displayContact;
@@ -34,17 +34,22 @@ public class ToolbarFragment extends Fragment implements ToolbarContract.View {
     @BindView(R.id.tv_contact_name) TextView tvName;
     @BindView(R.id.tv_status) TextView tvStatus;
 
+    public static Bundle prepareBundle(ChatViewModel chat) {
+        Bundle args = new Bundle();
+        args.putParcelable(EXTRA_CHAT, chat);
+        return args;
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ChatViewModel chat = getArguments().getParcelable(EXTRA_CHAT);
-        if (chat != null) {
-            displayContact = chat.getDisplayContact();
-        }
+        displayContact = chat.getDisplayContact();
 
         WhisperApplication.userComponent()
-                .plus(new ChatroomToolbarPresenterModule(this))
+                .plus(new ChatroomToolbarPresenterModule(this, chat))
                 .inject(this);
+        presenter.init();
     }
 
     @Nullable

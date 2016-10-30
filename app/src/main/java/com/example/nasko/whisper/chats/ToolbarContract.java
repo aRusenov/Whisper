@@ -16,7 +16,7 @@ public interface ToolbarContract {
         void navigateToLoginScreen();
     }
 
-    interface Presenter extends BasePresenter {
+    interface Presenter extends BasePresenter<View> {
 
         void onContactsClicked();
 

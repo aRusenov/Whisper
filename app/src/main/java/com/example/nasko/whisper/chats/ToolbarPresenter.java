@@ -2,28 +2,25 @@ package com.example.nasko.whisper.chats;
 
 import android.util.Log;
 
+import com.example.nasko.whisper.AbstractPresenter;
 import com.example.nasko.whisper.chats.interactors.ConnectionInteractor;
 import com.example.nasko.whisper.chats.interactors.SessionInteractor;
 
 import rx.android.schedulers.AndroidSchedulers;
-import rx.subscriptions.CompositeSubscription;
 
-public class ToolbarPresenter implements ToolbarContract.Presenter {
+public class ToolbarPresenter extends AbstractPresenter<ToolbarContract.View> implements ToolbarContract.Presenter {
 
     private static final String TAG = "ToolbarPresenter";
 
-    private ToolbarContract.View view;
     private SessionInteractor sessionInteractor;
     private ConnectionInteractor connectionInteractor;
-    private CompositeSubscription subscriptions;
 
     public ToolbarPresenter(ToolbarContract.View view,
                             ConnectionInteractor connectionInteractor,
                             SessionInteractor sessionInteractor) {
-        this.view = view;
+        super(view);
         this.connectionInteractor = connectionInteractor;
         this.sessionInteractor = sessionInteractor;
-        subscriptions = new CompositeSubscription();
     }
 
     @Override
@@ -53,17 +50,10 @@ public class ToolbarPresenter implements ToolbarContract.Presenter {
     }
 
     @Override
-    public void start() { }
-
-    @Override
-    public void stop() { }
-
-    @Override
     public void destroy() {
-        subscriptions.clear();
+        super.destroy();
         connectionInteractor.destroy();
         sessionInteractor.destroy();
-        view = null;
     }
 
     @Override

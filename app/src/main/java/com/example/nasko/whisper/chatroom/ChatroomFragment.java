@@ -27,7 +27,6 @@ import com.example.nasko.whisper.data.local.UserProvider;
 import com.example.nasko.whisper.models.MessageSeparator;
 import com.example.nasko.whisper.models.MessageStatus;
 import com.example.nasko.whisper.models.TypingEvent;
-import com.example.nasko.whisper.models.User;
 import com.example.nasko.whisper.models.view.ChatViewModel;
 import com.example.nasko.whisper.models.view.ContactViewModel;
 import com.example.nasko.whisper.models.view.MessageViewModel;
@@ -38,26 +37,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class ChatroomFragment extends Fragment implements ChatroomContract.View {
 
-    public static final String EXTRA_CHAT = "chat";
+    private static final String EXTRA_CHAT = "chat";
     private static final String KEY_LAST_LOADED_MESSAGE_ID = "lastLoadedMessageId";
     private static final String KEY_MESSAGES = "messages";
     private static final int DEFAULT_MESSAGE_SEQ = -1;
 
     @Inject ChatroomContract.Presenter presenter;
     @Inject UserProvider userProvider;
+    @Inject @Named("userModel") ContactViewModel userContact;
+
+    private ChatViewModel chat;
     private DateFormatter dateFormatter;
 
     private EndlessUpScrollListener endlessScrollListener;
 
     private boolean typing;
-    private ChatViewModel chat;
-    private ContactViewModel userContact;
 
     @BindView(R.id.rv_messages) MessagesRecyclerView messageList;
     @BindView(R.id.rv_emojis) RecyclerView emojisList;
@@ -66,6 +67,12 @@ public class ChatroomFragment extends Fragment implements ChatroomContract.View 
     @BindView(R.id.btn_send_message) ImageButton btnSend;
     @BindView(R.id.tv_error) TextView tvError;
     @BindView(R.id.btn_toggle_emojis) ImageButton btnToggleEmojis;
+
+    public static Bundle prepareBundle(ChatViewModel chat) {
+        Bundle args = new Bundle();
+        args.putParcelable(EXTRA_CHAT, chat);
+        return args;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -76,14 +83,12 @@ public class ChatroomFragment extends Fragment implements ChatroomContract.View 
                 savedInstanceState.getInt(KEY_LAST_LOADED_MESSAGE_ID, DEFAULT_MESSAGE_SEQ) :
                 DEFAULT_MESSAGE_SEQ;
 
+        dateFormatter = new MessageSeparatorDateFormatter();
+
         WhisperApplication.userComponent()
                 .plus(new ChatroomPresenterModule(this, chat, lastLoadedMessageSeq))
                 .inject(this);
         presenter.init();
-
-        User user = userProvider.getCurrentUser();
-        userContact = new ContactViewModel(user.getUId(), user.getUsername(), user.getName(), user.getImage(), false);
-        dateFormatter = new MessageSeparatorDateFormatter();
     }
 
     @Override

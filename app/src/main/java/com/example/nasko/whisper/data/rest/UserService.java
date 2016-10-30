@@ -1,7 +1,5 @@
 package com.example.nasko.whisper.data.rest;
 
-import com.example.nasko.whisper.models.LoginModel;
-import com.example.nasko.whisper.models.RegisterModel;
 import com.example.nasko.whisper.models.User;
 
 import okhttp3.RequestBody;

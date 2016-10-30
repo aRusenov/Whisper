@@ -71,8 +71,6 @@ public class MainActivity extends BaseActivity implements ViewCoordinator {
     }
 
     private void handleChatNavigation(ChatViewModel chat) {
-        Bundle args = new Bundle();
-        args.putParcelable(EXTRA_CHAT, chat);
         if (multipane) {
             if (tvEmptyChatroom != null && tvEmptyChatroom.getVisibility() != View.GONE) {
                 tvEmptyChatroom.setVisibility(View.GONE);
@@ -81,7 +79,7 @@ public class MainActivity extends BaseActivity implements ViewCoordinator {
             FragmentHelperUtil.addOrReplaceFragment(this,
                     new ChatroomFragment(),
                     R.id.container_chatroom_fragment,
-                    args,
+                    ChatroomFragment.prepareBundle(chat),
                     FRAGMENT_CHATROOM_TAG);
         } else {
             // Not multipane -> simply navigate to ChatroomActivtiy

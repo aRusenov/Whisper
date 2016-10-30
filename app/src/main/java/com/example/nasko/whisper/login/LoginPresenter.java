@@ -1,40 +1,18 @@
 package com.example.nasko.whisper.login;
 
+import com.example.nasko.whisper.AbstractPresenter;
 import com.example.nasko.whisper.login.interactors.LoginInteractor;
-import com.example.nasko.whisper.models.LoginModel;
+import com.example.nasko.whisper.data.rest.LoginModel;
 
 import rx.android.schedulers.AndroidSchedulers;
-import rx.subscriptions.CompositeSubscription;
 
-public class LoginPresenter implements LoginContract.Presenter {
+public class LoginPresenter extends AbstractPresenter<LoginContract.View> implements LoginContract.Presenter {
 
-    private LoginContract.View view;
     private LoginInteractor loginInteractor;
-    private CompositeSubscription subscriptions;
 
     public LoginPresenter(LoginContract.View view, LoginInteractor loginInteractor) {
-        this.view = view;
+        super(view);
         this.loginInteractor = loginInteractor;
-
-        subscriptions = new CompositeSubscription();
-    }
-
-    @Override
-    public void init() {
-    }
-
-    @Override
-    public void start() {
-    }
-
-    @Override
-    public void stop() {
-    }
-
-    @Override
-    public void destroy() {
-        subscriptions.clear();
-        view = null;
     }
 
     @Override

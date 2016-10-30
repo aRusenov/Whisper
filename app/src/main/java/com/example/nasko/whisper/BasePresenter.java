@@ -1,6 +1,6 @@
 package com.example.nasko.whisper;
 
-public interface BasePresenter {
+public interface BasePresenter<V extends BaseView> {
 
     void init();
 
