@@ -13,6 +13,7 @@ import com.example.nasko.whisper.dagger.rest.RestModule;
 import com.example.nasko.whisper.dagger.user.SocketModule;
 import com.example.nasko.whisper.dagger.user.UserComponent;
 import com.example.nasko.whisper.utils.helpers.ConfigLoader;
+import com.squareup.leakcanary.LeakCanary;
 
 public class WhisperApplication extends Application {
 
@@ -25,6 +26,14 @@ public class WhisperApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        if (LeakCanary.isInAnalyzerProcess(this)) {
+            // This process is dedicated to LeakCanary for heap analysis.
+            // You should not init your app in this process.
+            return;
+        }
+
+        LeakCanary.install(this);
+
         baseComponent = DaggerBaseComponent.builder()
                 .applicationModule(new ApplicationModule(this))
                 .build();
