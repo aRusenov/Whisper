@@ -12,13 +12,13 @@
         style="@style/ContactCircularImageView" />
 
     <TextView
+        android:id="@+id/tv_contact_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         tools:text="Gosho"
-        android:textSize="25sp"
-        android:textColor="#000"
-        android:id="@+id/tv_contact_name"
+        android:textSize="@dimen/font_xxlarge"
+        android:textColor="@color/color_black"
         android:layout_gravity="center_vertical"/>
 
     <ImageView
@@ -26,8 +26,8 @@
         android:layout_height="30dp"
         android:src="@drawable/letter"
         android:id="@+id/invite_icon"
-        android:layout_marginEnd="25dp"
-        android:layout_marginRight="25dp"
+        android:layout_marginEnd="@dimen/large_margin"
+        android:layout_marginRight="@dimen/large_margin"
         android:visibility="invisible"/>
 
 </LinearLayout>
