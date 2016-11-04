@@ -5,12 +5,12 @@ apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'com.google.gms.google-services'
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion "23.0.3"
+    compileSdkVersion rootProject.toolVersions.compileSdk
+    buildToolsVersion rootProject.toolVersions.buildTools
     defaultConfig {
         applicationId "com.example.nasko.whisper"
-        minSdkVersion 16
-        targetSdkVersion 24
+        minSdkVersion rootProject.toolVersions.minSdk
+        targetSdkVersion rootProject.toolVersions.targetSdk
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -39,43 +39,43 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:24.1.1'
-    compile 'com.android.support:design:24.1.1'
+    compile "com.android.support:appcompat-v7:$rootProject.libVersions.supportLibrary"
+    compile "com.android.support:design:$rootProject.libVersions.supportLibrary"
 
-    compile('io.socket:socket.io-client:0.7.0') {
+    compile("io.socket:socket.io-client:$rootProject.libVersions.socketIO") {
         exclude group: 'org.json', module: 'json'
     }
 
-    compile 'com.squareup.retrofit2:retrofit:2.1.0'
-    compile 'com.squareup.retrofit2:adapter-rxjava:2.0.2'
-    compile 'com.squareup.retrofit2:converter-jackson:2.1.0'
+    compile "com.squareup.retrofit2:retrofit:$rootProject.libVersions.retrofit"
+    compile "com.squareup.retrofit2:adapter-rxjava:$rootProject.libVersions.retrofitRxAdapter"
+    compile "com.squareup.retrofit2:converter-jackson:$rootProject.libVersions.retrofitJacksonConverter"
 
-    compile 'de.hdodenhof:circleimageview:2.0.0'
-    compile 'com.squareup.picasso:picasso:2.5.2'
+    compile "de.hdodenhof:circleimageview:$rootProject.libVersions.circleImageView"
+    compile "com.squareup.picasso:picasso:$rootProject.libVersions.picasso"
 
-    compile 'com.fasterxml.jackson.core:jackson-core:2.7.2'
-    compile 'com.fasterxml.jackson.core:jackson-annotations:2.7.2'
-    compile 'com.fasterxml.jackson.core:jackson-databind:2.7.2'
+    compile "com.fasterxml.jackson.core:jackson-core:$rootProject.libVersions.jackson"
+    compile "com.fasterxml.jackson.core:jackson-annotations:$rootProject.libVersions.jackson"
+    compile "com.fasterxml.jackson.core:jackson-databind:$rootProject.libVersions.jackson"
 
-    compile 'com.jakewharton:butterknife:8.2.1'
-    apt 'com.jakewharton:butterknife-compiler:8.2.1'
+    compile "com.jakewharton:butterknife:$rootProject.libVersions.butterknife"
+    apt "com.jakewharton:butterknife-compiler:$rootProject.libVersions.butterknife"
 
-    compile 'io.reactivex:rxandroid:1.2.1'
-    compile 'io.reactivex:rxjava:1.2.1'
+    compile "io.reactivex:rxandroid:$rootProject.libVersions.rxAndroid"
+    compile "io.reactivex:rxjava:$rootProject.libVersions.rxJava"
 
-    apt 'com.google.dagger:dagger-compiler:2.7'
-    compile 'com.google.dagger:dagger:2.7'
-    provided 'javax.annotation:jsr250-api:1.0'
+    apt "com.google.dagger:dagger-compiler:$rootProject.libVersions.dagger"
+    compile "com.google.dagger:dagger:$rootProject.libVersions.dagger"
+    provided "javax.annotation:jsr250-api:1.0"
 
-    compile 'com.google.firebase:firebase-core:9.4.0'
-    compile 'com.google.firebase:firebase-messaging:9.4.0'
+    compile "com.google.firebase:firebase-core:$rootProject.libVersions.firebase"
+    compile "com.google.firebase:firebase-messaging:$rootProject.libVersions.firebase"
 
-    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5'
-    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
-    testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
+    debugCompile "com.squareup.leakcanary:leakcanary-android:$rootProject.libVersions.leakCanary"
+    releaseCompile "com.squareup.leakcanary:leakcanary-android-no-op:$rootProject.libVersions.leakCanary"
+    testCompile "com.squareup.leakcanary:leakcanary-android-no-op:$rootProject.libVersions.leakCanary"
 
-    testCompile 'org.mockito:mockito-all:1.10.19'
-    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.2'
+    testCompile "junit:junit:$rootProject.libVersions.jUnit"
+    testCompile "org.mockito:mockito-all:$rootProject.libVersions.mockito"
+    androidTestCompile "com.android.support.test.espresso:espresso-core:$rootProject.libVersions.espresso"
     androidTestCompile 'com.android.support.test:testing-support-lib:0.1'
 }

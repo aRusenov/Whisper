@@ -23,3 +23,31 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+ext {
+    toolVersions = [
+            minSdk: 16,
+            targetSdk: 24,
+            compileSdk: 24,
+            buildTools: '23.0.3',
+    ]
+    libVersions = [
+            supportLibrary: '24.1.1',
+            socketIO: '0.7.0',
+            jackson: '2.7.2',
+            picasso: '2.5.2',
+            butterknife: '8.2.1',
+            retrofit: '2.1.0',
+            retrofitRxAdapter: '2.0.2',
+            retrofitJacksonConverter: '2.1.0',
+            circleImageView: '2.0.0',
+            rxJava: '1.2.1',
+            rxAndroid: '1.2.1',
+            dagger: '2.7',
+            firebase: '9.4.0',
+            leakCanary: '1.5',
+            jUnit: '4.12',
+            mockito: '1.10.19',
+            espresso: '2.2.2',
+    ]
+}
